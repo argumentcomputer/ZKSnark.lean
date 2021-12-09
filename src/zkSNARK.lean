@@ -1,5 +1,8 @@
 
+import zkSNARK.ConstraintSystem
+
 namespace zkSNARK
+
 
 def sayHello (name : String) : IO Unit := do
   println! "Hello {name}!"

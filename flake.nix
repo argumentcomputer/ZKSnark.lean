@@ -15,9 +15,13 @@
       url = github:yatima-inc/lean-ipld;
       inputs.lean.follows = "lean";
     };
+    lean-neptune = {
+      url = github:yatima-inc/lean-neptune;
+      inputs.lean.follows = "lean";
+    };
   };
 
-  outputs = { self, lean, utils, nixpkgs, lean-ipld }:
+  outputs = { self, lean, utils, nixpkgs, lean-ipld, lean-neptune }:
     let
       supportedSystems = [
         # "aarch64-linux"
@@ -35,7 +39,7 @@
         name = "zkSNARK";  # must match the name of the top-level .lean file
         project = leanPkgs.buildLeanPackage {
           inherit name;
-          # deps = [ lean-ipld.project.${system} ];
+          deps = [ lean-ipld.project.${system} ];
           # Where the lean files are located
           src = ./src;
         };
