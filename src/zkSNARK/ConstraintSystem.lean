@@ -44,7 +44,7 @@ structure LinearCombination (Scalar : Type u) [PrimeField Scalar] : Type u where
   aux : (Indexer Scalar)
 
 deriving instance Inhabited for LinearCombination
-  
+
 
 inductive SynthesisError {u} : Type u
     -- During synthesis, we lacked knowledge of a variable assignment.
@@ -110,6 +110,6 @@ rank-1 quadratic constraint systems. The `Circuit` trait represents a
 circuit that can be synthesized. The `synthesize` method is called during
 CRS generation and during proving.
 -/
-class Circuit (Scalar: Type u)  (CS: Type u) [ConstraintSystem CS Scalar] (A: Type u) where
+class Circuit (Scalar: Type u)  (A: Type u) where
   -- Synthesize the circuit into a rank-1 quadratic constraint system.
-  synthesize : ResultM CS SynthesisError PUnit
+  synthesize : {CS: Type u} [ConstraintSystem CS Scalar] → (self : A) → ResultM CS SynthesisError PUnit
