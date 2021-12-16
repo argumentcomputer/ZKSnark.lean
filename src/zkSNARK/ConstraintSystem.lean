@@ -3,10 +3,11 @@ import zkSNARK.Utils
 -/
 namespace zkSNARK.ConstraintSystem
 
-open ResultMonad
+open ResultM
 
 universe u
 universe v
+variable {T : Type u}
 
 
 class Field (F : Type u)
@@ -45,7 +46,7 @@ structure LinearCombination (Scalar : Type u) [PrimeField Scalar] : Type u where
 deriving instance Inhabited for LinearCombination
   
 
-inductive SynthesisError
+inductive SynthesisError {u} : Type u
     -- During synthesis, we lacked knowledge of a variable assignment.
     --[error("an assignment for a variable could not be computed")]
     | AssignmentMissing
@@ -84,7 +85,7 @@ inductive SynthesisError
     --[error("invalid pairing")]
     | InvalidPairing
 
-class ConstraintSystem (CS: Type v) (Scalar: Type u) where
+class ConstraintSystem (CS: Type u) (Scalar: Type u) where
     [primeField : PrimeField Scalar]
     /-
     The element 1 of the system
@@ -95,7 +96,7 @@ class ConstraintSystem (CS: Type v) (Scalar: Type u) where
     Allocate a private variable in the constraint system.
     -/
     alloc : ResultM CS SynthesisError Variable
-    
+
     /-
     Allocate a public variable.
     -/
@@ -109,6 +110,6 @@ rank-1 quadratic constraint systems. The `Circuit` trait represents a
 circuit that can be synthesized. The `synthesize` method is called during
 CRS generation and during proving.
 -/
-class Circuit (Scalar: Type u)  (CS: Type v) [ConstraintSystem CS Scalar] (A: Type u) where
+class Circuit (Scalar: Type u)  (CS: Type u) [ConstraintSystem CS Scalar] (A: Type u) where
   -- Synthesize the circuit into a rank-1 quadratic constraint system.
   synthesize : ResultM CS SynthesisError PUnit

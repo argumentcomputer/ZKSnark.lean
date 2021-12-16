@@ -2,6 +2,7 @@
 Utilities and types.
 -/
 
+universe u
 namespace ResultM
 
 /-
