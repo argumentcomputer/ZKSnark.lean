@@ -3,6 +3,11 @@ Utilities and types.
 -/
 
 universe u
+
+def enumerate {A : Type u} (as : Array) : Array (Nat × A) :=
+  for a in as
+    ()
+
 namespace ResultM
 
 /-

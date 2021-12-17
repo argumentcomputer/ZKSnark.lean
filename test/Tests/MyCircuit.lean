@@ -4,6 +4,7 @@ import zkSNARK.ConstraintSystem
 open zkSNARK
 universe u
 
+
 structure MyCircuit where
   /-
   The input to SHA-256d we are proving that we know.
@@ -20,6 +21,9 @@ instance (Scalar : Type u) [PrimeField Scalar] : Circuit Scalar MyCircuit where
     Vec of None (indicating that the value of each bit is unknown).
     -/
     let bit_values : Array (Option UInt8) ← if let some preimage := self.preimage
-      then ByteArray.map preimage (fun byte => )
-      else List.repeat none (80 * 8)
+      then ByteArray.map preimage (fun byte => map (0..8) (fun i => (byte >> i) & 1u8 == 1u8))
+      else List.repeat none (80 * 8);
+
+    let preimage_bits ← for b in enumerate bit_values do
+      
     
