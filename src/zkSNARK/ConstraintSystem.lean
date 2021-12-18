@@ -1,7 +1,7 @@
 import zkSNARK.Utils
 /- Rank 1 Constraint System
 -/
-namespace zkSNARK.ConstraintSystem
+namespace zkSNARK
 
 open ResultM
 
@@ -28,7 +28,7 @@ inductive Index
   | Input (index : USize)
   | Aux (index : USize)
 
-structure Variable where
+structure Variable : Type u where
   index : Index
 
 
@@ -46,7 +46,7 @@ structure LinearCombination (Scalar : Type u) [PrimeField Scalar] : Type u where
 deriving instance Inhabited for LinearCombination
 
 
-inductive SynthesisError {u} : Type u
+inductive SynthesisError : Type u
     -- During synthesis, we lacked knowledge of a variable assignment.
     --[error("an assignment for a variable could not be computed")]
     | AssignmentMissing
@@ -85,7 +85,7 @@ inductive SynthesisError {u} : Type u
     --[error("invalid pairing")]
     | InvalidPairing
 
-class ConstraintSystem (CS: Type u) (Scalar: Type u) where
+class ConstraintSystem (CS: Type u) (Scalar: Type v) where
     [primeField : PrimeField Scalar]
     /-
     The element 1 of the system
@@ -95,14 +95,14 @@ class ConstraintSystem (CS: Type u) (Scalar: Type u) where
     /-
     Allocate a private variable in the constraint system.
     -/
-    alloc : ResultM CS SynthesisError Variable
+    alloc : ResultM SynthesisError CS Variable
 
     /-
     Allocate a public variable.
     -/
-    allocInput : ResultM CS SynthesisError Variable
+    allocInput : ResultM SynthesisError CS Variable
 
-    enforce : (a b c : LinearCombination Scalar) → ResultM CS () ()
+    enforce : (a b c : LinearCombination Scalar) → ResultM PUnit CS PUnit
 
 /-
 Computations are expressed in terms of arithmetic circuits, in particular
@@ -112,4 +112,4 @@ CRS generation and during proving.
 -/
 class Circuit (Scalar: Type u)  (A: Type u) where
   -- Synthesize the circuit into a rank-1 quadratic constraint system.
-  synthesize : {CS: Type u} [ConstraintSystem CS Scalar] → (self : A) → ResultM CS SynthesisError PUnit
+  synthesize : {CS: Type u} → [ConstraintSystem CS Scalar] → (self : A) → ResultM SynthesisError CS PUnit

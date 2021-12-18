@@ -4,9 +4,12 @@ Utilities and types.
 
 universe u
 
-def enumerate {A : Type u} (as : Array) : Array (Nat × A) :=
-  for a in as
-    ()
+namespace Array
+
+def enumerate {A : Type u} (as : Array A) : Array (Nat × A) :=
+  Array.mk as.toList.enum
+
+end Array
 
 namespace ResultM
 
