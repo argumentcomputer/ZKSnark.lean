@@ -3,6 +3,7 @@ Utilities and types.
 -/
 
 universe u
+universe v
 
 namespace Array
 
@@ -10,6 +11,10 @@ def enumerate {A : Type u} (as : Array A) : Array (Nat × A) :=
   Array.mk as.toList.enum
 
 end Array
+
+def ByteArray.map {A : Type u} {B : Type v} (f : A → B) (bs : ByteArray A) : ByteArray B :=
+  -- Can be optimized
+  (List.map f bs.toList).toByteArray
 
 namespace ResultM
 

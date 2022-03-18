@@ -1,7 +1,7 @@
-import zkSNARK.Utils
+import ZKSnark.Utils
 /- Rank 1 Constraint System
 -/
-namespace zkSNARK
+namespace ZKSnark
 
 open ResultM
 
@@ -113,3 +113,5 @@ CRS generation and during proving.
 class Circuit (Scalar: Type u)  (A: Type u) where
   -- Synthesize the circuit into a rank-1 quadratic constraint system.
   synthesize : {CS: Type u} → [ConstraintSystem CS Scalar] → (self : A) → ResultM SynthesisError CS PUnit
+
+end ZKSnark

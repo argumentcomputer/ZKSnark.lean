@@ -1,11 +1,11 @@
 {
-  description = "My Lean package";
+  description = "Zero Knowledge SNARKs in Lean";
 
   inputs = {
     lean = {
       url = github:leanprover/lean4;
     };
-    nixpkgs.url = github:nixos/nixpkgs/nixos-21.05;
+    nixpkgs.url = github:nixos/nixpkgs/nixos-21.11;
     utils = {
       url = github:yatima-inc/nix-utils;
       inputs.nixpkgs.follows = "nixpkgs";
@@ -24,8 +24,8 @@
   outputs = { self, lean, utils, nixpkgs, lean-ipld, lean-neptune }:
     let
       supportedSystems = [
-        # "aarch64-linux"
-        # "aarch64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
         "i686-linux"
         "x86_64-darwin"
         "x86_64-linux"
@@ -36,10 +36,10 @@
       let
         leanPkgs = lean.packages.${system};
         pkgs = nixpkgs.legacyPackages.${system};
-        name = "zkSNARK";  # must match the name of the top-level .lean file
+        name = "ZKSnark";  # must match the name of the top-level .lean file
         project = leanPkgs.buildLeanPackage {
           inherit name;
-          deps = [ lean-ipld.project.${system} ];
+          # deps = [ lean-ipld.project.${system} ];
           # Where the lean files are located
           src = ./src;
         };
@@ -49,8 +49,8 @@
           # Where the lean files are located
           src = ./test;
         };
-        joinDepsDerivationns = getSubDrv:
-          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([ project ] ++ project.allExternalDeps));
+        joinDepsDerivations = getSubDrv:
+          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") project.allExternalDeps);
       in
       {
         inherit project test;
@@ -65,10 +65,10 @@
         devShell = pkgs.mkShell {
           inputsFrom = [ project.executable ];
           buildInputs = with pkgs; [
-            leanPkgs.lean
+            leanPkgs.lean-dev
           ];
-          LEAN_PATH = joinDepsDerivationns (d: d.modRoot);
-          LEAN_SRC_PATH = joinDepsDerivationns (d: d.src);
+          LEAN_PATH = "./src:./test";
+          LEAN_SRC_PATH = "./src:./test";
         };
       });
 }
