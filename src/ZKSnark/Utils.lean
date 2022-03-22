@@ -12,9 +12,17 @@ def enumerate {A : Type u} (as : Array A) : Array (Nat × A) :=
 
 end Array
 
-def ByteArray.map {A : Type u} {B : Type v} (f : A → B) (bs : ByteArray A) : ByteArray B :=
+namespace ByteArray
+
+/-- More consistent naming of array function.
+-/
+def toArray (b : ByteArray) : Array UInt8 := b.data
+
+def map {B : Type} (f : UInt8 → B) (bs : ByteArray) : Array B :=
   -- Can be optimized
-  (List.map f bs.toList).toByteArray
+  (Array.map f bs.toArray)
+
+end ByteArray
 
 namespace ResultM
 
@@ -28,7 +36,7 @@ inductive Result (ε σ α : Type u) where
 variable {ε σ α : Type u}
 
 instance [Inhabited ε] [Inhabited σ] : Inhabited (Result ε σ α) where
-  default := Result.error arbitrary arbitrary
+  default := Result.error default default
 
 end ResultM
 
@@ -40,7 +48,7 @@ namespace ResultM
 variable {ε σ α β : Type u}
 
 instance [Inhabited ε] : Inhabited (ResultM ε σ α) where
-  default := fun s => Result.error arbitrary s
+  default := fun s => Result.error default s
 
 @[inline] protected def pure (a : α) : ResultM ε σ α := fun s =>
   Result.ok a s

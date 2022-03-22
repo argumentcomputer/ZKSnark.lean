@@ -43,6 +43,12 @@
           # Where the lean files are located
           src = ./src;
         };
+        cli = leanPkgs.buildLeanPackage {
+          name = "ZKSnark.Cli";
+          deps = [ project ];
+          executableName = "zksnark";
+          src = ./src;
+        };
         test = leanPkgs.buildLeanPackage {
           name = "Tests";
           deps = [ project ];
@@ -56,12 +62,11 @@
         inherit project test;
         packages = {
           ${name} = project.executable;
+          "${name}-cli" = cli.executable;
           test = test.executable;
         };
 
-        checks.test = test.executable;
-
-        defaultPackage = self.packages.${system}.${name};
+        defaultPackage = self.packages.${system}."${name}-cli";
         devShell = pkgs.mkShell {
           inputsFrom = [ project.executable ];
           buildInputs = with pkgs; [
