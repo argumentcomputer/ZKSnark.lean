@@ -19,7 +19,6 @@ namespace ByteArray
 def toArray (b : ByteArray) : Array UInt8 := b.data
 
 def map {B : Type} (f : UInt8 → B) (bs : ByteArray) : Array B :=
-  -- Can be optimized
   (Array.map f bs.toArray)
 
 end ByteArray
