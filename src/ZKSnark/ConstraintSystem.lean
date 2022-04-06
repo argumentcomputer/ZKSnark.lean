@@ -1,9 +1,13 @@
+import ZKSnark.Utils
 /- Rank 1 Constraint System
 -/
-namespace zkSNARK.ConstraintSystem
+namespace ZKSnark
+
+open ResultM
 
 universe u
 universe v
+variable {T : Type u}
 
 
 class Field (F : Type u)
@@ -11,7 +15,8 @@ class Field (F : Type u)
 /-
 Elements of a given prime field
 -/
-class PrimeField (F : Type u) [Field F]
+class PrimeField (F : Type u) where
+    [field: Field F]
 
 
 
@@ -23,6 +28,9 @@ inductive Index
   | Input (index : USize)
   | Aux (index : USize)
 
+structure Variable : Type u where
+  index : Index
+
 
 structure Indexer (T : Type u) : Type u where
   values : (Array (Prod USize T))
@@ -31,14 +39,14 @@ structure Indexer (T : Type u) : Type u where
 deriving instance Inhabited for Indexer
 
 
-structure LinearCombination (Scalar : Type u) [Field Scalar] [PrimeField Scalar] : Type u where
+structure LinearCombination (Scalar : Type u) [PrimeField Scalar] : Type u where
   inputs : (Indexer Scalar)
   aux : (Indexer Scalar)
 
 deriving instance Inhabited for LinearCombination
-  
 
-inductive SynthesisError
+
+inductive SynthesisError : Type u
     -- During synthesis, we lacked knowledge of a variable assignment.
     --[error("an assignment for a variable could not be computed")]
     | AssignmentMissing
@@ -77,21 +85,33 @@ inductive SynthesisError
     --[error("invalid pairing")]
     | InvalidPairing
 
-class ConstraintSystem (CS: Type v) (Scalar: Type u) [Field Scalar] [PrimeField Scalar]
+class ConstraintSystem (CS: Type u) (Scalar: Type v) where
+    [primeField : PrimeField Scalar]
+    /-
+    The element 1 of the system
+    -/
+    one : Variable
 
+    /-
+    Allocate a private variable in the constraint system.
+    -/
+    alloc : ResultM SynthesisError CS Variable
 
-inductive Result (α ε: Type u)
-  | ok    : α → Result α ε
-  | error : ε → Result α ε
+    /-
+    Allocate a public variable.
+    -/
+    allocInput : ResultM SynthesisError CS Variable
+
+    enforce : (a b c : LinearCombination Scalar) → ResultM PUnit CS PUnit
+
 /-
 Computations are expressed in terms of arithmetic circuits, in particular
 rank-1 quadratic constraint systems. The `Circuit` trait represents a
 circuit that can be synthesized. The `synthesize` method is called during
 CRS generation and during proving.
 -/
-class inductive Circuit (Scalar: Type u) [Field Scalar]
-    [PrimeField Scalar] {CS: Type v} [ConstraintSystem CS Scalar]
-    -- Synthesize the circuit into a rank-1 quadratic constraint system.
-| synthesize : (self : Circuit Scalar) → (cs: CS) → (r : Result Unit SynthesisError) -> Circuit
-Scalar
+class Circuit (Scalar: Type u)  (A: Type u) where
+  -- Synthesize the circuit into a rank-1 quadratic constraint system.
+  synthesize : {CS: Type u} → [ConstraintSystem CS Scalar] → (self : A) → ResultM SynthesisError CS PUnit
 
+end ZKSnark
