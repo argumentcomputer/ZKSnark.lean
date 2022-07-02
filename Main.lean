@@ -1,7 +1,7 @@
 import ZkSNARK.ConstraintSystem
-import ZkSNARK.ZkSNARK
+import ZkSNARK
 
-def main (args : List String) : IO UInt32 := do
+def main : IO UInt32 := do
   try
     ZkSNARK.sayHello "world"
     pure 0
