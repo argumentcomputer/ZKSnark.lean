@@ -1,2 +1,4 @@
 /build
 /lean_packages
+site/.jekyll-cache/
+site/Gemfile.lock
