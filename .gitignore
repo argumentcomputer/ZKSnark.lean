@@ -1,4 +1,2 @@
 build/
 lean_packages/
-docs/
-!docs/_config.yml
