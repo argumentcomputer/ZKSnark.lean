@@ -1,13 +1,13 @@
-name: continuous integration
+name: build blueprint
 
 on:
   push:
     branches: main
     
 jobs:
-  update_lean_xyz_branch_and_build:
+  build:
     runs-on: ubuntu-latest
-    name: Update lean-x.y.z branch and build project
+    name: build blueprint
     steps:
 
     - name: checkout project
@@ -38,7 +38,7 @@ jobs:
         git clone https://github.com/plastex/plastex.git
         pip install ./plastex
         git clone https://github.com/mpenciak/noleanblueprint.git
-        pip install ./leanblueprint
+        pip install ./noleanblueprint
     - name: build blueprint
       run: |
         inv all html
