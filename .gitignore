@@ -1,8 +1,4 @@
 build/
-<<<<<<< HEAD
 lean_packages/
 docs/
 !docs/_config.yml
-=======
-lean_packages/
->>>>>>> 57b03ebf217112dc06df9d6e965b7b85793ea4e5
