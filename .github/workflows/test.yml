@@ -2,6 +2,7 @@ name: Testing the GitHub Pages publication
 
 on:
   push
+    branches: gh-pages
 
 jobs:
   jekyll:
@@ -32,4 +33,4 @@ jobs:
     - uses: helaili/jekyll-action@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        target_branch: 'mp/site'
+        target_branch: 'gh-pages'
