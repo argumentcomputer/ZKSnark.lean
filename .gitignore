@@ -1,3 +1,4 @@
-/build
-/lean_packages
-docs/*
+build/
+lean_packages/
+/docs/.jekyll-cache/
+/docs/Gemfile.lock
