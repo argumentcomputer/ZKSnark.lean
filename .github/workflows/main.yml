@@ -37,12 +37,8 @@ jobs:
         pip install invoke
         git clone https://github.com/plastex/plastex.git
         pip install ./plastex
-        git clone https://github.com/PatrickMassot/leanblueprint.git
+        git clone https://github.com/mpenciak/noleanblueprint.git
         pip install ./leanblueprint
-    - name: build project
-      run: |
-        leanproject get-mathlib-cache
-        lean --make src
     - name: build blueprint
       run: |
         inv all html
