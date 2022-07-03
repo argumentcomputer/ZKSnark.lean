@@ -2,9 +2,7 @@
 -/
 namespace zkSNARK.ConstraintSystem
 
-universe u
-universe v
-
+universe u v
 
 class Field (F : Type u)
 
@@ -12,8 +10,6 @@ class Field (F : Type u)
 Elements of a given prime field
 -/
 class PrimeField (F : Type u) [Field F]
-
-
 
 /-
 Represents the index of either an input variable or
@@ -23,21 +19,16 @@ inductive Index
   | Input (index : USize)
   | Aux (index : USize)
 
-
 structure Indexer (T : Type u) : Type u where
   values : (Array (Prod USize T))
   lastInserted : (Option (Prod USize USize))
-
-deriving instance Inhabited for Indexer
-
+deriving Inhabited
 
 structure LinearCombination (Scalar : Type u) [Field Scalar] [PrimeField Scalar] : Type u where
   inputs : (Indexer Scalar)
   aux : (Indexer Scalar)
-
-deriving instance Inhabited for LinearCombination
+deriving Inhabited
   
-
 inductive SynthesisError
     -- During synthesis, we lacked knowledge of a variable assignment.
     --[error("an assignment for a variable could not be computed")]
@@ -94,4 +85,3 @@ class inductive Circuit (Scalar: Type u) [Field Scalar]
     -- Synthesize the circuit into a rank-1 quadratic constraint system.
 | synthesize : (self : Circuit Scalar) → (cs: CS) → (r : Result Unit SynthesisError) -> Circuit
 Scalar
-
