@@ -22,7 +22,6 @@ def all(ctx):
     shutil.copy2(ROOT/'blueprint'/'print'/'print.pdf', ROOT/'docs'/'blueprint.pdf')
     shutil.copy2(ROOT/'docs_src'/'pygments.css', ROOT/'docs'/'pygments.css')
     shutil.copy2(ROOT/'docs_src'/'style.css', ROOT/'docs'/'style.css')
-    shutil.copy2(ROOT/'docs_src'/'_config.yml', ROOT/'docs'/'_config.yml')
 
 @task(doc, web)
 def html(ctx):
