@@ -20,6 +20,9 @@ def all(ctx):
     shutil.rmtree(ROOT/'docs'/'blueprint', ignore_errors=True)
     shutil.copytree(ROOT/'blueprint'/'web', ROOT/'docs'/'blueprint')
     shutil.copy2(ROOT/'blueprint'/'print'/'print.pdf', ROOT/'docs'/'blueprint.pdf')
+    shutil.copy2(ROOT/'docs_src'/'pygments.css', ROOT/'docs'/'pygments.css')
+    shutil.copy2(ROOT/'docs_src'/'style.css', ROOT/'docs'/'style.css')
+    shutil.copy2(ROOT/'docs_src'/'_config.yml', ROOT/'docs'/'_config.yml')
 
 @task(doc, web)
 def html(ctx):
