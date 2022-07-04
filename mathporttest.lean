@@ -14,3 +14,4 @@ import Mathbin.Data.Polynomial.Div
 #check Polynomial.eval₂
 #check Polynomial.X_pow_eq_monomial
 #check Polynomial.monomial_zero_left
+#check Polynomial.multiplicity_finite_of_degree_pos_of_monic
