@@ -17,7 +17,7 @@ There are two big aspects to this work: the formalization and documentation.
 
 ### Formalization
 
-The formalization can be found in the [`ZKSNARK`](/ZkSNARK/) folder. As the project matures, there will likely be more structure to this aspect.
+The formalization can be found in the [`ZkSNARK`](/ZkSNARK/) folder. As the project matures, there will likely be more structure to this aspect.
 
 ### Documentation
 
