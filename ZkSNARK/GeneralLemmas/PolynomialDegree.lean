@@ -2,8 +2,9 @@ import Mathbin
 
 namespace PolynomialDegree
 
-constant F : Type
+open BigOperators
 
+variable {F : Type u}
 variable [Field F]
 
 lemma natDegreeProductForm (m : ℕ) (f : Fin m → F) : 

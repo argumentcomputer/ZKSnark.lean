@@ -14,6 +14,16 @@ variable [Field F]
   n_stmt - the statement size,
   n_wit - the witness size -/
 
+<<<<<<< HEAD
+=======
+/-- An inductive type from which to index the variables of the 3-variable polynomials the proof manages -/
+@[derive decidable_eq]
+inductive vars : Type
+| X : vars
+| Y : vars
+| Z : vars
+
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 variable (m n_stmt n_wit : ℕ)
 def n := n_stmt + n_wit
 
@@ -27,7 +37,11 @@ variable (r : Fin m → F)
 def t : Polynomial F := 
   ∏ i in (Finset.range m), (Polynomial.X - Polynomial.C (r i))
 
+<<<<<<< HEAD
 /-- t has degree m -/
+=======
+/- t has degree m -/
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 lemma nat_degree_t : t.natDegree = m :=
   rw t
   rw Polynomial.nat_degree_prod
@@ -68,11 +82,19 @@ lemma degree_t_pos : 0 < m → 0 < t.degree := by
 def V_wit_sv (a_wit : Fin n_wit → F) : Polynomial F 
 := ∑ i in Finset.range n_wit, a_wit i • u_wit i
 
+<<<<<<< HEAD
 /-- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
 def V_stmt_sv (a_stmt : Fin n_stmt → F) : Polynomial F 
 := ∑ i in (Finset.range n_stmt), a_stmt i • u_stmt i
 
 /-- Checks whether a statement witness pair satisfies the SSP -/
+=======
+/- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
+def V_stmt_sv (a_stmt : Fin n_stmt → F) : Polynomial F 
+:= ∑ i in (Finset.range n_stmt), a_stmt i • u_stmt i
+
+/- Checks whether a statement witness pair satisfies the SSP -/
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 def satisfying (a_stmt : Fin n_stmt → F ) (a_wit : Fin n_wit → F) := 
 (∑ i in (Finset.range n_stmt), a_stmt i • u_stmt i
   + (∑ i in (finset.range n_wit), a_wit i • u_wit i))^2 %ₘ t = 1
@@ -82,32 +104,54 @@ def satisfying (a_stmt : Fin n_stmt → F ) (a_wit : Fin n_wit → F) :=
 /- Multivariable polynomial definititons and ultilities -/
 
 
+<<<<<<< HEAD
 /-- Helper for converting mv_polynomial to single -/
+=======
+/- Helper for converting mv_polynomial to single -/
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 @[simp]
 def singlify : Vars → Polynomial F
 | vars.X := Polynomial.X 
 | vars.Y := 1
 | vars.Z := 1
 
+<<<<<<< HEAD
 /-- Helpers for representing X, Y, Z as 3-variable polynomials -/
+=======
+/- Helpers for representing X, Y, Z as 3-variable polynomials -/
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 def X_poly : mv_polynomial vars F := mv_polynomial.X vars.X
 def Y_poly : mv_polynomial vars F := mv_polynomial.X vars.Y
 def Z_poly : mv_polynomial vars F := mv_polynomial.X vars.Z
 
+<<<<<<< HEAD
 /-- Multivariable version of t -/
 def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
 
 /-- V_stmt as a multivariable polynomial of vars.X -/
+=======
+/- Multivariable version of t -/
+def t_mv : mv_polynomial vars F := t.eval₂ mv_polynomial.C X_poly
+
+/- V_stmt as a multivariable polynomial of vars.X -/
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 def V_stmt_mv (a_stmt : Fin n_stmt → F) : mv_polynomial vars F 
 := (V_stmt_sv a_stmt).eval₂ mv_polynomial.C X_poly
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
+<<<<<<< HEAD
 lemma my_multivariable_to_single_variable (p : Polynomial F) : ((p.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = p 
 :=
 begin
   apply multivariable_to_single_variable,
   simp,
 end
+=======
+lemma my_multivariable_to_single_variable 
+      (p : Polynomial F) : ((p.eval₂ mv_polynomial.C X_poly).eval₂ polynomial.C singlify) = p := by
+  apply multivariable_to_single_variable
+  simp
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
 def crs_powers_of_τ (i : Fin m) : (mv_polynomial vars F) := X_poly^(i : ℕ)
@@ -150,8 +194,12 @@ def H : mv_polynomial vars F :=
 
 
 /-- V as a multivariable polynomial -/
+<<<<<<< HEAD
 def V (a_stmt : Fin n_stmt → F) : mv_polynomial vars F 
 := V_stmt_mv a_stmt + V_wit
+=======
+def V (a_stmt : Fin n_stmt → F) : mv_polynomial vars F := V_stmt_mv a_stmt + V_wit
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 
 /- Lemmas for proof -/
 
@@ -205,6 +253,7 @@ begin
 
 end
 
+<<<<<<< HEAD
 lemma h4_1 : (∀ i, b i = 0) → (λ (i : Fin m), b i • crs_powers_of_τ i) = (λ (i : Fin m), 0)
 :=
 begin
@@ -236,16 +285,49 @@ begin
   rw finset.sum_singleton,
   simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly],
   simp only with coeff_simp polynomial_nf, 
+=======
+lemma h4_1 : (∀ i, b i = 0) → (λ (i : Fin m), b i • crs_powers_of_τ i) = (λ (i : Fin m), 0) := by
+  intro tmp
+  apply funext
+  intro x
+  rw tmp x
+  simp
+
+lemma h5_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly := by
+  rw mv_polynomial.smul_eq_C_mul
+  rw mv_polynomial.smul_eq_C_mul
+  ring
+
+lemma h6_2 : (H * t_mv + mv_polynomial.C 1).coeff (finsupp.single vars.Z 2) = 0 := by
+  rw mv_polynomial.coeff_add
+  rw mv_polynomial.coeff_C
+  rw if_neg
+  rw mv_polynomial.coeff_mul
+  rw single_2_antidiagonal
+  rw finset.sum_insert
+  rw finset.sum_insert
+  rw finset.sum_singleton
+  simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly]
+  simp only with coeff_simp polynomial_nf
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
   -- unfold_coes,
 
   -- ite_finsupp_simplify,
   -- simp only with coeff_simp,
 
+<<<<<<< HEAD
   simp [-finsupp.single_zero, finsupp.single_eq_single_iff],
   rw finset.mem_singleton,
   simp,
   simp [finset.mem_insert, finset.mem_singleton],
   simp,
+=======
+  simp [-finsupp.single_zero, finsupp.single_eq_single_iff]
+  rw finset.mem_singleton
+  simp
+  simp [finset.mem_insert, finset.mem_singleton]
+  simp
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
   -- -- dec_trivial,
 
   -- rw finsupp.eq_single_iff,
@@ -259,6 +341,7 @@ lemma h6_3 (a_stmt : Fin n_stmt → F) : (
     (b_γβ • Z_poly 
       + ∑ (i : Fin n_stmt) in Finset.range n_stmt, a_stmt i • Polynomial.eval₂ mv_polynomial.C X_poly (u_stmt i) 
       + ∑ (i : Fin n_wit) in Finset.range n_wit, b' i • Polynomial.eval₂ mv_polynomial.C X_poly (u_wit i)
+<<<<<<< HEAD
     ) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2
 :=
 begin
@@ -270,10 +353,22 @@ begin
   rw finset.sum_insert,
   rw finset.sum_insert,
   rw finset.sum_singleton,
+=======
+    ) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2 := by
+  rw pow_succ
+  rw pow_one
+  rw mv_polynomial.coeff_mul
+  rw single_2_antidiagonal
+
+  rw finset.sum_insert
+  rw finset.sum_insert
+  rw finset.sum_singleton
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 
   -- NOTE The simp only with coeff_simp and ite_finsupp_simplify tactic work here
   --      But I used to get deterministic timeout - i fixed this by making simp only with coeff_simp do simp only instead
   --
+<<<<<<< HEAD
   simp [X_poly, Y_poly, Z_poly],
   simp only with coeff_simp polynomial_nf,
   -- simp only with coeff_simp,
@@ -287,6 +382,19 @@ begin
   simp,
   -- finish,
 end
+=======
+  simp [X_poly, Y_poly, Z_poly]
+  simp only with coeff_simp polynomial_nf
+  -- simp only with coeff_simp,
+  -- ite_finsupp_simplify,
+  rw pow_succ
+  rw pow_one
+
+  simp
+  simp [-finsupp.single_zero, finsupp.single_eq_single_iff]
+  simp [finset.mem_insert, finset.mem_singleton]
+  simp
+>>>>>>> f5dd3872a80fabe47c78f4cea7961b90765bca26
 
 
 /-- This function represents the exctractor in the AGM. -/
