@@ -41,14 +41,14 @@ lemma dec_change (f : vars →₀ ℕ) {s a : vars} (hsa : s = a) : decrement f 
 -- The fact that I need to include all of these lemmas is weird...
 lemma coefn_funlike {α : vars →₀ ℕ} : coeFn α = FunLike.coe α := by rfl
 
-lemma one_eq_one (n : ℕ) : n - 1 = n - One.one := by rfl 
+-- lemma one_eq_one (n : ℕ) : n - 1 = n - One.one := by rfl 
 
-lemma le_asymm {n m : ℕ} : n > m ↔ m < n := by rfl
+-- lemma le_asymm {n m : ℕ} : n > m ↔ m < n := by rfl
 
 lemma equal_dec_equal 
   (s : vars) (f g : vars →₀ ℕ) 
-  (hf : 0 < (f s)) 
-  (hg : 0 < (g s)) 
+  (hf : 0 < f s) 
+  (hg : 0 < g s) 
   (hxy : decrement f s = decrement g s) : 
   f = g := 
 by 
@@ -68,16 +68,17 @@ by
     rw [dec_nochange f h, dec_nochange g h] at hxy
     exact hxy
 
-lemma inc_dec_nonzero_equal (s : vars) (f : vars →₀ ℕ) 
-                            (hf : @LT.lt ℕ instLTNat 0 (f s)) 
-  : increment (decrement f s) s = f := by
+lemma inc_dec_nonzero_equal 
+  (s : vars) (f : vars →₀ ℕ) (hf : 0 < f s) : 
+  increment (decrement f s) s = f := 
+by
   apply Finsupp.ext
   intro a
   by_cases h : s = a -- Not sure what's going on here, why do I need to use `;` but not before?
   · change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
     rw [h, Finsupp.single_eq_same]
     rw [← coefn_funlike, h] at hf
-    exact Nat.succ_pred_eq_of_pos hf
+    exact Nat.succ_pred_eq_of_posₓ hf
   · change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
     rw [Finsupp.single_eq_of_ne h]
     ring
@@ -104,7 +105,7 @@ Frankly, this function should be generalized to all mv_polynomials
 Not just mv_polynomials over vars
 TODO generalize this method and add to mathlib candidates folder
 -/
-def div_X_v2 (p : MvPolynomial vars F) (s : vars) 
+noncomputable def div_X_v2 (p : MvPolynomial vars F) (s : vars) 
              (h : (∀ m : vars →₀ ℕ, m s = 0 -> p.coeff m = 0)) 
              : MvPolynomial vars F where
   toFun              := fun m => p.coeff (increment m s)
