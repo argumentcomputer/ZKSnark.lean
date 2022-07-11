@@ -58,29 +58,26 @@ lemma monic_t : Polynomial.Monic (t r) := by
   intros
   exact Polynomial.monic_X_sub_C (r _)
 
-lemma degree_t_pos : 0 < m → 0 < (t r).degree := by
+lemma degree_t_pos (hm : 0 < m) : 0 < (t r).degree := by
+  --intro hm
+--  set n : WithBot ℕ := some m
+  suffices h : (t r).degree = some m
+  · rw [h]
+    apply WithBot.some_lt_some.2
+    exact hm
+
+  have h := nat_degree_t r
+  rw [Polynomial.natDegree] at h
+
+  induction (t r).degree
+
+  rw [Option.getOrElse] at h
+  rw [← h] at hm
+  exfalso
   sorry
-  -- intro hm
-  -- suffices h : t.degree = some m
-  --   rw h
-  --   apply with_bot.some_lt_some.2
-  --   exact hm
-
-  -- have h := nat_degree_t
-  -- rw Polynomial.nat_degree at h
-
-  -- induction h1 : t.degree
-
-  -- rw h1 at h
-  -- rw option.get_or_else at h
-  -- rw h at hm
-  -- have h2 := has_lt.lt.false hm
-  -- exfalso
-  -- exact h2
-
-  -- rw h1 at h,
-  -- rw option.get_or_else at h
-  -- rw h
+  
+  rw [Option.getOrElse] at h
+  sorry
 
 -- Single variable form of V_wit
 def V_wit_sv (a_wit : Finₓ n_wit → F) : Polynomial F := 
