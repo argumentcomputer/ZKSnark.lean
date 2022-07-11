@@ -1,43 +1,42 @@
 import Mathbin
 
-import ZkSNARK.BabyZkSNARK.GeneralLemmas.PolynomialDegree
+-- import ZkSNARK.BabyZkSNARK.GeneralLemmas.PolynomialDegree
 
 namespace KnowledgeSoundness
 
 
-/-- The finite field parameter of our SNARK -/
-constant F : Type
+/- The finite field parameter of our SNARK -/
 
-variable [Field F]
+variable {F : Type u} [Field F]
 /- The naturals representing:
   m - the number of gates in the circuit,
   n_stmt - the statement size,
   n_wit - the witness size -/
 
-/-- An inductive type from which to index the variables of the 3-variable polynomials the proof manages -/
-@[derive decidable_eq]
-inductive vars : Type
-| X : vars
-| Y : vars
-| Z : vars
 
-variable (m n_stmt n_wit : ℕ)
+/-- An inductive type from which to index the variables of the 3-variable polynomials the proof manages -/
+inductive vars : Type
+  | X : vars
+  | Y : vars
+  | Z : vars
+
+variable {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
 
 /- u_stmt and u_wit are fin-indexed collections of polynomials from the square span program -/
-variable (u_stmt : Fin n_stmt → (Polynomial F) )
-variable (u_wit : Fin n_wit → (Polynomial F) )
+variable {u_stmt : Fin n_stmt → F[X]} 
+variable {u_wit : Fin n_wit → F[X]}
 
 /- The roots of the polynomial t -/
-variable (r : Fin m → F)
+variable (r : Finₓ m → F)
 /- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def t : Polynomial F := 
-  ∏ i in (Finset.range m), (Polynomial.X - Polynomial.C (r i))
+noncomputable def t : Polynomial F := 
+  ∏ i in Finset.finRange m, (Polynomial.x : F[X]) - Polynomial.c (r i)
 
 /- t has degree m -/
-lemma nat_degree_t : t.natDegree = m :=
-  rw t
-  rw Polynomial.nat_degree_prod
+lemma nat_degree_t : (t r).natDegree = m := by
+  rw [t]
+  rw [Polynomial.nat_degree_prod]
   simp
   intros i hi
   exact Polynomial.X_sub_C_ne_zero (r i)

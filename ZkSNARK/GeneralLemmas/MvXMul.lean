@@ -114,13 +114,14 @@ lemma extract_mul_from_sum {α : Type u} {r : Finset α} {f : α -> MvPolynomial
 by rw [Finset.mul_sum]
 
 
-lemma C_mul_C (a a' : R) : (C a) * (C a') = (C (a * a') : MvPolynomial σ R) := by simp
+-- lemma C_mul_C (a a' : R) : (C a) * (C a') = (C (a * a') : MvPolynomial σ R) := by simp
 
 
-lemma C_mul_monomial' (a a' : R) (s : σ →₀ ℕ) : (monomial s a') * C a  = monomial s (a' * a) :=
-by simp [C_apply, monomial, single_mul_single]
+-- lemma C_mul_monomial' (a a' : R) (s : σ →₀ ℕ) : (monomial s a') * C a  = monomial s (a' * a) :=
+-- by sorry
+-- simp [C_apply, monomial, single_mul_single]
 
-lemma C_to_monomial (a : R) : @C _ σ _ a = monomial 0 (a) := by exact C_apply
+-- lemma C_to_monomial (a : R) : @C _ σ _ a = monomial 0 (a) := by exact C_apply
 
 -- -- For some reason, this lemma is actually useless https://leanprover.zulipchat.com/#narrow/stream/113488-general/topic/Extracting.20constant.20from.20sum
 -- -- I expect many other lemmas in theis file may be useless as well
@@ -133,15 +134,20 @@ lemma C_to_monomial (a : R) : @C _ σ _ a = monomial 0 (a) := by exact C_apply
 -- end
 
 lemma rearrange1 (n : ℕ) (v1 v2 : σ) (p : MvPolynomial σ R) :
-  ((MvPolynomial.x v1) ^ n) * ((MvPolynomial.x v2) * p) = (MvPolynomial.x v2) * ((MvPolynomial.x v1 ^ n) * p) := by ring
+  ((MvPolynomial.x v1) ^ n) * ((MvPolynomial.x v2) * p) = (MvPolynomial.x v2) * ((MvPolynomial.x v1 ^ n) * p) := 
+  by sorry
+  --by ring
 
 lemma rearrange2 (n : ℕ) (f : R) (v1 : σ) (p : MvPolynomial σ R) :
-  (MvPolynomial.x v1 ^ n) * ((MvPolynomial.c f) * p) = (MvPolynomial.c f) * ((MvPolynomial.x v1 ^ n) * p) := by ring
+  (MvPolynomial.x v1 ^ n) * ((MvPolynomial.c f) * p) = (MvPolynomial.c f) * ((MvPolynomial.x v1 ^ n) * p) := 
+  by sorry
+  -- by ring
 
 -- -- move constants right of X
 lemma rearrange_constants_right (f : R) (v1 : σ) : 
   (MvPolynomial.c f) * MvPolynomial.x v1 = (MvPolynomial.x v1) * (MvPolynomial.c f)
-:= by ring
+:= by sorry
+-- by ring
 
 lemma rearrange_constants_right_with_extra (f : R) (v1 : σ) (p : MvPolynomial σ R) : 
   (MvPolynomial.c f) * ((MvPolynomial.x v1) * p) = (MvPolynomial.X v1) * (MvPolynomial.C f * p)
