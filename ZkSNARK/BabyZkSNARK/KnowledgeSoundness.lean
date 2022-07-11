@@ -2,8 +2,10 @@ import Mathbin
 
 -- import ZkSNARK.BabyZkSNARK.GeneralLemmas.PolynomialDegree
 
-namespace KnowledgeSoundness
+noncomputable section
 
+namespace KnowledgeSoundness
+open Finset Polynomial
 
 /- The finite field parameter of our SNARK -/
 
@@ -15,73 +17,76 @@ variable {F : Type u} [Field F]
 
 
 /-- An inductive type from which to index the variables of the 3-variable polynomials the proof manages -/
-inductive vars : Type
-  | X : vars
-  | Y : vars
-  | Z : vars
+inductive Vars : Type
+  | X : Vars
+  | Y : Vars
+  | Z : Vars
 
 variable {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
 
 /- u_stmt and u_wit are fin-indexed collections of polynomials from the square span program -/
-variable {u_stmt : Fin n_stmt → F[X]} 
-variable {u_wit : Fin n_wit → F[X]}
+variable (u_stmt : Finₓ n_stmt → F[X]) 
+variable (u_wit : Finₓ n_wit → F[X])
 
 /- The roots of the polynomial t -/
 variable (r : Finₓ m → F)
-/- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
-noncomputable def t : Polynomial F := 
-  ∏ i in Finset.finRange m, (Polynomial.x : F[X]) - Polynomial.c (r i)
+/-- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
+def t : Polynomial F := 
+  ∏ i in finRange m, (x : F[X]) - c (r i)
+
+lemma t_def : (t r) = ∏ i in finRange m, (x : F[X]) - c (r i) := rfl
 
 /- t has degree m -/
 lemma nat_degree_t : (t r).natDegree = m := by
+  rw [t, Polynomial.nat_degree_prod]
+  sorry
+  -- rw [Polynomial.nat_degree_prod]
+  -- simp
+  -- intros i hi
+  -- exact Polynomial.X_sub_C_ne_zero (r i)
+
+lemma monic_t : (t r).Monic := by
   rw [t]
-  rw [Polynomial.nat_degree_prod]
-  simp
-  intros i hi
-  exact Polynomial.X_sub_C_ne_zero (r i)
-
-lemma monic_t : t.monic := by
-  rw t
   apply Polynomial.monic_prod_of_monic
-  intros i hi
-  exact Polynomial.monic_X_sub_C (r i)
+  exact fun i _ => Polynomial.monic_X_sub_C (r i)
 
-lemma degree_t_pos : 0 < m → 0 < t.degree := by
-  intro hm
-  suffices h : t.degree = some m
-    rw h
-    apply with_bot.some_lt_some.2
-    exact hm
+lemma degree_t_pos : 0 < m → 0 < (t r).degree := by
+  sorry
+  -- intro hm
+  -- suffices h : t.degree = some m
+  --   rw h
+  --   apply with_bot.some_lt_some.2
+  --   exact hm
 
-  have h := nat_degree_t
-  rw Polynomial.nat_degree at h
+  -- have h := nat_degree_t
+  -- rw Polynomial.nat_degree at h
 
-  induction h1 : t.degree
+  -- induction h1 : t.degree
 
-  rw h1 at h
-  rw option.get_or_else at h
-  rw h at hm
-  have h2 := has_lt.lt.false hm
-  exfalso
-  exact h2
+  -- rw h1 at h
+  -- rw option.get_or_else at h
+  -- rw h at hm
+  -- have h2 := has_lt.lt.false hm
+  -- exfalso
+  -- exact h2
 
-  rw h1 at h,
-  rw option.get_or_else at h
-  rw h
+  -- rw h1 at h,
+  -- rw option.get_or_else at h
+  -- rw h
 
 -- Single variable form of V_wit
-def V_wit_sv (a_wit : Fin n_wit → F) : Polynomial F 
-:= ∑ i in Finset.range n_wit, a_wit i • u_wit i
+def V_wit_sv (a_wit : Finₓ n_wit → F) : Polynomial F := 
+∑ i in finRange n_wit, a_wit i • u_wit i
 
 /- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
-def V_stmt_sv (a_stmt : Fin n_stmt → F) : Polynomial F 
-:= ∑ i in (Finset.range n_stmt), a_stmt i • u_stmt i
+def V_stmt_sv (a_stmt : Finₓ n_stmt → F) : Polynomial F 
+:= ∑ i in finRange n_stmt, a_stmt i • u_stmt i
 
 /- Checks whether a statement witness pair satisfies the SSP -/
-def satisfying (a_stmt : Fin n_stmt → F ) (a_wit : Fin n_wit → F) := 
-(∑ i in (Finset.range n_stmt), a_stmt i • u_stmt i
-  + (∑ i in (finset.range n_wit), a_wit i • u_wit i))^2 %ₘ t = 1
+def satisfying (a_stmt : Finₓ n_stmt → F) (a_wit : Finₓ n_wit → F) := 
+(∑ i in finRange n_stmt, a_stmt i • u_stmt i
+  + ∑ i in finRange n_wit, a_wit i • u_wit i) ^ 2 %ₘ (t r) = 1
 
 
 
@@ -89,52 +94,50 @@ def satisfying (a_stmt : Fin n_stmt → F ) (a_wit : Fin n_wit → F) :=
 
 
 /- Helper for converting MvPolynomial to single -/
-@[simp]
 def singlify : Vars → Polynomial F
-| vars.X := Polynomial.x 
-| vars.Y := 1
-| vars.Z := 1
+| Vars.X => Polynomial.x 
+| Vars.Y => 1
+| Vars.Z => 1
 
+variable (F)
 /- Helpers for representing X, Y, Z as 3-variable polynomials -/
-def X_poly : MvPolynomial vars F := MvPolynomial.X vars.X
-def Y_poly : MvPolynomial vars F := MvPolynomial.X vars.Y
-def Z_poly : MvPolynomial vars F := MvPolynomial.X vars.Z
+def X_poly : MvPolynomial Vars F := MvPolynomial.x Vars.X
+def Y_poly : MvPolynomial Vars F := MvPolynomial.x Vars.Y
+def Z_poly : MvPolynomial Vars F := MvPolynomial.x Vars.Z
 
+variable {F}
 /- Multivariable version of t -/
-def t_mv : MvPolynomial vars F := t.eval₂ MvPolynomial.C X_poly
+def t_mv : MvPolynomial Vars F := (t r).eval₂ MvPolynomial.c (X_poly F)
 
-/- V_stmt as a multivariable polynomial of vars.X -/
-def V_stmt_mv (a_stmt : Fin n_stmt → F) : MvPolynomial vars F 
-:= (V_stmt_sv a_stmt).eval₂ MvPolynomial.C X_poly
+/- V_stmt as a multivariable polynomial of Vars.X -/
+def V_stmt_mv (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F 
+:= (V_stmt_sv u_stmt a_stmt).eval₂ MvPolynomial.c (X_poly F)
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
 lemma my_multivariable_to_single_variable 
-      (p : Polynomial F) : ((p.eval₂ MvPolynomial.C X_poly).eval₂ polynomial.C singlify) = p := by
-  apply multivariable_to_single_variable
-  simp
+  (p : Polynomial F) : ((p.eval₂ MvPolynomial.c (X_poly F)).eval₂ Polynomial.c singlify) = p := by
+  sorry
+  -- apply multivariable_to_single_variable
+  -- simp
 
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
-def crs_powers_of_τ (i : Fin m) : (MvPolynomial vars F) := X_poly^(i : ℕ)
-def crs_γ : MvPolynomial vars F := Z_poly
-def crs_γβ : MvPolynomial vars F := Z_poly * Y_poly
-def crs_β_ssps (i : Fin n_wit) : (MvPolynomial vars F) := (Y_poly) * (u_wit i).eval₂ MvPolynomial.C X_poly
+def crs_powers_of_τ (i : Fin m) : (MvPolynomial Vars F) := X_poly F ^ (i : ℕ)
+def crs_γ : MvPolynomial Vars F := Z_poly F
+def crs_γβ : MvPolynomial Vars F := (Z_poly F) * Y_poly F
+def crs_β_ssps (i : Finₓ n_wit) : (MvPolynomial Vars F) := (Y_poly F) * (u_wit i).eval₂ MvPolynomial.c (X_poly F)
 
-/-- The coefficients of the CRS elements in the algebraic adversary's representation -/
+/- The coefficients of the CRS elements in the algebraic adversary's representation -/
 variable (b v h : Fin m → F)
 variable (b_γ v_γ h_γ b_γβ v_γβ h_γβ : F)
 variable (b' v' h' : Fin n_wit → F)
 
 /-- Polynomial forms of the adversary's proof representation -/
-def B_wit : MvPolynomial vars F := 
-  ∑ i in (Finset.range m), (b i) • (crs_powers_of_τ i)
-  +
-  b_γ • crs_γ
-  +
-  b_γβ • crs_γβ
-  +
-  ∑ i in (Finset.range n_wit),  (b' i) • (crs_β_ssps i)
+def B_wit : MvPolynomial Vars F := 
+  ∑ i in finRange m, b i • crs_powers_of_τ i + 
+  b_γ • crs_γ + b_γβ • crs_γβ +
+  ∑ i in finRange n_wit,  b' i • crs_β_ssps i
 
-def V_wit : MvPolynomial vars F := 
+def V_wit : MvPolynomial Vars F := 
   ∑ i in (Finset.range m), (v i) • (crs_powers_of_τ i)
   +
   v_γ • crs_γ
@@ -143,7 +146,7 @@ def V_wit : MvPolynomial vars F :=
   +
   ∑ i in (Finset.range n_wit), (v' i) • (crs_β_ssps i)
 
-def H : MvPolynomial vars F := 
+def H : MvPolynomial Vars F := 
   ∑ i in (Finset.range m), (h i) • (crs_powers_of_τ i)
   +
   h_γ • crs_γ
@@ -154,7 +157,7 @@ def H : MvPolynomial vars F :=
 
 
 /-- V as a multivariable polynomial -/
-def V (a_stmt : Fin n_stmt → F) : MvPolynomial vars F := V_stmt_mv a_stmt + V_wit
+def V (a_stmt : Fin n_stmt → F) : MvPolynomial Vars F := V_stmt_mv a_stmt + V_wit
 
 /- Lemmas for proof -/
 
@@ -170,7 +173,7 @@ begin
   exact h,
 end
 
-lemma h2_1 : (∀ (i : Fin m), B_wit.coeff (finsupp.single vars.X i) = b i) :=
+lemma h2_1 : (∀ (i : Fin m), B_wit.coeff (finsupp.single Vars.X i) = b i) :=
 begin
   intro j,
   rw B_wit,
@@ -191,7 +194,7 @@ begin
 end
 
 
-lemma h3_1 : B_wit.coeff (Finsupp.single vars.Z 1) = b_γ
+lemma h3_1 : B_wit.coeff (Finsupp.single Vars.Z 1) = b_γ
 :=
 begin
   rw B_wit,
@@ -220,7 +223,7 @@ lemma h5_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly := by
   rw MvPolynomial.smul_eq_C_mul
   ring
 
-lemma h6_2 : (H * t_mv + MvPolynomial.C 1).coeff (finsupp.single vars.Z 2) = 0 := by
+lemma h6_2 : (H * t_mv + MvPolynomial.C 1).coeff (finsupp.single Vars.Z 2) = 0 := by
   rw MvPolynomial.coeff_add
   rw MvPolynomial.coeff_C
   rw if_neg
@@ -254,7 +257,7 @@ lemma h6_3 (a_stmt : Fin n_stmt → F) : (
     (b_γβ • Z_poly 
       + ∑ (i : Fin n_stmt) in Finset.range n_stmt, a_stmt i • Polynomial.eval₂ MvPolynomial.C X_poly (u_stmt i) 
       + ∑ (i : Fin n_wit) in Finset.range n_wit, b' i • Polynomial.eval₂ MvPolynomial.C X_poly (u_wit i)
-    ) ^ 2).coeff (finsupp.single vars.Z 2) = b_γβ ^ 2 := by
+    ) ^ 2).coeff (finsupp.single Vars.Z 2) = b_γβ ^ 2 := by
   rw pow_succ
   rw pow_one
   rw MvPolynomial.coeff_mul
@@ -295,9 +298,9 @@ theorem case_1 (a_stmt : Fin n_stmt → F ) :
   intros hm eqnI eqnII
   -- TODO eqnI should have a Z term on both sides
   -- "B_wit only has terms with a Y component"
-  have h1 : (∀ m : vars →₀ ℕ, m vars.Y = 0 → B_wit.coeff m = 0)
+  have h1 : (∀ m : Vars →₀ ℕ, m Vars.Y = 0 → B_wit.coeff m = 0)
     rw eqnI
-    apply mul_var_no_constant V_wit vars.Y
+    apply mul_var_no_constant V_wit Vars.Y
   -- "b_0 b_1, ..., b_m, ... are all zero"
   have h2 : ∀ i : Fin m, b i = 0
     intro i
@@ -321,7 +324,7 @@ theorem case_1 (a_stmt : Fin n_stmt → F ) :
     simp
   -- "... we also see that V_wit must not have any Y terms at all"
   have h5 : V_wit = b_γβ • Z_poly + ∑ i in (Finset.range n_wit), (b' i) • ((u_wit i).eval₂ MvPolynomial.C X_poly)
-    apply left_cancel_X_mul vars.Y
+    apply left_cancel_X_mul Vars.Y
     rw ←Y_poly
     rw mul_comm
     rw ←eqnI
@@ -347,7 +350,7 @@ theorem case_1 (a_stmt : Fin n_stmt → F ) :
   have h7 : b_γβ = 0
     let eqnII' := eqnII
     rw h6 at eqnII'
-    have h6_1 := congr_arg (MvPolynomial.coeff (finsupp.single vars.Z 2)) eqnII'
+    have h6_1 := congr_arg (MvPolynomial.coeff (finsupp.single Vars.Z 2)) eqnII'
     rw h6_2 at h6_1
     rw h6_3 at h6_1
     exact pow_eq_zero (eq.symm h6_1)
