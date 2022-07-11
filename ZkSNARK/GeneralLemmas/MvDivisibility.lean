@@ -41,7 +41,7 @@ lemma dec_change (f : vars →₀ ℕ) {s a : vars} (hsa : s = a) : decrement f 
 -- The fact that I need to include all of these lemmas is weird...
 lemma coefn_funlike {α : vars →₀ ℕ} : coeFn α = FunLike.coe α := by rfl
 
--- lemma one_eq_one (n : ℕ) : n - 1 = n - One.one := by rfl 
+lemma one_eq_one (n : ℕ) : n - 1 = n - One.one := by rfl 
 
 -- lemma le_asymm {n m : ℕ} : n > m ↔ m < n := by rfl
 

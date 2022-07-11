@@ -40,16 +40,23 @@ lemma t_def : (t r) = ∏ i in finRange m, (x : F[X]) - c (r i) := rfl
 /- t has degree m -/
 lemma nat_degree_t : (t r).natDegree = m := by
   rw [t, Polynomial.nat_degree_prod]
-  sorry
-  -- rw [Polynomial.nat_degree_prod]
-  -- simp
-  -- intros i hi
-  -- exact Polynomial.X_sub_C_ne_zero (r i)
+  have h1 : ∀ x : F, RingHom.toFun Polynomial.c x = coeFn Polynomial.c x
+  · intro
+    rw [RingHom.to_fun_eq_coe]
+  conv_lhs =>
+  · congr
+    skip
+    ext
+    simp_rw [h1 (r _), Polynomial.nat_degree_X_sub_C]
+  rw [Finset.sum_const, Finset.fin_range_card, Algebra.id.smul_eq_mul, mul_oneₓ]
+  intros
+  apply Polynomial.X_sub_C_ne_zero
 
-lemma monic_t : (t r).Monic := by
+lemma monic_t : Polynomial.Monic (t r) := by
   rw [t]
   apply Polynomial.monic_prod_of_monic
-  exact fun i _ => Polynomial.monic_X_sub_C (r i)
+  intros
+  exact Polynomial.monic_X_sub_C (r _)
 
 lemma degree_t_pos : 0 < m → 0 < (t r).degree := by
   sorry
