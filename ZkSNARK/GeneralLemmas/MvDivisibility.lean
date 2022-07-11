@@ -45,26 +45,28 @@ lemma one_eq_one (n : ℕ) : n - 1 = n - One.one := by rfl
 
 lemma le_asymm {n m : ℕ} : n > m ↔ m < n := by rfl
 
-lemma equal_dec_equal (s : vars) (f g : vars →₀ ℕ) 
-                      (hf : @LT.lt ℕ instLTNat 0 (f s)) 
-                      (hg : @LT.lt ℕ instLTNat 0 (g s)) 
-                      (hxy : decrement f s = decrement g s) 
-  : f = g := by 
+lemma equal_dec_equal 
+  (s : vars) (f g : vars →₀ ℕ) 
+  (hf : 0 < (f s)) 
+  (hg : 0 < (g s)) 
+  (hxy : decrement f s = decrement g s) : 
+  f = g := 
+by 
   apply Finsupp.ext
   intro a
   rw [FunLike.ext_iff] at hxy
   specialize hxy a
   by_cases h : s = a
-  { rw [coefn_funlike, coefn_funlike] at *
+  · rw [coefn_funlike, coefn_funlike] at *
     rw [dec_change f h, dec_change g h, 
         one_eq_one, one_eq_one, 
-        ←Nat.pred_eq_sub_one (FunLike.coe f a), 
-        ←Nat.pred_eq_sub_one (FunLike.coe g a)] at hxy
+        ← Nat.pred_eq_sub_one (FunLike.coe f a), 
+        ← Nat.pred_eq_sub_one (FunLike.coe g a)] at hxy
     rw [h] at hf hg
-    exact Nat.pred_inj hf hg hxy }
-  { rw [coefn_funlike, coefn_funlike] at *
+    exact Nat.pred_injₓ hf hg hxy
+  · rw [coefn_funlike, coefn_funlike] at *
     rw [dec_nochange f h, dec_nochange g h] at hxy
-    exact hxy }
+    exact hxy
 
 lemma inc_dec_nonzero_equal (s : vars) (f : vars →₀ ℕ) 
                             (hf : @LT.lt ℕ instLTNat 0 (f s)) 
@@ -72,25 +74,24 @@ lemma inc_dec_nonzero_equal (s : vars) (f : vars →₀ ℕ)
   apply Finsupp.ext
   intro a
   by_cases h : s = a -- Not sure what's going on here, why do I need to use `;` but not before?
-  { change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
-    ; rw [h, Finsupp.single_eq_same]
-    ; rw [←coefn_funlike, h] at hf
-    ; exact Nat.succ_pred_eq_of_pos hf }
-  { change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
-    ; rw [Finsupp.single_eq_of_ne h]
-    ; ring }
+  · change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
+    rw [h, Finsupp.single_eq_same]
+    rw [← coefn_funlike, h] at hf
+    exact Nat.succ_pred_eq_of_pos hf
+  · change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
+    rw [Finsupp.single_eq_of_ne h]
+    ring
 
 lemma dec_inc_equal (s : vars) (f : vars →₀ ℕ) : decrement (increment f s) s = f := by
   apply Finsupp.ext
   intro a
   by_cases h : s = a
-  { change (coeFn f) a + (coeFn $ Finsupp.single s 1) a - (coeFn $ Finsupp.single s 1) a = coeFn f a
-    ; rw [h, Finsupp.single_eq_same]
-    ; ring }
-  { change (coeFn f) a + (coeFn $ Finsupp.single s 1) a - (coeFn $ Finsupp.single s 1) a = coeFn f a
-    ; rw [Finsupp.single_eq_of_ne h]
-    ; ring
-  }
+  · change (coeFn f) a + (coeFn $ Finsupp.single s 1) a - (coeFn $ Finsupp.single s 1) a = coeFn f a
+    rw [h, Finsupp.single_eq_same]
+    ring
+  · change (coeFn f) a + (coeFn $ Finsupp.single s 1) a - (coeFn $ Finsupp.single s 1) a = coeFn f a
+    rw [Finsupp.single_eq_of_ne h]
+    ring
 
 /-
 the div_X function in data.polynomial.div returns a polynomial in the form of a curly-brace enclosed support, to_fun, mem_support_to_fun
