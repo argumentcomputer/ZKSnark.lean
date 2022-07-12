@@ -10,7 +10,7 @@ universe u
 
 variable {F : Type u} [Field F]
 
-constant vars : Type
+variable {vars : Type}
 variable [DecidableEq vars]
 
 noncomputable def increment (f : vars →₀ ℕ) (s : vars) : (vars →₀ ℕ) := f + Finsupp.single s (1 : ℕ)
@@ -152,42 +152,30 @@ noncomputable def div_X_v2 (p : MvPolynomial vars F) (s : vars)
 --     exact dec_inc_equal s a,
 --   end
 
--- /-- In the product of a polynomial with a variable, the coefficients of all terms without that variable are zero -/
--- lemma mul_var_no_constant (a : mv_polynomial vars F) (s : vars) (m : vars →₀ ℕ):
--- m s = 0 -> (a * X s).coeff m = 0
--- :=
--- begin
---   intro hc,
---   rw coeff_mul_X' m s a,
---   apply if_neg,
---   intro a_1,
---   exact ((m.mem_support_to_fun s).1 a_1) hc,
--- end
+/-- In the product of a polynomial with a variable, the coefficients of all terms without that variable are zero -/
+lemma coeff_mul_X_eq_zero (a : MvPolynomial vars F) (s : vars) (m : vars →₀ ℕ) :
+  m s = (0 : ℕ) → (a * (MvPolynomial.x s : MvPolynomial vars F)).coeff m = 0 :=
+by 
+  intro hc
+  rw [coeff_mul_X']
+  apply if_neg
+  rw [Finsupp.not_mem_support_iff, coefn_funlike, hc]
+  rfl
 
--- -- TODO: the converse of the above statement
+-- TODO: the converse of the above statement
+lemma right_cancel_X_mul {a b : MvPolynomial vars F} (s : vars) 
+  (h : a * (x s : MvPolynomial vars F) = b * (x s : MvPolynomial vars F)) :
+  a = b :=
+by 
+  apply MvPolynomial.ext _ _ (λ m => ?_)
+  rw [← coeff_mul_X m s a, ← coeff_mul_X m s b, h]
 
--- lemma right_cancel_X_mul {a b : mv_polynomial vars F} (s : vars) :
--- a * X s = b * X s -> a = b
--- :=
--- begin
---   intro h,
---   rw ext_iff,
---   intro m,
---   rw ← coeff_mul_X m s a,
---   rw ← coeff_mul_X m s b,
---   rw h,  
--- end
-
--- lemma left_cancel_X_mul {a b : mv_polynomial vars F} (s : vars) :
--- X s * a = X s * b -> a = b
--- :=
--- begin
---   intro h,
---   apply right_cancel_X_mul,
---   rw mul_comm,
---   rw h,
---   rw mul_comm,
--- end
+lemma left_cancel_X_mul {a b : MvPolynomial vars F} (s : vars) 
+  (h : (x s : MvPolynomial vars F) * a = (x s : MvPolynomial vars F) * b):
+  a = b :=
+by 
+  apply right_cancel_X_mul s
+  rw [_root_.mul_comm, h, _root_.mul_comm]
 
 -- -- For all monomials with no X component, the coefficient of a is zero
 -- -- a * b = c

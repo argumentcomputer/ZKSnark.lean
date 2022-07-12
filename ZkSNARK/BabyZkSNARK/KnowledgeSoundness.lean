@@ -1,6 +1,6 @@
 import Mathbin
 
--- import ZkSNARK.BabyZkSNARK.GeneralLemmas.PolynomialDegree
+import ZkSNARK.GeneralLemmas.MvDivisibility
 
 noncomputable section
 
@@ -18,7 +18,19 @@ variable {F : Type u} [Field F]
 inductive Vars : Type
   | X : Vars
   | Y : Vars
-  | Z : Vars
+  | Z : Vars 
+
+instance : DecidableEq Vars := 
+  fun a b => match a, b with
+   | .X, .X => isTrue rfl
+   | .X, .Y => isFalse (fun h => Vars.noConfusion h)
+   | .X, .Z => isFalse (fun h => Vars.noConfusion h)
+   | .Y, .X => isFalse (fun h => Vars.noConfusion h)
+   | .Y, .Y => isTrue rfl
+   | .Y, .Z => isFalse (fun h => Vars.noConfusion h)
+   | .Z, .X => isFalse (fun h => Vars.noConfusion h)
+   | .Z, .Y => isFalse (fun h => Vars.noConfusion h)
+   | .Z, .Z => isTrue rfl
 
 variable {m n_stmt n_wit : ℕ}
 def n := n_stmt + n_wit
@@ -89,7 +101,7 @@ def V_stmt_sv (a_stmt : Finₓ n_stmt → F) : Polynomial F
 
 /- Checks whether a statement witness pair satisfies the SSP -/
 def satisfying (a_stmt : Finₓ n_stmt → F) (a_wit : Finₓ n_wit → F) := 
-(∑ i in finRange n_stmt, a_stmt i • u_stmt i
+((∑ i in finRange n_stmt, a_stmt i • u_stmt i)
   + ∑ i in finRange n_wit, a_wit i • u_wit i) ^ 2 %ₘ (t r) = 1
 
 
@@ -123,6 +135,7 @@ lemma my_multivariable_to_single_variable
   sorry
   -- apply multivariable_to_single_variable
   -- simp
+
 variable (F)
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
 def crs_powers_of_τ (i : Finₓ m) : (MvPolynomial Vars F) := X_poly F ^ (i : ℕ)
@@ -138,18 +151,18 @@ variable (b' v' h' : Finₓ n_wit → F)
 
 /-- Polynomial forms of the adversary's proof representation -/
 def B_wit : MvPolynomial Vars F := 
-  ∑ i in finRange m, b i • crs_powers_of_τ F i + 
+  (∑ i in finRange m, b i • crs_powers_of_τ F i) + 
   b_γ • crs_γ F + b_γβ • crs_γβ F + 
   ∑ i in finRange n_wit, b' i • crs_β_ssps F u_wit i
 
 def V_wit : MvPolynomial Vars F := 
-  ∑ i in finRange m, v i • crs_powers_of_τ F i +
+  (∑ i in finRange m, v i • crs_powers_of_τ F i) +
   v_γ • crs_γ F +
   v_γβ • crs_γβ F +
   ∑ i in finRange n_wit, v' i • crs_β_ssps F u_wit i
 
 def H : MvPolynomial Vars F := 
-  ∑ i in finRange m, h i • crs_powers_of_τ F i + 
+  (∑ i in finRange m, h i • crs_powers_of_τ F i) + 
   h_γ • crs_γ F +
   h_γβ • crs_γβ F +
   ∑ i in finRange n_wit, h' i • crs_β_ssps F u_wit i
@@ -205,14 +218,13 @@ by sorry
   -- ite_finsupp_simplify,
   -- simp only with coeff_simp,
   -- ite_finsupp_simplify,
-
 -- this is pretty useless
--- lemma h4_1 (hb : ∀ i, b i = 0) : (λ (i : Finₓ m), b i • crs_powers_of_τ i) = (λ (i : Finₓ m), 0) := by
---   intro tmp
---   apply funext
---   intro x
---   rw tmp x
---   simp
+lemma h4_1 (hb : ∀ i, b i = 0) : (λ i : Finₓ m => b i • crs_powers_of_τ F i) = λ i : Finₓ m => (0 : MvPolynomial Vars F) := 
+by 
+  funext i
+  rw [hb i]
+  change Zero.zero • crs_powers_of_τ F i = Zero.zero
+  rw [zero_smul]
 
 lemma h5_1 : b_γβ • ((Z_poly F) * Y_poly F) = (Y_poly F) * b_γβ • Z_poly F := 
 by sorry
@@ -251,7 +263,7 @@ by sorry
 
 lemma h6_3 (a_stmt : Finₓ n_stmt → F) : 
   ((b_γβ • Z_poly F
-    + ∑ i in finRange n_stmt, a_stmt i • Polynomial.eval₂ MvPolynomial.c (X_poly F) (u_stmt i) 
+    + (∑ i in finRange n_stmt, a_stmt i • Polynomial.eval₂ MvPolynomial.c (X_poly F) (u_stmt i)) 
     + ∑ i in finRange n_wit, b' i • Polynomial.eval₂ MvPolynomial.c (X_poly F) (u_wit i : F[X])) ^ 2 : MvPolynomial Vars F).coeff 
       (Finsupp.single Vars.Z 2) = b_γβ ^ 2 := 
 by sorry
@@ -280,126 +292,123 @@ by sorry
   -- simp
 
 
-/-- This function represents the exctractor in the AGM. -/
+/- This function represents the exctractor in the AGM. -/
 -- This makes no sense 
 -- def extractor : Finₓ n_wit → F := b'
+
+lemma zero_eq_zero : (0 : F) = Zero.zero := rfl
 
 /-- Show that if the adversary polynomials obey the equations, 
 then the coefficients give a satisfying witness. 
 This theorem appears in the Baby SNARK paper as Theorem 1 case 1. -/
-theorem case_1 (a_stmt : Finₓ n_stmt → F ) : 
-  (0 < m)
-  → (B_wit = V_wit * Y_poly)
-  → (H * t_mv + MvPolynomial.C 1 = (V a_stmt)^2) 
-  → (satisfying a_stmt extractor) := by
-  rw extractor
-  intros hm eqnI eqnII
+theorem case_1 (a_stmt : Finₓ n_stmt → F ) (hm : 0 < m) 
+  (eqnI : B_wit u_wit b b_γ b_γβ b' = (V_wit u_wit v v_γ v_γβ v') * Y_poly F) 
+  (eqnII : (H u_wit h h_γ h_γβ h') * t_mv r + (MvPolynomial.c 1 : MvPolynomial Vars F) = (V u_stmt u_wit v v_γ v_γβ v' a_stmt) ^ 2) : 
+  (satisfying u_stmt u_wit r a_stmt b') := 
+by
   -- TODO eqnI should have a Z term on both sides
   -- "B_wit only has terms with a Y component"
-  have h1 : (∀ m : Vars →₀ ℕ, m Vars.Y = 0 → B_wit.coeff m = 0)
-    rw eqnI
-    apply mul_var_no_constant V_wit Vars.Y
+  have h1 : (∀ m : Vars →₀ ℕ, m Vars.Y = 0 → (B_wit u_wit b b_γ b_γβ b').coeff m = 0)
+  · rw [eqnI]
+    sorry 
   -- "b_0 b_1, ..., b_m, ... are all zero"
   have h2 : ∀ i : Finₓ m, b i = 0
-    intro i
-    rw ← (h2_1 i)
-    rw eqnI
-    apply mul_var_no_constant
-    rw finsupp.single_apply
-    simp
+  · intro i
+    rw [← (h2_1 u_wit b b_γ b_γβ b' i), eqnI]
+    apply coeff_mul_X_eq_zero
+    rw [← coefn_funlike, Finsupp.single_eq_of_ne]
+    · rfl
+    · decide
   -- b_γ = 0
   have h3 : b_γ = 0
-    rw ← h3_1
-    rw eqnI
-    apply mul_var_no_constant
-    rw finsupp.single_apply
-    simp
+  · rw [← h3_1 u_wit b b_γ b_γβ b', eqnI]
+    apply coeff_mul_X_eq_zero
+    rw [← coefn_funlike, Finsupp.single_eq_of_ne]
+    · rfl
+    · decide
   -- "We can write B_wit as ..."
-  have h4 : B_wit = b_γβ • crs_γβ + ∑ i in (Finset.range n_wit), (b' i) • (crs_β_ssps i)
-    rw B_wit
-    rw h4_1 h2
-    rw h3
-    simp
+  have h4 : B_wit u_wit b b_γ b_γβ b' = b_γβ • crs_γβ F + ∑ i in finRange n_wit, b' i • crs_β_ssps F u_wit i
+  · simp_rw [B_wit, h2, h3]
+    have : (∑ i in finRange m, (Zero.zero : F) • (crs_powers_of_τ F i : MvPolynomial Vars F)) = ∑ i in finRange m, Zero.zero
+    · apply Finset.sum_congr rfl (fun i hi => ?_)
+      rw [zero_smul]
+    rw [zero_eq_zero, zero_smul, this, Finset.sum_const_zero, add_zeroₓ, zero_addₓ]
   -- "... we also see that V_wit must not have any Y terms at all"
-  have h5 : V_wit = b_γβ • Z_poly + ∑ i in (Finset.range n_wit), (b' i) • ((u_wit i).eval₂ MvPolynomial.C X_poly)
-    apply left_cancel_X_mul Vars.Y
-    rw ←Y_poly
-    rw mul_comm
-    rw ←eqnI
-    rw h4
-    simp only [crs_γβ, crs_β_ssps]
-    rw mul_add
-    rw h5_1
-    rw finset.mul_sum
-    simp
-  -- "... write V(.) as follows ..."
-  have h6 : V a_stmt = b_γβ • Z_poly 
-      + ∑ i in (Finset.range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ MvPolynomial.C X_poly)
-      + ∑ i in (Finset.range n_wit), (b' i) • ((u_wit i).eval₂ MvPolynomial.C X_poly)
-    rw V
-    rw V_stmt_mv
-    rw h5
-    rw V_stmt_sv
-    rw polynomial.eval₂_finset_sum
-    simp only [Polynomial.eval₂_smul]
-    simp only [←MvPolynomial.smul_eq_C_mul]
-    ring
+  have h5 : V_wit u_wit v v_γ v_γβ v' = b_γβ • Z_poly F + ∑ i in finRange n_wit, b' i • (u_wit i).eval₂ MvPolynomial.c (X_poly F)
+  · apply left_cancel_X_mul Vars.Y
+    rw [← Y_poly, _root_.mul_comm, ← eqnI, h4, crs_γβ]
+    simp_rw [crs_β_ssps]
+    rw [mul_addₓ, h5_1, Finset.mul_sum, add_right_injₓ]
+    apply Finset.sum_congr rfl (fun i hi => ?_)
+    rw [MvPolynomial.smul_eq_C_mul, MvPolynomial.smul_eq_C_mul, mul_left_commₓ]
+--   -- "... write V(.) as follows ..."
+  have h6 : V u_stmt u_wit v v_γ v_γβ v' a_stmt = b_γβ • Z_poly F
+      + (∑ i in finRange n_stmt, a_stmt i • (u_stmt i).eval₂ MvPolynomial.c (X_poly F))
+      + ∑ i in finRange n_wit, b' i • (u_wit i).eval₂ MvPolynomial.c (X_poly F)
+  · rw [V, V_stmt_mv, h5, V_stmt_sv, eval₂_finset_sum, add_left_commₓ]
+    rw [add_assocₓ, add_right_injₓ, add_left_injₓ]
+    apply Finset.sum_congr rfl (fun i hi => ?_)
+    rw [eval₂_smul, MvPolynomial.smul_eq_C_mul]
   -- ... we can conclude that b_γβ = 0.
   have h7 : b_γβ = 0
-    let eqnII' := eqnII
-    rw h6 at eqnII'
-    have h6_1 := congr_arg (MvPolynomial.coeff (finsupp.single Vars.Z 2)) eqnII'
-    rw h6_2 at h6_1
-    rw h6_3 at h6_1
-    exact pow_eq_zero (eq.symm h6_1)
+  · let eqnII' := eqnII
+    rw [h6] at eqnII'
+    have h6_1 := congr_arg (MvPolynomial.coeff (Finsupp.single Vars.Z 2)) eqnII'
+    rw [h6_2, h6_3] at h6_1
+    exact pow_eq_zero (Eq.symm h6_1)
   -- Finally, we arrive at the conclusion that the coefficients define a satisfying witness such that ...
-  have h8 : V a_stmt = 
-      ∑ i in (Finset.range n_stmt), (a_stmt i) • ((u_stmt i).eval₂ MvPolynomial.C X_poly)
-      + ∑ i in (Finset.range n_wit), (b' i) • ((u_wit i).eval₂ MvPolynomial.C X_poly)
-    rw h6
-    rw h7
-    simp
+  have h8 : V u_stmt u_wit v v_γ v_γβ v' a_stmt = 
+      (∑ i in finRange n_stmt, a_stmt i • (u_stmt i).eval₂ MvPolynomial.c (X_poly F))
+      + ∑ i in finRange n_wit, b' i • (u_wit i).eval₂ MvPolynomial.c (X_poly F)
+  · rw [h6, h7, add_assocₓ]
+    change (Zero.zero : F) • Z_poly F + _ = _
+    rw [zero_smul, zero_addₓ]
   -- Treat both sides of this a single variable polynomial
-  have h9 := congr_arg (MvPolynomial.eval₂ (@polynomial.C F _) singlify) h8
-  rw MvPolynomial.eval₂_add at h9
-  rw MvPolynomial.eval₂_sum at h9
-  simp [MvPolynomial.smul_eq_C_mul] at h9
-  simp [my_multivariable_to_single_variable] at h9
-  simp [←Polynomial.smul_eq_C_mul] at h9
-  -- Now we solve the main goal. First, we expand the definition of "satisfying"
-  rw satisfying
-  rw ←h9
+  have h9 := congr_arg (MvPolynomial.eval₂ (@Polynomial.c F _) singlify) h8
+  rw [MvPolynomial.eval₂_add, MvPolynomial.eval₂_sum, MvPolynomial.eval₂_sum] at h9
+  conv at h9 => 
+  · rhs congr congr skip
+    intro i
+    rw [MvPolynomial.smul_eq_C_mul, ← eval₂_smul]
+    rw [my_multivariable_to_single_variable]
+    skip congr skip
+    intro i
+    rw [MvPolynomial.smul_eq_C_mul, ← eval₂_smul]
+    rw [my_multivariable_to_single_variable]
+  have wat : 0 = 0 := rfl -- if this isn't here, the `conv` makes everything break?
+  clear wat
+  rw [satisfying, ← h9]
   clear h8 h9
 
-  -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
-  have h10 : ((H * t_mv + MvPolynomial.C 1).eval₂ Polynomial.C singlify) %ₘ t = (((V a_stmt)^2).eval₂ Polynomial.C singlify) %ₘ t
-    rw eqnII
-  -- h10 done
-  rw MvPolynomial.eval₂_add at h10
-  rw MvPolynomial.eval₂_mul at h10
+--   -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
+--   have h10 : ((H * t_mv + MvPolynomial.C 1).eval₂ Polynomial.C singlify) %ₘ t = (((V a_stmt)^2).eval₂ Polynomial.C singlify) %ₘ t
+--     rw eqnII
+--   -- h10 done
+--   rw MvPolynomial.eval₂_add at h10
+--   rw MvPolynomial.eval₂_mul at h10
 
-  rw ←MvPolynomial.eval₂_pow
+--   rw ←MvPolynomial.eval₂_pow
 
-  rw ←h10
-  rw t_mv
-  rw my_multivariable_to_single_variable t
-  have h12: MvPolynomial.C 1 = (Polynomial.C 1 : Polynomial F).eval₂ MvPolynomial.C X_poly
-    rw Polynomial.eval₂_C
-  -- h12 done
-  rw h12
-  rw my_multivariable_to_single_variable
-  have h13 : (MvPolynomial.eval₂ Polynomial.C singlify H * t + Polynomial.C 1 : Polynomial F) /ₘ t = (MvPolynomial.eval₂ Polynomial.C singlify H : Polynomial F) ∧ (MvPolynomial.eval₂ Polynomial.C singlify H * t + Polynomial.C 1 : Polynomial F) %ₘ t = (Polynomial.C 1 : Polynomial F)
-    apply Polynomial.div_mod_by_monic_unique
-    exact monic_t
-    split
-    rw [add_comm, mul_comm]
-    rw Polynomial.degree_C
-    exact degree_t_pos hm
-    exact one_ne_zero
-  -- h13 done
-  rw h13.2
-  simp
-end
+--   rw ←h10
+--   rw t_mv
+--   rw my_multivariable_to_single_variable t
+--   have h12: MvPolynomial.C 1 = (Polynomial.C 1 : Polynomial F).eval₂ MvPolynomial.C X_poly
+--     rw Polynomial.eval₂_C
+--   -- h12 done
+--   rw h12
+--   rw my_multivariable_to_single_variable
+--   have h13 : (MvPolynomial.eval₂ Polynomial.C singlify H * t + Polynomial.C 1 : Polynomial F) /ₘ t = (MvPolynomial.eval₂ Polynomial.C singlify H : Polynomial F) ∧ (MvPolynomial.eval₂ Polynomial.C singlify H * t + Polynomial.C 1 : Polynomial F) %ₘ t = (Polynomial.C 1 : Polynomial F)
+--     apply Polynomial.div_mod_by_monic_unique
+--     exact monic_t
+--     split
+--     rw [add_comm, mul_comm]
+--     rw Polynomial.degree_C
+--     exact degree_t_pos hm
+--     exact one_ne_zero
+--   -- h13 done
+--   rw h13.2
+--   simp
+-- end
 
 
 end KnowledgeSoundness
