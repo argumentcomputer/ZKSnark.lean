@@ -8,13 +8,11 @@ namespace KnowledgeSoundness
 open Finset Polynomial
 
 /- The finite field parameter of our SNARK -/
-
 variable {F : Type u} [Field F]
 /- The naturals representing:
   m - the number of gates in the circuit,
   n_stmt - the statement size,
   n_wit - the witness size -/
-
 
 /-- An inductive type from which to index the variables of the 3-variable polynomials the proof manages -/
 inductive Vars : Type
@@ -58,7 +56,9 @@ lemma monic_t : Polynomial.Monic (t r) := by
   intros
   exact Polynomial.monic_X_sub_C (r _)
 
-lemma degree_t_pos : 0 < m → 0 < (t r).degree := by
+lemma degree_t_pos (hm : 0 < m) : 0 < (t r).degree := by
+  -- rw [Polynomial.degree_eq_nat_degree, nat_degree_t]
+  -- dsimp
   sorry
   -- intro hm
   -- suffices h : t.degree = some m
@@ -117,8 +117,8 @@ variable {F}
 def t_mv : MvPolynomial Vars F := (t r).eval₂ MvPolynomial.c (X_poly F)
 
 /- V_stmt as a multivariable polynomial of Vars.X -/
-def V_stmt_mv (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F 
-:= (V_stmt_sv u_stmt a_stmt).eval₂ MvPolynomial.c (X_poly F)
+def V_stmt_mv (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F := 
+  (V_stmt_sv u_stmt a_stmt).eval₂ MvPolynomial.c (X_poly F)
 
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
 lemma my_multivariable_to_single_variable 
@@ -126,177 +126,171 @@ lemma my_multivariable_to_single_variable
   sorry
   -- apply multivariable_to_single_variable
   -- simp
-
+variable (F)
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
-def crs_powers_of_τ (i : Fin m) : (MvPolynomial Vars F) := X_poly F ^ (i : ℕ)
+def crs_powers_of_τ (i : Finₓ m) : (MvPolynomial Vars F) := X_poly F ^ (i : ℕ)
 def crs_γ : MvPolynomial Vars F := Z_poly F
 def crs_γβ : MvPolynomial Vars F := (Z_poly F) * Y_poly F
 def crs_β_ssps (i : Finₓ n_wit) : (MvPolynomial Vars F) := (Y_poly F) * (u_wit i).eval₂ MvPolynomial.c (X_poly F)
 
+variable {F}
 /- The coefficients of the CRS elements in the algebraic adversary's representation -/
-variable (b v h : Fin m → F)
+variable (b v h : Finₓ m → F)
 variable (b_γ v_γ h_γ b_γβ v_γβ h_γβ : F)
-variable (b' v' h' : Fin n_wit → F)
+variable (b' v' h' : Finₓ n_wit → F)
 
 /-- Polynomial forms of the adversary's proof representation -/
 def B_wit : MvPolynomial Vars F := 
-  ∑ i in finRange m, b i • crs_powers_of_τ i + 
-  b_γ • crs_γ + b_γβ • crs_γβ +
-  ∑ i in finRange n_wit,  b' i • crs_β_ssps i
+  ∑ i in finRange m, b i • crs_powers_of_τ F i + 
+  b_γ • crs_γ F + b_γβ • crs_γβ F + 
+  ∑ i in finRange n_wit, b' i • crs_β_ssps F u_wit i
 
 def V_wit : MvPolynomial Vars F := 
-  ∑ i in (Finset.range m), (v i) • (crs_powers_of_τ i)
-  +
-  v_γ • crs_γ
-  +
-  v_γβ • crs_γβ
-  +
-  ∑ i in (Finset.range n_wit), (v' i) • (crs_β_ssps i)
+  ∑ i in finRange m, v i • crs_powers_of_τ F i +
+  v_γ • crs_γ F +
+  v_γβ • crs_γβ F +
+  ∑ i in finRange n_wit, v' i • crs_β_ssps F u_wit i
 
 def H : MvPolynomial Vars F := 
-  ∑ i in (Finset.range m), (h i) • (crs_powers_of_τ i)
-  +
-  h_γ • crs_γ
-  +
-  h_γβ • crs_γβ
-  +
-  ∑ i in (Finset.range n_wit), (h' i) • (crs_β_ssps i)
+  ∑ i in finRange m, h i • crs_powers_of_τ F i + 
+  h_γ • crs_γ F +
+  h_γβ • crs_γβ F +
+  ∑ i in finRange n_wit, h' i • crs_β_ssps F u_wit i
 
 
 /-- V as a multivariable polynomial -/
-def V (a_stmt : Fin n_stmt → F) : MvPolynomial Vars F := V_stmt_mv a_stmt + V_wit
+def V (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F := V_stmt_mv u_stmt a_stmt + V_wit u_wit v v_γ v_γβ v'
 
 /- Lemmas for proof -/
 
 lemma eq_helper (x j : ℕ) : x = j ∨ (x = 0 ∧ j = 0) ↔ x = j :=
-begin
-  split,
-  intro h, 
-  cases h,
-  exact h,
-  rw [h.left, h.right],
-  intro h,
-  left,
-  exact h,
-end
+by
+  apply Iff.intro 
+  · intro h 
+    apply Or.elim h id
+    · rintro ⟨h, h'⟩
+      rw [h, h']
+  · intro h
+    left 
+    exact h
 
-lemma h2_1 : (∀ (i : Fin m), B_wit.coeff (finsupp.single Vars.X i) = b i) :=
-begin
-  intro j,
-  rw B_wit,
-  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  simp [X_poly, Y_poly, Z_poly],
-  simp with coeff_simp,
-  unfold_coes,
-  --TODO is this best?
-  -- TODO improve ite_finsupp_simplify with this
-  -- simp [],
-  -- ite_finsupp_simplify,
-  -- simp only [single_injective_iff],
-  -- simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
-  simp [finsupp.single_eq_single_iff],
-  simp only [eq_helper],
-  unfold_coes,
-  simp [←fin.eq_iff_veq],
-end
+lemma h2_1 (i : Finₓ m) : 
+  (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.X i) = b i :=
+by sorry
+--   intro j,
+--   rw B_wit,
+--   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+--   simp [X_poly, Y_poly, Z_poly],
+--   simp with coeff_simp,
+--   unfold_coes,
+--   --TODO is this best?
+--   -- TODO improve ite_finsupp_simplify with this
+--   -- simp [],
+--   -- ite_finsupp_simplify,
+--   -- simp only [single_injective_iff],
+--   -- simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
+--   simp [finsupp.single_eq_single_iff],
+--   simp only [eq_helper],
+--   unfold_coes,
+--   simp [←fin.eq_iff_veq],
+-- end
 
 
-lemma h3_1 : B_wit.coeff (Finsupp.single Vars.Z 1) = b_γ
-:=
-begin
-  rw B_wit,
-  simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
-  simp [X_poly, Y_poly, Z_poly],
-  simp with coeff_simp,
-  simp [finsupp.single_eq_single_iff],
+lemma h3_1 : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.Z 1) = b_γ :=
+by sorry 
+  -- rw B_wit,
+  -- simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
+  -- simp [X_poly, Y_poly, Z_poly],
+  -- simp with coeff_simp,
+  -- simp [finsupp.single_eq_single_iff],
   -- -- simp? [-finsupp.single_nat_sub],
   -- simp?,
   -- ite_finsupp_simplify,
   -- simp only with coeff_simp,
   -- ite_finsupp_simplify,
 
+-- this is pretty useless
+-- lemma h4_1 (hb : ∀ i, b i = 0) : (λ (i : Finₓ m), b i • crs_powers_of_τ i) = (λ (i : Finₓ m), 0) := by
+--   intro tmp
+--   apply funext
+--   intro x
+--   rw tmp x
+--   simp
 
-end
+lemma h5_1 : b_γβ • ((Z_poly F) * Y_poly F) = (Y_poly F) * b_γβ • Z_poly F := 
+by sorry
+  -- rw MvPolynomial.smul_eq_C_mul
+  -- rw MvPolynomial.smul_eq_C_mul
+  -- ring
 
-lemma h4_1 : (∀ i, b i = 0) → (λ (i : Fin m), b i • crs_powers_of_τ i) = (λ (i : Fin m), 0) := by
-  intro tmp
-  apply funext
-  intro x
-  rw tmp x
-  simp
-
-lemma h5_1 : b_γβ • (Z_poly * Y_poly) = Y_poly * b_γβ • Z_poly := by
-  rw MvPolynomial.smul_eq_C_mul
-  rw MvPolynomial.smul_eq_C_mul
-  ring
-
-lemma h6_2 : (H * t_mv + MvPolynomial.C 1).coeff (finsupp.single Vars.Z 2) = 0 := by
-  rw MvPolynomial.coeff_add
-  rw MvPolynomial.coeff_C
-  rw if_neg
-  rw MvPolynomial.coeff_mul
-  rw single_2_antidiagonal
-  rw Finset.sum_insert
-  rw Finset.sum_insert
-  rw Finset.sum_singleton
-  simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly]
-  simp only with coeff_simp polynomial_nf
+lemma h6_2 : ((H u_wit h h_γ h_γβ h') * t_mv r + (MvPolynomial.c 1 : MvPolynomial Vars F)).coeff (Finsupp.single Vars.Z 2) = 0 := 
+by sorry
+  -- rw MvPolynomial.coeff_add
+  -- rw MvPolynomial.coeff_C
+  -- rw if_neg
+  -- rw MvPolynomial.coeff_mul
+  -- rw single_2_antidiagonal
+  -- rw Finset.sum_insert
+  -- rw Finset.sum_insert
+  -- rw Finset.sum_singleton
+  -- simp [H, t_mv, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly]
+  -- simp only with coeff_simp polynomial_nf
   -- unfold_coes,
 
   -- ite_finsupp_simplify,
   -- simp only with coeff_simp,
 
-  simp [-finsupp.single_zero, finsupp.single_eq_single_iff]
-  rw finset.mem_singleton
-  simp
-  simp [finset.mem_insert, finset.mem_singleton]
-  simp
+  -- simp [-finsupp.single_zero, finsupp.single_eq_single_iff]
+  -- rw finset.mem_singleton
+  -- simp
+  -- simp [finset.mem_insert, finset.mem_singleton]
+  -- simp
   -- -- dec_trivial,
 
   -- rw finsupp.eq_single_iff,
   -- dec_trivial,
 
-end
-
 -- TODO check all lemmas are used
 
-lemma h6_3 (a_stmt : Fin n_stmt → F) : (
-    (b_γβ • Z_poly 
-      + ∑ (i : Fin n_stmt) in Finset.range n_stmt, a_stmt i • Polynomial.eval₂ MvPolynomial.C X_poly (u_stmt i) 
-      + ∑ (i : Fin n_wit) in Finset.range n_wit, b' i • Polynomial.eval₂ MvPolynomial.C X_poly (u_wit i)
-    ) ^ 2).coeff (finsupp.single Vars.Z 2) = b_γβ ^ 2 := by
-  rw pow_succ
-  rw pow_one
-  rw MvPolynomial.coeff_mul
-  rw single_2_antidiagonal
+lemma h6_3 (a_stmt : Finₓ n_stmt → F) : 
+  ((b_γβ • Z_poly F
+    + ∑ i in finRange n_stmt, a_stmt i • Polynomial.eval₂ MvPolynomial.c (X_poly F) (u_stmt i) 
+    + ∑ i in finRange n_wit, b' i • Polynomial.eval₂ MvPolynomial.c (X_poly F) (u_wit i : F[X])) ^ 2 : MvPolynomial Vars F).coeff 
+      (Finsupp.single Vars.Z 2) = b_γβ ^ 2 := 
+by sorry
+  -- rw pow_succ
+  -- rw pow_one
+  -- rw MvPolynomial.coeff_mul
+  -- rw single_2_antidiagonal
 
-  rw Finset.sum_insert
-  rw Finset.sum_insert
-  rw Finset.sum_singleton
+  -- rw Finset.sum_insert
+  -- rw Finset.sum_insert
+  -- rw Finset.sum_singleton
 
-  -- NOTE The simp only with coeff_simp and ite_finsupp_simplify tactic work here
-  --      But I used to get deterministic timeout - i fixed this by making simp only with coeff_simp do simp only instead
-  --
-  simp [X_poly, Y_poly, Z_poly]
-  simp only with coeff_simp polynomial_nf
-  -- simp only with coeff_simp,
-  -- ite_finsupp_simplify,
-  rw pow_succ
-  rw pow_one
+  -- -- NOTE The simp only with coeff_simp and ite_finsupp_simplify tactic work here
+  -- --      But I used to get deterministic timeout - i fixed this by making simp only with coeff_simp do simp only instead
+  -- --
+  -- simp [X_poly, Y_poly, Z_poly]
+  -- simp only with coeff_simp polynomial_nf
+  -- -- simp only with coeff_simp,
+  -- -- ite_finsupp_simplify,
+  -- rw pow_succ
+  -- rw pow_one
 
-  simp
-  simp [-finsupp.single_zero, finsupp.single_eq_single_iff]
-  simp [finset.mem_insert, finset.mem_singleton]
-  simp
+  -- simp
+  -- simp [-finsupp.single_zero, finsupp.single_eq_single_iff]
+  -- simp [finset.mem_insert, finset.mem_singleton]
+  -- simp
 
 
 /-- This function represents the exctractor in the AGM. -/
-def extractor : Fin n_wit → F := b'
+-- This makes no sense 
+-- def extractor : Finₓ n_wit → F := b'
 
 /-- Show that if the adversary polynomials obey the equations, 
 then the coefficients give a satisfying witness. 
 This theorem appears in the Baby SNARK paper as Theorem 1 case 1. -/
-theorem case_1 (a_stmt : Fin n_stmt → F ) : 
+theorem case_1 (a_stmt : Finₓ n_stmt → F ) : 
   (0 < m)
   → (B_wit = V_wit * Y_poly)
   → (H * t_mv + MvPolynomial.C 1 = (V a_stmt)^2) 
@@ -309,7 +303,7 @@ theorem case_1 (a_stmt : Fin n_stmt → F ) :
     rw eqnI
     apply mul_var_no_constant V_wit Vars.Y
   -- "b_0 b_1, ..., b_m, ... are all zero"
-  have h2 : ∀ i : Fin m, b i = 0
+  have h2 : ∀ i : Finₓ m, b i = 0
     intro i
     rw ← (h2_1 i)
     rw eqnI
