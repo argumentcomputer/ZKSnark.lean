@@ -15,7 +15,6 @@ variable {σ : Type _} {e : ℕ} {n m : σ} {s : σ →₀ ℕ}
 section CommSemiringₓ
 
 variable [CommSemiringₓ R] {p q : MvPolynomial σ R}
-variable [CommSemiring R]
 
 section DecidableEq
 
