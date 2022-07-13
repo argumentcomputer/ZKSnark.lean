@@ -1,0 +1,21 @@
+\begin{thebibliography}{1}
+
+\bibitem{code}
+Bolton Bailey.
+\newblock Knowledge soundness of baby snarks.
+\newblock
+  \url{https://github.com/BoltonBailey/formal-snarks-project/blob/master/src/snarks/babysnark/knowledge_soundness.lean},
+  2021.
+
+\bibitem{main}
+Ye~Zhang Andrew~Miller and Sanket Kanjalkar.
+\newblock Baby snark (do do dodo dodo).
+\newblock \url{https://github.com/initc3/babySNARK/blob/master/babysnark.pdf},
+  2020.
+
+\bibitem{big_operators}
+Lean 3.
+\newblock
+  \url{https://github.com/leanprover-community/mathlib/blob/master/src/algebra/big_operators/basic.lean}.
+
+\end{thebibliography}
