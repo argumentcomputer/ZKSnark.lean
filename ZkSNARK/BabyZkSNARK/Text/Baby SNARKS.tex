@@ -1,0 +1,199 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath} % Required for some math elements 
+\usepackage{amsfonts}
+\usepackage{amsthm} % for proof pkg
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{parskip} % Remove paragraph indentation
+\usepackage[margin=1in]{geometry}
+\usepackage[inline]{enumitem}
+\usepackage{mathtools}
+\usepackage{multirow}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{theorem}{Theorem}
+ 
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{fact}{Fact}[section]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\anote}[1]{{\color{magenta} [AM: #1]}}
+\newcommand{\Gen}{\mathsf{Gen}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\pk}{\mathit{pk}}
+\newcommand{\sk}{\mathit{sk}}
+\newcommand{\bbZ}{\mathbb{Z}}
+\newcommand{\bit}{\{0,1\}}
+\newcommand{\la}{\leftarrow}
+\newcommand{\ninN}{{n \in \mathbf{N}}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\RF}{\mathsf{RF}}
+\newcommand{\Half}{\frac{1}{2}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Adv}{\mathcal{A}}
+\newcommand{\Ext}{\mathcal{E}}
+
+\newcommand{\ignore}[1]{{}}
+
+\newcommand{\samples}{\overset{\$}{\leftarrow}}
+\newcommand{\hash}{\ensuremath{\mathcal{H}}}
+\newcommand{\doubleplus}{+\kern-1.3ex+\kern0.8ex}
+\newcommand{\mdoubleplus}{\ensuremath{\mathbin{+\mkern-10mu+}}}
+
+\title{Baby SNARKs}
+\author{Ashvni Narayanan, for Yatima Inc}
+\date{\today\footnote{This document may be updated frequently.}}
+
+\begin{document}
+
+\maketitle
+
+This file describes the implementation of the soundness proof of the Baby SNARKs program. The aim is to explain the code of the proof of soundness in \cite{code}. The mathematics is given in \cite{main}, and the code shall be explained in the same notation.
+
+\section{Code}
+\subsection{Setup}
+Some notes :
+\begin{itemize}
+  \item The \texttt{open\_locale big\_operators} command lets us use the local notation for sums ($\sum$) and products ($\prod$), as defined in the file \cite{big_operators}.
+  \item By declaring \texttt{universes u}, one assumes that all elements have \texttt{Type u}.
+  \item \texttt{parameters} is the same as \texttt{variables}, and is used to declare variables that have scope in a given \texttt{section}. In this case, they are valid throughout the file.
+  \item It would help to \texttt{open polynomial} (open the namespace \texttt{polynomial}) at the beginning of the file, one then does not need to add the prefix to each lemma that is called from that namespace.
+\end{itemize}
+
+We have as variables \texttt{F}, which is a field (although it is mentioned that this is the finite field parameter of the SNARK, the finiteness is nowhere stated or used). We also 
+have the natural number variables \texttt{m}, \texttt{n\_stmt} and \texttt{n\_wit}. These are $m$, $l$ and $n - l$ in \cite{main}. $n$ is defined to be the sum of \texttt{n\_stmt} and \texttt{n\_wit}. 
+
+The collection of polynomials $u_0, u_1, \cdots u_{l - 1}$ are defined \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L59}{here}. 
+The author defines it in terms of a function \texttt{u\_stmt}, which takes an element of $\mathbb{Z}/l \mathbb{Z}$ and returns a polynomial with $F$-coefficients. Note that \texttt{fin n\_stmt} is nothing but the set of natural numbers 
+up to $l$, or equivalently, $\mathbb{Z}/l \mathbb{Z}$. \texttt{u\_wit} is defined similarly to denote the polynomials $u_l, u_{l + 1}, \cdots u_{n - 1}$. The roots of the polynomial $t$ are defined in the same fashion, with 
+\texttt{r i} denoting $r_i$, for $0 \le i \le m - 1$. 
+
+The polynomial $t$ is then defined as $t = \prod_{i = 0}^{m - 1} (X - r_i)$ \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L66}{here}. 
+\texttt{polynomial.X} denotes $X$ as a polynomial in $F[X]$, and \texttt{polynomial.C (r i)} denotes the constant polynomial $r_i$.
+
+\subsection{Properties of $t$}
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L71}{\texttt{nat\_degree\_t}} says : 
+\theoremstyle{Lemma}
+\begin{lemma}[]
+  The degree of $t$ is $m$.  
+\end{lemma}
+
+\texttt{nat\_degree} returns the degree of the polynomial as a natural number. This differs from \texttt{polynomial.degree} only when the polynomial is zero. 
+The proof follows simply by noting that the degree of the product of the polynomials $\prod_{i = 0}^{m - 1} (X - r_i)$ is the sum of the degrees of $X - r_i$ (\texttt{nat\_degree\_prod}), as long as each of these are nonzero (\texttt{X\_sub\_C\_ne\_zero}).
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L82}{\texttt{monic\_t}} then says :
+\theoremstyle{lemma}
+\begin{lemma}
+  The polynomial $t$ is monic.
+\end{lemma}
+The proof follows from the fact that a product of monic polynomials is monic (\texttt{monic\_prod\_of\_monic}), and that each $(X - r_i)$ is monic (\texttt{monic\_X\_sub\_C}).
+
+The next lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L91}{\texttt{degree\_t\_pos}} tells us :
+\theoremstyle{lemma}
+\begin{lemma}
+  If $0 < m$, then the degree of $t$ is positive.
+\end{lemma}
+Note that this lemma uses \texttt{degree} instead of \texttt{nat\_degree}. As a result, we must prove that $m$ is nonzero implies $t$ being nonzero, in which case \texttt{nat\_degree} and \texttt{degree} coincide. 
+
+Before getting into the proof, let us first understand the reason for the distinction between \texttt{nat\_degree} and \texttt{degree}. Lean uses the inductive type \texttt{option}. Basically, given \texttt{A}, 
+\texttt{option A} comprises of \texttt{none} (the undefined element) and \texttt{some a} for all elements \texttt{a} of \texttt{A}. The function \texttt{option.get\_or\_else a} returns \texttt{b} when given 
+\texttt{some b} and \texttt{a} when given \texttt{none}. Given a polynomial \texttt{p}, \texttt{degree p} returns \texttt{some} of the supremum of all numbers $n$ such that $X^n$ has 
+a nonzero coefficient in $p$. When $p = 0$, this returns the supremum of the empty set, $\bot$, which is the same as \texttt{none}. \texttt{nat\_degree} is then defined to be \texttt{(degree p).get\_or\_else 0} : 
+if \texttt{degree p} is $\bot$, it returns 0, and \texttt{(degree p)} otherwise.
+
+We first show that it suffices to prove that \texttt{degree t = some m}. This follows easily from the fact that \texttt{0 < some m} implies \texttt{0 < m} (\texttt{with\_bot.some\_lt\_some}).
+The proof is then by induction on \texttt{degree t}. 
+If \texttt{degree t = none}, then a contradiction is derived, since we then have that \texttt{some m = none}, which then implies \texttt{m < m}, which is false. In the other case, we have that \texttt{degree t = some val} 
+for some value \texttt{val}. Then by the definition of \texttt{option.get\_or\_else}, we get that \texttt{m = val}, and the proof follows simply from Lemma 1.
+
+\subsection{Some definitions}
+One of the fundamental concepts used in this proof is that single variable polynomials can also be thought of as multi-variable polynomials. In this section, we give the mechanism to translate between the two, as well as 
+define the polynomials $V_w$, $V_s$, $B_w$, $V$, $H$ etc, sometimes separately as both single and multivariable polynomials. 
+
+Let us first understand the conversion between single and multivariable polynomials. The author defines \texttt{vars} to be an inductive type used to index 3-variable polynomials (we shall assume the variables are $X$, $Y$ 
+and $Z$ throughout). They then define \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L139}{\texttt{singlify}} to 
+convert 3-variable polynomials to a single variable one : \texttt{singlify} replaces the coefficients $Y$ and $Z$ with 1 and leaves $X$ as it is.
+
+On the other side, \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L145}{\texttt{X\_poly}}, \texttt{Y\_poly} and 
+\texttt{Z\_poly} are $X$, $Y$ and $Z$ thought of as elements of $F[X, Y, Z]$.
+
+We now give the definitions of various single and multivariable polynomials :
+\begin{itemize}
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L120}{\texttt{V\_wit\_sv}} : Given $a_w = (a_l, \cdots, a_{n - 1})$, returns $V_w(X) := \sum_{i = l}^{n - 1} a_w (i) u_i (X)$ as an element of $F[X]$.
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L124}{\texttt{V\_stmt\_sv}} : Given $a_s = (a_0, \cdots, a_{l - 1})$, returns $V_s(X) := \sum_{i = 0}^{l - 1} a_s (i) u_i (X)$ as an element of $F[X]$.
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L153}{\texttt{V\_stmt\_mv}} : Given $a_s = (a_0, \cdots, a_{l - 1})$, returns $V_s(X, Y, Z) := V_s(X)$ as an element of $F[X, Y, Z]$.
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L150}{\texttt{t\_mv}} : Returns $t(X, Y, Z) := t(X)$ as an element of $F[X, Y, Z]$.
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L166}{\texttt{crs\_powers\_of\_t}} : Given $i \in \{ 0, \cdots, m - 1 \}$, returns $X^i$ as an element of $F[X, Y, Z]$.
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L167}{\texttt{crs\_g}} : Returns $Z$ as an element of $F[X, Y, Z]$.
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L168}{\texttt{crs\_gb}} : Returns $Z Y$ as an element of $F[X, Y, Z]$.
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L169}{\texttt{crs\_b\_ssps}} : Given $i \in \{ l, \cdots, n - 1 \}$, returns $Y u_i(X)$ as an element of $F[X, Y, Z]$.
+\end{itemize}
+
+We also have the variables \texttt{b}, \texttt{v} and \texttt{h} which are functions/strings of length $m$, $\mathbb{Z}/m \mathbb{Z} \to F$ representing $(b_i)_{i = 0}^{m - 1}$, $(v_i)_{i = 0}^{m - 1}$ and $(h_i)_{i = 0}^{m - 1}$ respectively; 
+\texttt{b'}, \texttt{v'} and \texttt{h'} which are functions/strings of length $n - l$, $\mathbb{Z}/(n - l) \mathbb{Z} \to F$ representing $(b'_i)_{i = l}^{n - l - 1}$, $(v'_i)_{i = l}^{n - l - 1}$ and $(h'_i)_{i = l}^{n - l - 1}$ respectively; and 
+\texttt{b\_g v\_g h\_g b\_gb v\_gb h\_gb}, which are elements of $F$, representing $b_{\gamma}, v_{\gamma}, h_{\gamma}, b_{\gamma \beta}, v_{\gamma \beta}, h_{\gamma \beta}$ respectively.
+
+We can now define the main polynomials used :
+\begin{itemize}
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L177}{\texttt{B\_wit}} : Returns $B_w := \sum_{i = 0}^{m - 1} b_i X^i + b_{\gamma}Z + b_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} b'_{i} Y u_{i}(X)$ as an element of $F[X, Y, Z]$
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L186}{\texttt{V\_wit}} : Returns $V_w := \sum_{i = 0}^{m - 1} v_i X^i + v_{\gamma}Z + v_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} v'_{i} Y u_{i}(X)$ as an element of $F[X, Y, Z]$
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L195}{\texttt{H}} : Returns $H := \sum_{i = 0}^{m - 1} h_i X^i + h_{\gamma}Z + h_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} h'_{i} Y u_{i}(X)$ as an element of $F[X, Y, Z]$
+  \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L206}{\texttt{V}} : Given $a_s = (a_0, \cdots, a_{l - 1})$, returns $V := V_w + V_s$ as an element of $F[X, Y, Z]$
+\end{itemize}
+
+The above information is encapsulated in the following table :
+\begin{center}
+  \begin{tabular}{ c c c c }
+    \textbf{Lean} & \textbf{Text} & \textbf{Description} & \textbf{Type} \\
+    \texttt{X\_poly} & $X$ & $X$ & $F[X, Y, Z]$ \\
+    \texttt{Y\_poly} & $Y$ & $Y$ & $F[X, Y, Z]$ \\
+    \texttt{Z\_poly} & $Z$ & $Z$ & $F[X, Y, Z]$ \\
+    \texttt{V\_wit\_sv} & $V_w(X)$ & $\sum_{i = l}^{n - 1} a_w (i) u_i (X)$ & $F[X]$ \\
+    \texttt{V\_stmt\_sv} & $V_s(X)$ & $\sum_{i = 0}^{l - 1} a_s (i) u_i (X)$ & $F[X]$ \\
+    \texttt{V\_stmt\_mv} & $V_s(X)$ & $\sum_{i = 0}^{l - 1} a_s (i) u_i (X)$ & $F[X, Y, Z]$ \\
+    \texttt{t\_mv} & $t(X)$ & $t(X)$ & $F[X, Y, Z]$ \\
+    \texttt{crs\_powers\_of\_t i} & $X^i$ & $X^i$ & $F[X, Y, Z]$ \\
+    \texttt{crs\_g} & $Z$ & $Z$ & $F[X, Y, Z]$ \\
+    \texttt{crs\_gb} & $ZY$ & $ZY$ & $F[X, Y, Z]$ \\
+    \texttt{crs\_b\_ssps i} & $Y u_i (X)$ & $F[X, Y, Z]$ \\
+    \texttt{b} & $(b_i)_{i = 0}^{m - 1}$ & $(b_i)_{i = 0}^{m - 1}$ & $\mathbb{Z}/m \mathbb{Z} \to F$ \\
+    \texttt{v} & $(v_i)_{i = 0}^{m - 1}$ & $(v_i)_{i = 0}^{m - 1}$ & $\mathbb{Z}/m \mathbb{Z} \to F$ \\
+    \texttt{h} & $(h_i)_{i = 0}^{m - 1}$ & $(h_i)_{i = 0}^{m - 1}$ & $\mathbb{Z}/m \mathbb{Z} \to F$ \\
+    \texttt{b'} & $(b'_i)_{i = l}^{n - l - 1}$ & $(b'_i)_{i = l}^{n - l - 1}$ & $\mathbb{Z}/(n - l) \mathbb{Z} \to F$ \\
+    \texttt{v'} & $(v'_i)_{i = l}^{n - l - 1}$ & $(v'_i)_{i = l}^{n - l - 1}$ & $\mathbb{Z}/(n - l) \mathbb{Z} \to F$ \\
+    \texttt{h'} & $(h'_i)_{i = l}^{n - l - 1}$ & $(h'_i)_{i = l}^{n - l - 1}$ & $\mathbb{Z}/(n - l) \mathbb{Z} \to F$ \\
+    \texttt{b\_g} & $b_{\gamma}$ & $b_{\gamma}$ & $F$ \\
+    \texttt{v\_g} & $v_{\gamma}$ & $v_{\gamma}$ & $F$ \\
+    \texttt{h\_g} & $h_{\gamma}$ & $h_{\gamma}$ & $F$ \\
+    \texttt{b\_gb} & $b_{\gamma \beta}$ & $b_{\gamma \beta}$ & $F$ \\
+    \texttt{v\_gb} & $v_{\gamma \beta}$ & $v_{\gamma \beta}$ & $F$ \\
+    \texttt{h\_gb} & $h_{\gamma \beta}$ & $F$ \\
+    \texttt{B\_wit} & $B_w$ & $\sum_{i = 0}^{m - 1} b_i X^i + b_{\gamma}Z + b_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} b'_{i} Y u_{i}(X)$ & $F[X, Y, Z]$ \\
+    \texttt{V\_wit} & $V_w$ & $\sum_{i = 0}^{m - 1} v_i X^i + v_{\gamma}Z + v_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} v'_{i} Y u_{i}(X)$ & $F[X, Y, Z]$ \\
+    \texttt{H} & $H$ & $\sum_{i = 0}^{m - 1} h_i X^i + h_{\gamma}Z + h_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} h'_{i} Y u_{i}(X)$ & $F[X, Y, Z]$ \\
+    \texttt{V} & $V$ & $V_s + V_w$ & $F[X, Y, Z]$ \\
+  \end{tabular}
+\end{center}
+
+Finally, we say that the pair $(a_i)_{i = 0}^{l - 1}$ and $(a_i)_{i = l}^{n - 1}$ is \texttt{satisfying} if 
+$$ \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} a_i u_i (X) \equiv 1 \texttt{mod } t $$
+that is, on dividing the above polynomial by $t$, the remainder obtained is 1. The significance of looking at these sums 
+separately is that the witness information is only available to the prover, not the verifier.
+
+\subsection{Supporting lemmas}
+In this section we state some lemmas that shall assist us in the proof of the final theorem.
+
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+
+\end{document}
