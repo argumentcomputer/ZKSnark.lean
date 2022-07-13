@@ -9,13 +9,13 @@ open Set Function Finsupp AddMonoidAlgebra
 universe u v
 variable {R : Type u} 
 
-
 namespace MvPolynomial
 variable {σ : Type _} {e : ℕ} {n m : σ} {s : σ →₀ ℕ}
 
 section CommSemiringₓ
 
 variable [CommSemiringₓ R] {p q : MvPolynomial σ R}
+variable [CommSemiring R]
 
 section DecidableEq
 
@@ -138,6 +138,7 @@ lemma rearrange1 (n : ℕ) (v1 v2 : σ) (p : MvPolynomial σ R) :
   by sorry
   --by ring
 
+/--
 lemma rearrange2 (n : ℕ) (f : R) (v1 : σ) (p : MvPolynomial σ R) :
   (MvPolynomial.x v1 ^ n) * ((MvPolynomial.c f) * p) = (MvPolynomial.c f) * ((MvPolynomial.x v1 ^ n) * p) := 
   by sorry
@@ -182,8 +183,7 @@ lemma rearrange_002 (f : R) (p1 p2 p3 : Polynomial R) :
    split
     { intro h, rw h }
     { intro h, rw h }
-
-variable [CommSemiring R]
+-/
 
 lemma add_mul_distrib (a b c d : R) : a + b * c + b * d = a + b * (c + d) :=
 by ring

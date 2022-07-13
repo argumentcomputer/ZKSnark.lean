@@ -379,6 +379,7 @@ by
   clear wat
   rw [satisfying, ← h9]
   clear h8 h9
+  sorry
 
 --   -- TODO is there a more efficient way to simply say (evaluate f on both sides of this hypothesis)? Yes the congr tactic does this
 --   have h10 : ((H * t_mv + MvPolynomial.C 1).eval₂ Polynomial.C singlify) %ₘ t = (((V a_stmt)^2).eval₂ Polynomial.C singlify) %ₘ t
