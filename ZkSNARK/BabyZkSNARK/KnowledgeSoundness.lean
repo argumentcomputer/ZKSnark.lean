@@ -1,6 +1,7 @@
 import Mathbin
 
 import ZkSNARK.GeneralLemmas.MvDivisibility
+import ZkSNARK.GeneralLemmas.PolynomialMvSvCast
 
 noncomputable section
 
@@ -132,9 +133,8 @@ def V_stmt_mv (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F :=
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
 lemma my_multivariable_to_single_variable 
   (p : Polynomial F) : ((p.eval₂ MvPolynomial.c (X_poly F)).eval₂ Polynomial.c singlify) = p := by
-  sorry
-  -- apply multivariable_to_single_variable
-  -- simp
+  apply multivariable_to_single_variable
+  simp_rw [singlify]
 
 variable (F)
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
@@ -184,9 +184,8 @@ by
     left 
     exact h
 
-lemma h2_1 (i : Finₓ m) : 
-  (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.X i) = b i :=
-by sorry
+lemma h2_1 (j : Finₓ m) : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.X j) = b j := by 
+sorry
 --   intro j,
 --   rw B_wit,
 --   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
