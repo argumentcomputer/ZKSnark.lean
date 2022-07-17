@@ -11,7 +11,8 @@ variable [DecidableEq S]
 lemma single_antidiagonal (s : S) (n : ℕ) : 
   (Finsupp.single s n).antidiagonal 
   = (Finset.range (n+1)).image (λ i => (Finsupp.single s (n-i), Finsupp.single s (i))) 
-:= by
+:= by sorry
+/-  
   rw [Finset.ext_iff]
   intro a
   rw [Finsupp.mem_antidiagonal]
@@ -93,31 +94,35 @@ lemma single_antidiagonal (s : S) (n : ℕ) :
     rw nat.lt_succ_iff at h_h_w
     exact nat.sub_add_cancel h_h_w
   rw h4
+-/
 
 
-
-lemma Finsupp.sub_le_right_of_le_add (a b c : S →₀ ℕ) (h : a ≤ b + c) : a - c ≤ b := by
+lemma Finsupp.sub_le_right_of_le_add (a b c : S →₀ ℕ) (h : a ≤ b + c) : a - c ≤ b := by sorry
+/-
   intro
   have z := h s
   rw [Nat.nat_sub_apply]
   rw [Nat.add_apply] at z
   -- rw z,
   exact Nat.sub_le_right_of_le_add z
+-/
 
 -- TODO generalize and add to mathlib
-lemma Nat.add_inf (a b c : ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := by
+lemma Nat.add_inf (a b c : ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := by sorry
+/-- 
   by_cases b ≤ c
-  simp [inf_eq_left.2 h]
+  rw [inf_eq_left.2 h]
   exact h
   have h' : c ≤ b
     exact le_of_not_ge h
   simp [inf_eq_right.2 h']
   exact h'
+-/
 
-lemma Finsupp.nat_add_inf (a b c : S →₀ ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) :=  by
-  ext
-  simp only [Nat.add_apply, Finsupp.inf_apply]
-  apply nat.add_inf
+lemma Finsupp.nat_add_inf (a b c : S →₀ ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := by sorry
+--  ext
+--  simp only [Nat.add_apply, Finsupp.inf_apply]
+--  apply Nat.add_inf
 
 -- -- TODO generalize and add to mathlib
 -- lemma nat.add_lemma (a b c : ℕ) (h : b ≤ a) : a - b + c = a + c - b := 
@@ -126,10 +131,12 @@ lemma Finsupp.nat_add_inf (a b c : S →₀ ℕ) : a + (b ⊓ c) = (a + b) ⊓ (
 -- end
 
 -- TODO generalize and add to mathlib
-lemma Nat.add_lemma2 (a b c : ℕ) : c = a + b -> c - a = b := by
-  exact Nat.sub_eq_of_eq_add
+lemma Nat.add_lemma2 (a b c : ℕ) : c = a + b -> c - a = b := by sorry
+  --exact Nat.sub_eq_of_eq_add
 
 lemma helper (a b c d : ℕ) (h : b + d = a + c) : a - b ⊓ a + (c - (b - b ⊓ a)) = d := by
+  sorry
+/- 
   by_cases h1 : b ≤ a
   simp [inf_eq_left.2 h1]
   rw [Nat.sub_add_eq_add_sub]
@@ -144,10 +151,13 @@ lemma helper (a b c d : ℕ) (h : b + d = a + c) : a - b ⊓ a + (c - (b - b ⊓
   rw [h]
   simp only [Nat.add_sub_cancel_left]
   exact h'
+-/
 
 -- TODO: Put in mathlib
 lemma add_antidiagonal (f g : S →₀ ℕ) : 
   (f + g).antidiagonal = (Finset.product (f.antidiagonal) (g.antidiagonal)).image (λ x => ((x.fst.fst + x.snd.fst), (x.fst.snd + x.snd.snd))) := by
+  sorry
+ /- 
   rw [Finset.ext_iff]
   intro a
   rw [Finsupp.mem_antidiagonal]
@@ -204,9 +214,10 @@ lemma add_antidiagonal (f g : S →₀ ℕ) :
   -- ext,
   -- simp only,
   -- use 
+-/
 
-
-/-- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal rather than being self contained. -/
+/- A copy of the square_antidiagonal lemma, which relies on the more general single_antidiagonal rather than being self contained. -/
+/-
 lemma single_2_antidiagonal (s : S) : (Finsupp.single s 2).Antidiagonal = 
 {
   (Finsupp.single s 0, Finsupp.single s 2), 
@@ -220,5 +231,6 @@ lemma single_2_antidiagonal (s : S) : (Finsupp.single s 2).Antidiagonal =
   rw [Finset.range]
   rw [Finset.image]
   simp [-Finsupp.single_nat_sub]
+-/
 
 end SingleAntidiagonal
