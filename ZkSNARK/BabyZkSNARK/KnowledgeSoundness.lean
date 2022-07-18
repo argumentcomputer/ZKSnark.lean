@@ -173,7 +173,7 @@ def V (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F := V_stmt_mv u_stmt a
 
 /- Lemmas for proof -/
 
-lemma eq_helper (x j : ℕ) : x = j ∨ (x = 0 ∧ j = 0) ↔ x = j :=
+lemma eq_helper (x j : ℕ) : x = j ∨ (x = Zero.zero ∧ j = Zero.zero) ↔ x = j :=
 by
   apply Iff.intro 
   · intro h 
@@ -184,7 +184,72 @@ by
     left 
     exact h
 
+example (f : F) : f + 0 = f := by apply add_zeroₓ
+
 lemma h2_1 (j : Finₓ m) : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.X j) = b j := by 
+  rw [B_wit]
+  rw [MvPolynomial.coeff_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add]
+  simp only [B_wit, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly, Finsupp.single_eq_single_iff,
+  eq_helper, true_and, Nat.one_ne_zero, mul_boole, add_zero, Algebra.id.smul_eq_mul, MvPolynomial.coeff_add,
+  eq_self_iff_true, not_true, Finsupp.mem_support_iff, if_false, Ne.def, not_false_iff, Finset.sum_const_zero,
+  MvPolynomial.coeff_smul, _root_.mul_zero, Finsupp.single_eq_of_ne, false_and, or_self, MvPolynomial.coeff_mul]
+  rw [MvPolynomial.coeff_sum] 
+  simp_rw [MvPolynomial.coeff_smul]
+  have h1 : (@Zero.zero F (AddZeroClassₓ.toHasZero F) : F) = (@OfNat.ofNat F 0 Zero.toOfNat0 : F)
+  · simp only [OfNat.ofNat]
+  have : b j = b j + 0 + 0 + 0
+  · rw [← h1]
+    rw [add_zeroₓ (b j), add_zeroₓ (b j), add_zeroₓ (b j)]
+  rw [this]
+  apply congr_arg2ₓ
+  apply congr_arg2ₓ
+  apply congr_arg2ₓ
+  · conv_lhs => 
+    · congr skip ext
+      rw [MvPolynomial.coeff_smul, MvPolynomial.coeff_X_pow]
+    simp_rw [smul_ite _ (b _) _ _, smul_zero (b _), Finsupp.single_eq_single_iff, true_and, eq_helper]
+    rw [Finset.sum_ite, Finset.sum_const_zero, add_zeroₓ]
+      conv_lhs =>
+      · congr skip ext
+        rw [smul_eq_mul, mul_oneₓ]
+    rw [Finset.sum_eq_single]
+    · intros x hx h
+      exfalso
+      apply h
+      rw [Finset.mem_filter] at hx
+      rw [Finₓ.eq_iff_veq, hx.2]
+    · intro h
+      exfalso
+      apply h
+      simp_rw [Finset.mem_filter, and_true, Finset.mem_fin_range]
+  · rw [MvPolynomial.coeff_smul, ← h1, smul_eq_zero]
+    apply smul_eq_zero.1
+    simp [Finₓ.eq_iff_veq, hx]
+    { simp [crs_γ, Z_poly], right,
+      rw mv_polynomial.coeff_X', rw if_neg,
+      intro h,
+      rw finsupp.single_eq_single_iff at h,
+      simp only [nat.one_ne_zero, false_and, or_self] at h,
+      exact h, },
+    { simp [crs_γβ, Y_poly, Z_poly], right,
+      apply finset.sum_eq_zero,
+      intros x hx,
+      simp_rw mv_polynomial.coeff_X',
+      simp,
+      simp at hx,
+      intros h1 h2,
+      rw [← h1, ← h2] at hx,
+      rw finsupp.ext_iff at hx, simp at hx,
+      specialize hx vars.Z, simp at hx,
+      exact hx, },
+    { rw mv_polynomial.coeff_sum,
+      simp_rw mv_polynomial.coeff_smul,
+      apply finset.sum_eq_zero,
+      intros x hx,
+      rw smul_eq_zero, right,
+      rw mul_comm,
+      rw mv_polynomial.coeff_mul_X',
+      rw if_neg, simp, },
 sorry
 --   intro j,
 --   rw B_wit,
