@@ -184,11 +184,8 @@ by
     left 
     exact h
 
-example (f : F) : f + 0 = f := by apply add_zeroₓ
-
 lemma h2_1 (j : Finₓ m) : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.X j) = b j := by 
-  rw [B_wit]
-  rw [MvPolynomial.coeff_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add]
+  rw [B_wit, MvPolynomial.coeff_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add]
   simp only [B_wit, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly, Finsupp.single_eq_single_iff,
   eq_helper, true_and, Nat.one_ne_zero, mul_boole, add_zero, Algebra.id.smul_eq_mul, MvPolynomial.coeff_add,
   eq_self_iff_true, not_true, Finsupp.mem_support_iff, if_false, Ne.def, not_false_iff, Finset.sum_const_zero,
@@ -198,8 +195,7 @@ lemma h2_1 (j : Finₓ m) : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single
   have h1 : (@Zero.zero F (AddZeroClassₓ.toHasZero F) : F) = (@OfNat.ofNat F 0 Zero.toOfNat0 : F)
   · simp only [OfNat.ofNat]
   have : b j = b j + 0 + 0 + 0
-  · rw [← h1]
-    rw [add_zeroₓ (b j), add_zeroₓ (b j), add_zeroₓ (b j)]
+  · rw [← h1, add_zeroₓ (b j), add_zeroₓ (b j), add_zeroₓ (b j)]
   rw [this]
   apply congr_arg2ₓ
   apply congr_arg2ₓ
@@ -222,53 +218,44 @@ lemma h2_1 (j : Finₓ m) : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single
       exfalso
       apply h
       simp_rw [Finset.mem_filter, and_true, Finset.mem_fin_range]
-  · rw [MvPolynomial.coeff_smul, ← h1, smul_eq_zero]
-    apply smul_eq_zero.1
-    simp [Finₓ.eq_iff_veq, hx]
-    { simp [crs_γ, Z_poly], right,
-      rw mv_polynomial.coeff_X', rw if_neg,
-      intro h,
-      rw finsupp.single_eq_single_iff at h,
-      simp only [nat.one_ne_zero, false_and, or_self] at h,
-      exact h, },
-    { simp [crs_γβ, Y_poly, Z_poly], right,
-      apply finset.sum_eq_zero,
-      intros x hx,
-      simp_rw mv_polynomial.coeff_X',
-      simp,
-      simp at hx,
-      intros h1 h2,
-      rw [← h1, ← h2] at hx,
-      rw finsupp.ext_iff at hx, simp at hx,
-      specialize hx vars.Z, simp at hx,
-      exact hx, },
-    { rw mv_polynomial.coeff_sum,
-      simp_rw mv_polynomial.coeff_smul,
-      apply finset.sum_eq_zero,
-      intros x hx,
-      rw smul_eq_zero, right,
-      rw mul_comm,
-      rw mv_polynomial.coeff_mul_X',
-      rw if_neg, simp, },
-sorry
---   intro j,
---   rw B_wit,
---   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
---   simp [X_poly, Y_poly, Z_poly],
---   simp with coeff_simp,
---   unfold_coes,
---   --TODO is this best?
---   -- TODO improve ite_finsupp_simplify with this
---   -- simp [],
---   -- ite_finsupp_simplify,
---   -- simp only [single_injective_iff],
---   -- simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
---   simp [finsupp.single_eq_single_iff],
---   simp only [eq_helper],
---   unfold_coes,
---   simp [←fin.eq_iff_veq],
--- end
-
+  · rw [MvPolynomial.coeff_smul, (@smul_eq_zero F F _ _ _ _ _ _).2]
+    · rw [h1]
+    · right
+      rw [MvPolynomial.coeff_X', if_neg]
+      intro H
+      rw [Finsupp.single_eq_single_iff] at H
+      simp only [false_and] at H
+  · rw [MvPolynomial.coeff_smul, (@smul_eq_zero F F _ _ _ _ _ _).2, h1]
+    simp only
+    right
+    rw [MvPolynomial.coeff_mul]
+    apply Finset.sum_eq_zero
+    intros x hx
+    simp_rw [MvPolynomial.coeff_X']
+    rw [boole_mul _ _, ite_eq_right_iff, ite_eq_right_iff]
+    intros f1 f2
+    exfalso
+    simp only [Finsupp.mem_antidiagonal] at hx
+    rw [← f1, ← f2, Finsupp.ext_iff] at hx
+    simp only [Pi.add_apply, Finsupp.coe_add] at hx
+    specialize hx Vars.Z
+    simp only [Finsupp.single_eq_same] at hx
+    rw [Finsupp.single_eq_of_ne, Finsupp.single_eq_of_ne, add_zeroₓ] at hx
+    apply Nat.one_ne_zero
+    · simp 
+      simp at hx
+    simp only
+    simp only
+  · rw [MvPolynomial.coeff_sum]
+    apply Finset.sum_eq_zero
+    intros x hx
+    rw [MvPolynomial.coeff_smul]
+    rw [(@smul_eq_zero F F _ _ _ _ _ _).2]
+    right
+    rw [mul_comm (MvPolynomial.x Vars.Y) _]
+    rw [MvPolynomial.coeff_mul_X', if_neg]
+    rw [Finsupp.mem_support_iff, not_not, Finsupp.single_eq_of_ne]
+    simp only
 
 lemma h3_1 : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.Z 1) = b_γ :=
 by sorry 
