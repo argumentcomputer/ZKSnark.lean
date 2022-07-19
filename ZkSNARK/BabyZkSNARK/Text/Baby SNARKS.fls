@@ -159,6 +159,7 @@ INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\cme
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam5.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm5.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\jknappen\ec\tcrm0600.tfm
+INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx10.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmr12.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx12.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx12.tfm
@@ -170,13 +171,10 @@ INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\sym
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmti10.tfm
-INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx10.tfm
 INPUT C:\Users\ashvn\AppData\Local\MiKTeX\pdftex\config\pdftex.map
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt8.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt8.tfm
 INPUT C:\Users\ashvn\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmitt10.tfm
-INPUT c:\Users\ashvn\OneDrive\Documents\Yatima\ZKSnark.lean\ZkSNARK\BabyZkSNARK\Text\Baby SNARKS.bbl
-INPUT c:\Users\ashvn\OneDrive\Documents\Yatima\ZKSnark.lean\ZkSNARK\BabyZkSNARK\Text\Baby SNARKS.bbl
 INPUT c:\Users\ashvn\OneDrive\Documents\Yatima\ZKSnark.lean\ZkSNARK\BabyZkSNARK\Text\Baby SNARKS.aux
 INPUT c:\Users\ashvn\OneDrive\Documents\Yatima\ZKSnark.lean\ZkSNARK\BabyZkSNARK\Text\Baby SNARKS.out
 INPUT c:\Users\ashvn\OneDrive\Documents\Yatima\ZKSnark.lean\ZkSNARK\BabyZkSNARK\Text\Baby SNARKS.out

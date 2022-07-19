@@ -241,14 +241,25 @@ The lemma uses the fact \texttt{mv\_polynomial.smul\_eq\_C\_mul}, which says tha
 the polynomial by the constant polynomial, that is $b \cdot p(X) = b(X) * p(X)$, where $b \in F$ and a polynomial $p(X) \in F[X]$. The tactic \texttt{ring} then finishes the proof 
 by using associativity and commutativity of multiplication. One can check what \texttt{ring} does by looking at \texttt{show\_term\{ring\}}.
 
-The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L279}{\texttt{h5\_1}} says :
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L279}{\texttt{h6\_2}} says : 
 \theoremstyle{lemma}
 \begin{lemma}
-    The coefficient of $Z^2$ in $H t + 1$ is 0.
+  The coefficient of $Z^2$ in $H t + 1$ is 0.
 \end{lemma}
 
 The coefficient of $Z^2$ in $H t + 1$ is precisely the coefficient of $Z^2$ in $H t$, which is the same as $\sum_{i= 0}^2 coeff_{H}(Z^i) coeff_{t}(Z^{2 - i})$.
 We know that $coeff_{t}(Z^i)$ is 0 for every $i$, which concludes the proof.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L311}{\texttt{h6\_3}} says : 
+\theoremstyle{lemma}
+\begin{lemma}
+  Given $(a_i)_{i = 0}^{l - 1}$, the coefficient of $Z^2$ in $(b_{\gamma \beta} \cdot Z + \sum_{i = 0}^{l - 1} a_i u_i (X) + \sum_{j = l}^{n - 1} b'_i u_i (X))^2$ is $b_{\gamma \beta}^2$.
+\end{lemma}
+
+Mathematically, this statement is trivial, simply by looking at the coefficients. The code relies on first computing the power. This is done by looking at $z^2 = z * z$. One then uses 
+\texttt{mv\_polynomial.coeff\_mul} to write out the coefficients in terms of sums over the \texttt{antidiagonal}, which is the same as using the binomial theorem. Given a given a 
+finitely supported function $s$ taking values in the natural numbers, \texttt{antidiagonal s} is the set $\{ (m, n) | m + n = s \}$. 
+%%We then use \texttt{single\_2\_antidiagonal} to convert the set of elements in the sum with a coefficient of \texttt{antidiagonal ()} and then showing that the irrelevant coefficients 
 
 \bibliographystyle{unsrt}
 \bibliography{refs}
