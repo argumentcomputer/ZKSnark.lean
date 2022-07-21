@@ -129,6 +129,10 @@ Any finitely supported function taking values in $\mathbb{N}$ can be thought of 
 $m : \texttt{vars} \to \mathbb{N}$ can be thought of as a monomial of the form $X^{m(\texttt{vars.X})} Y^{m(\texttt{vars.Y})} Z^{m(\texttt{vars.Z})}$. Then, 
 given a multivariable polynomial $p(X, Y, Z)$, \texttt{mv\_polynomial.coeff p m} denotes the coefficient of $p$ at the monomial $m$.
 
+Given a ring $S$, a multivariable polynomial $p := \sum_{m \in \sigma} a_{\sigma} m$ ($\sigma$ is a set of monomials) with coefficients in $R$, 
+a function $f : R \to S$, and a function $g : \sigma \to S$, \texttt{mv\_polynomial.eval\_2 f g p :=} $\sum_{m \in \sigma} f(a_{\sigma}) g(m)$ returns the evaluation of $p$ with respect to $f$ and $g$. 
+In our case, we get, for $p := \sum_{i, j, k = 0}^{1} a_{i, j ,k} X^i Y^j Z^k$, we get \texttt{mv\_polynomial.eval\_2 polynomial.C singlify p :=} $\sum_{i, j, k = 0}^{1} a_{i, j ,k} X^i$ as an element of $F[X]$.
+
 We now give the definitions of various single and multivariable polynomials :
 \begin{itemize}
   \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L120}{\texttt{V\_wit\_sv}} : Given $a_w = (a_l, \cdots, a_{n - 1})$, returns $V_w(X) := \sum_{i = l}^{n - 1} a_w (i) u_i (X)$ as an element of $F[X]$.
@@ -194,6 +198,17 @@ separately is that the witness information is only available to the prover, not 
 
 \section{Supporting lemmas}
 In this section we state some lemmas that shall assist us in the proof of the final theorem.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L158}{\texttt{my\_multivariable\_to\_single\_variable}} 
+states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{eval2}
+  Given a polynomial $p$ in $F[X]$, we have \texttt{(mv\_polynomial.eval\_2 polynomial.C singlify (eval\_2 mv\_polynomial.C X\_poly p)) = p}
+\end{lemma}
+This gives tells us that converting a single variable polynomial to a multivariable polynomial and reducing it to a single variable polynomial returns the original polynomial. 
+The proof remains the same if \texttt{singlify} is replaced with an arbitrary function. Thus we use the lemma 
+\href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/general_lemmas/polynomial_mv_sv_cast.lean#L14}{\texttt{multivariable\_to\_single\_variable}}. The proof of this lemma 
+follows simply by unfolding the definitions, using properties of monomials, and the fact that any polynomial $p$ can be written as $\sum_{n} coeff_{p}(X^n) X^n$, along with some \texttt{simp} lemmas.
 
 The following lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L211}{\texttt{eq\_helper}} 
 is used in \texttt{h2\_1} :
@@ -395,7 +410,13 @@ We must prove that, given $(a_i)_{i = 0}^{l - 1}$,
 $$ \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} b'_i u_i (X) \equiv 1 \texttt{mod } t $$
 
 First, we define \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L426}{\texttt{h9}} 
-to be 
+to be \ref{h8}, seen as an element of $F[X]$. We then use the additivity properties of the \texttt{eval\_2} map, and the lemma \ref{eval2} on \texttt{h9}. Using \texttt{h9}, it now suffices 
+to prove that \newline $\text{mv\_polynomial.eval\_2 polynomial.C singlify (V a\_stmt)} ^ 2 \equiv 1 (\text{mod }t)$.
+
+We then use \ref{h10} and \ref{eval2} to change the statement to \newline $\text{(mv\_polynomial.eval\_2 polynomial.C singlify H * t +
+mv\_polynomial.eval\_2 polynomial.C singlify (mv\_polynomial.C 1))} \equiv 1 (\text{mod }t)$.
+
+Finally, the result follows from applying \ref{h12},\ref{h13} and \ref{eval2} along with some \texttt{simp} lemmas. Yay!
 
 \bibliographystyle{unsrt}
 \bibliography{refs}
