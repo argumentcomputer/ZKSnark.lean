@@ -1,16 +1,16 @@
 # Fdb version 3
-["bibtex Baby SNARKS"] 1658247454 "Baby SNARKS.aux" "Baby SNARKS.bbl" "Baby SNARKS" 1658247456
-  "Baby SNARKS.aux" 1658247456 1351 3afdfbac9756d09e68a075adf5b5cf65 "pdflatex"
+["bibtex Baby SNARKS"] 1658426378 "Baby SNARKS.aux" "Baby SNARKS.bbl" "Baby SNARKS" 1658426380
+  "Baby SNARKS.aux" 1658426379 2419 8abbb0307a3dcf81d780320a2501986d "pdflatex"
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/unsrt.bst" 1291868336 18030 1376b4b231b50c66211e47e42eda2875 ""
   "refs.bib" 0 -1 0 ""
   (generated)
-  "Baby SNARKS.bbl"
   "Baby SNARKS.blg"
-["pdflatex"] 1658247454 "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.tex" "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.pdf" "Baby SNARKS" 1658247456
-  "Baby SNARKS.aux" 1658247456 1351 3afdfbac9756d09e68a075adf5b5cf65 "pdflatex"
+  "Baby SNARKS.bbl"
+["pdflatex"] 1658426378 "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.tex" "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.pdf" "Baby SNARKS" 1658426380
+  "Baby SNARKS.aux" 1658426379 2419 8abbb0307a3dcf81d780320a2501986d "pdflatex"
   "Baby SNARKS.bbl" 0 -1 0 "bibtex Baby SNARKS"
-  "Baby SNARKS.out" 1658247456 288 81bcdc70330b9ae3aba7c47743442e6d "pdflatex"
-  "Baby SNARKS.tex" 1658247453 21227 dbd7a0816c7abe51556446102229c736 ""
+  "Baby SNARKS.out" 1658426379 369 78c523b3dbf087a4f0917eab63b2e637 "pdflatex"
+  "Baby SNARKS.tex" 1658426375 31164 453cb209cfeb7a75c085d66528156ae1 ""
   "C:/Users/ashvn/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm0600.pk" 1656965822 7284 c6c654980b85630208fd97b10155576a ""
   "C:/Users/ashvn/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm0800.pk" 1656965823 9292 a999dbc285cab832ec0a83700fbbd961 ""
   "C:/Users/ashvn/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1000.pk" 1594863851 11548 17ed1b6ed8843bd7b984d210705b6d70 ""
@@ -42,6 +42,7 @@
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmsy6.tfm" 1136768653 1116 933a60c408fc0a863a92debe84b2d294 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmsy8.tfm" 1136768653 1120 8b7d695260f3cff42e636090a8002094 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti10.tfm" 1136768653 1480 aa8e34af0eb6a2941b776984cf1dfdc4 ""
+  "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti7.tfm" 1136768653 1492 86331993fe614793f5e7e755835c31c5 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmtt10.tfm" 1136768653 768 1321e9409b4137d6fb428ac9dc956269 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmtt8.tfm" 1136768653 768 d7b9a2629a0c353102ad947dc9221d49 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1247596666 34811 78b52f49e893bcba91bd7581cdc144c0 ""
@@ -60,6 +61,7 @@
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb" 1247596666 32716 08e384dc442464e7285e891af9f45947 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb" 1247596667 37944 359e864bd06cde3b1cf57bb20757fb06 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb" 1247596667 31099 342ef5a582aacbd3346f3cf4579679fa ""
+  "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt8.pfb" 1247596666 24287 6b803fa9eb1ddff9112e00519b09dd9e ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb" 1247596673 34694 870c211f62cb72718a00e353f14f254d ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/tex/context/base/mkii/supp-pdf.mkii" 1580393758 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/tex/generic/atbegshi/atbegshi.sty" 1575574700 24708 5584a51a7101caf7e6bbf1fc27d8f7b1 ""
@@ -122,12 +124,12 @@
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/tex/latex/tools/calc.sty" 1580648486 10216 5efd55f2010055e7b7875afd6a75be82 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/tex/latex/tools/verbatim.sty" 1580648484 7308 a7fb09b68a4a07a482e876fbe2959b04 ""
   "C:/Users/ashvn/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388494052 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
-  "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.aux" 1658247456 1351 3afdfbac9756d09e68a075adf5b5cf65 ""
-  "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.tex" 1658247453 21227 dbd7a0816c7abe51556446102229c736 ""
+  "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.aux" 1658426379 2419 8abbb0307a3dcf81d780320a2501986d ""
+  "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.tex" 1658426375 31164 453cb209cfeb7a75c085d66528156ae1 ""
   (generated)
-  "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.log"
   "Baby SNARKS.aux"
+  "Baby SNARKS.log"
   "Baby SNARKS.pdf"
   "Baby SNARKS.out"
-  "Baby SNARKS.log"
+  "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.log"
   "c:/Users/ashvn/OneDrive/Documents/Yatima/ZKSnark.lean/ZkSNARK/BabyZkSNARK/Text/Baby SNARKS.pdf"
