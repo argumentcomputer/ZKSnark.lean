@@ -2,3 +2,10 @@ build/
 lean_packages/
 docs/*
 !_config.yml
+blueprint/src/print.tex
+blueprint/src/web_src.tex
+docs_src/template.html
+ZkSNARK/BabyZkSNARK/Text/*
+!ZkSNARK/BabyZkSNARK/Text/*.pdf
+!ZkSNARK/BabyZkSNARK/Text/*.tex
+!ZkSNARK/BabyZkSNARK/Text/*.bib

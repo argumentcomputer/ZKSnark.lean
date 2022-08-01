@@ -1,6 +1,6 @@
 import Mathbin
-
 import ZkSNARK.GeneralLemmas.MvDivisibility
+import ZkSNARK.GeneralLemmas.PolynomialMvSvCast
 
 noncomputable section
 
@@ -132,9 +132,8 @@ def V_stmt_mv (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F :=
 /-- Converting a single variable polynomial to a multivariable polynomial and back yields the same polynomial -/
 lemma my_multivariable_to_single_variable 
   (p : Polynomial F) : ((p.eval₂ MvPolynomial.c (X_poly F)).eval₂ Polynomial.c singlify) = p := by
-  sorry
-  -- apply multivariable_to_single_variable
-  -- simp
+  apply multivariable_to_single_variable
+  simp_rw [singlify]
 
 variable (F)
 /-- The crs elements as multivariate polynomials of the toxic waste samples -/
@@ -173,7 +172,7 @@ def V (a_stmt : Finₓ n_stmt → F) : MvPolynomial Vars F := V_stmt_mv u_stmt a
 
 /- Lemmas for proof -/
 
-lemma eq_helper (x j : ℕ) : x = j ∨ (x = 0 ∧ j = 0) ↔ x = j :=
+lemma eq_helper (x j : ℕ) : x = j ∨ (x = Zero.zero ∧ j = Zero.zero) ↔ x = j :=
 by
   apply Iff.intro 
   · intro h 
@@ -184,27 +183,78 @@ by
     left 
     exact h
 
-lemma h2_1 (i : Finₓ m) : 
-  (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.X i) = b i :=
-by sorry
---   intro j,
---   rw B_wit,
---   simp [crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps],
---   simp [X_poly, Y_poly, Z_poly],
---   simp with coeff_simp,
---   unfold_coes,
---   --TODO is this best?
---   -- TODO improve ite_finsupp_simplify with this
---   -- simp [],
---   -- ite_finsupp_simplify,
---   -- simp only [single_injective_iff],
---   -- simp [finsupp.single_eq_single_iff, ←fin.eq_iff_veq],
---   simp [finsupp.single_eq_single_iff],
---   simp only [eq_helper],
---   unfold_coes,
---   simp [←fin.eq_iff_veq],
--- end
-
+lemma h2_1 (j : Finₓ m) : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.X j) = b j := by 
+  rw [B_wit, MvPolynomial.coeff_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add]
+  simp only [B_wit, crs_powers_of_τ, crs_γ, crs_γβ, crs_β_ssps, X_poly, Y_poly, Z_poly, Finsupp.single_eq_single_iff,
+  eq_helper, true_and, Nat.one_ne_zero, mul_boole, add_zero, Algebra.id.smul_eq_mul, MvPolynomial.coeff_add,
+  eq_self_iff_true, not_true, Finsupp.mem_support_iff, if_false, Ne.def, not_false_iff, Finset.sum_const_zero,
+  MvPolynomial.coeff_smul, _root_.mul_zero, Finsupp.single_eq_of_ne, false_and, or_self, MvPolynomial.coeff_mul]
+  rw [MvPolynomial.coeff_sum] 
+  simp_rw [MvPolynomial.coeff_smul]
+  have h1 : (@Zero.zero F (AddZeroClassₓ.toHasZero F) : F) = (@OfNat.ofNat F 0 Zero.toOfNat0 : F)
+  · simp only [OfNat.ofNat]
+  have : b j = b j + 0 + 0 + 0
+  · rw [← h1, add_zeroₓ (b j), add_zeroₓ (b j), add_zeroₓ (b j)]
+  rw [this]
+  apply congr_arg2ₓ
+  apply congr_arg2ₓ
+  apply congr_arg2ₓ
+  · conv_lhs => 
+    · congr skip ext
+      rw [MvPolynomial.coeff_smul, MvPolynomial.coeff_X_pow]
+    simp_rw [smul_ite _ (b _) _ _, smul_zero (b _), Finsupp.single_eq_single_iff, true_and, eq_helper]
+    rw [Finset.sum_ite, Finset.sum_const_zero, add_zeroₓ]
+      conv_lhs =>
+      · congr skip ext
+        rw [smul_eq_mul, mul_oneₓ]
+    rw [Finset.sum_eq_single]
+    · intros x hx h
+      exfalso
+      apply h
+      rw [Finset.mem_filter] at hx
+      rw [Finₓ.eq_iff_veq, hx.2]
+    · intro h
+      exfalso
+      apply h
+      simp_rw [Finset.mem_filter, and_true, Finset.mem_fin_range]
+  · rw [MvPolynomial.coeff_smul, (@smul_eq_zero F F _ _ _ _ _ _).2]
+    · rw [h1]
+    · right
+      rw [MvPolynomial.coeff_X', if_neg]
+      intro H
+      rw [Finsupp.single_eq_single_iff] at H
+      simp only [false_and] at H
+  · rw [MvPolynomial.coeff_smul, (@smul_eq_zero F F _ _ _ _ _ _).2, h1]
+    simp only
+    right
+    rw [MvPolynomial.coeff_mul]
+    apply Finset.sum_eq_zero
+    intros x hx
+    simp_rw [MvPolynomial.coeff_X']
+    rw [boole_mul _ _, ite_eq_right_iff, ite_eq_right_iff]
+    intros f1 f2
+    exfalso
+    simp only [Finsupp.mem_antidiagonal] at hx
+    rw [← f1, ← f2, Finsupp.ext_iff] at hx
+    simp only [Pi.add_apply, Finsupp.coe_add] at hx
+    specialize hx Vars.Z
+    simp only [Finsupp.single_eq_same] at hx
+    rw [Finsupp.single_eq_of_ne, Finsupp.single_eq_of_ne, add_zeroₓ] at hx
+    apply Nat.one_ne_zero
+    · simp 
+      simp at hx
+    simp only
+    simp only
+  · rw [MvPolynomial.coeff_sum]
+    apply Finset.sum_eq_zero
+    intros x hx
+    rw [MvPolynomial.coeff_smul]
+    rw [(@smul_eq_zero F F _ _ _ _ _ _).2]
+    right
+    rw [mul_comm (MvPolynomial.x Vars.Y) _]
+    rw [MvPolynomial.coeff_mul_X', if_neg]
+    rw [Finsupp.mem_support_iff, not_not, Finsupp.single_eq_of_ne]
+    simp only
 
 lemma h3_1 : (B_wit u_wit b b_γ b_γβ b').coeff (Finsupp.single Vars.Z 1) = b_γ :=
 by sorry 

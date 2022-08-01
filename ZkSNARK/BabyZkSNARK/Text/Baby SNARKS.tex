@@ -59,8 +59,7 @@
 
 This file describes the implementation of the soundness proof of the Baby SNARKs program. The aim is to explain the code of the proof of soundness in \cite{code}. The mathematics is given in \cite{main}, and the code shall be explained in the same notation.
 
-\section{Code}
-\subsection{Setup}
+\section{Setup}
 Some notes :
 \begin{itemize}
   \item The \texttt{open\_locale big\_operators} command lets us use the local notation for sums ($\sum$) and products ($\prod$), as defined in the file \cite{big_operators}.
@@ -80,7 +79,7 @@ up to $l$, or equivalently, $\mathbb{Z}/l \mathbb{Z}$. \texttt{u\_wit} is define
 The polynomial $t$ is then defined as $t = \prod_{i = 0}^{m - 1} (X - r_i)$ \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L66}{here}. 
 \texttt{polynomial.X} denotes $X$ as a polynomial in $F[X]$, and \texttt{polynomial.C (r i)} denotes the constant polynomial $r_i$.
 
-\subsection{Properties of $t$}
+\section{Properties of $t$}
 The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L71}{\texttt{nat\_degree\_t}} says : 
 \theoremstyle{Lemma}
 \begin{lemma}[]
@@ -92,14 +91,14 @@ The proof follows simply by noting that the degree of the product of the polynom
 
 The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L82}{\texttt{monic\_t}} then says :
 \theoremstyle{lemma}
-\begin{lemma}
+\begin{lemma} \label{monic_t}
   The polynomial $t$ is monic.
 \end{lemma}
 The proof follows from the fact that a product of monic polynomials is monic (\texttt{monic\_prod\_of\_monic}), and that each $(X - r_i)$ is monic (\texttt{monic\_X\_sub\_C}).
 
 The next lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L91}{\texttt{degree\_t\_pos}} tells us :
 \theoremstyle{lemma}
-\begin{lemma}
+\begin{lemma} \label{t_pos}
   If $0 < m$, then the degree of $t$ is positive.
 \end{lemma}
 Note that this lemma uses \texttt{degree} instead of \texttt{nat\_degree}. As a result, we must prove that $m$ is nonzero implies $t$ being nonzero, in which case \texttt{nat\_degree} and \texttt{degree} coincide. 
@@ -115,7 +114,7 @@ The proof is then by induction on \texttt{degree t}.
 If \texttt{degree t = none}, then a contradiction is derived, since we then have that \texttt{some m = none}, which then implies \texttt{m < m}, which is false. In the other case, we have that \texttt{degree t = some val} 
 for some value \texttt{val}. Then by the definition of \texttt{option.get\_or\_else}, we get that \texttt{m = val}, and the proof follows simply from Lemma 1.
 
-\subsection{Some definitions}
+\section{Some definitions}
 One of the fundamental concepts used in this proof is that single variable polynomials can also be thought of as multi-variable polynomials. In this section, we give the mechanism to translate between the two, as well as 
 define the polynomials $V_w$, $V_s$, $B_w$, $V$, $H$ etc, sometimes separately as both single and multivariable polynomials. 
 
@@ -125,6 +124,14 @@ convert 3-variable polynomials to a single variable one : \texttt{singlify} repl
 
 On the other side, \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L145}{\texttt{X\_poly}}, \texttt{Y\_poly} and 
 \texttt{Z\_poly} are $X$, $Y$ and $Z$ thought of as elements of $F[X, Y, Z]$.
+
+Any finitely supported function taking values in $\mathbb{N}$ can be thought of as a polynomial. As an example, any finitely supported function 
+$m : \texttt{vars} \to \mathbb{N}$ can be thought of as a monomial of the form $X^{m(\texttt{vars.X})} Y^{m(\texttt{vars.Y})} Z^{m(\texttt{vars.Z})}$. Then, 
+given a multivariable polynomial $p(X, Y, Z)$, \texttt{mv\_polynomial.coeff p m} denotes the coefficient of $p$ at the monomial $m$.
+
+Given a ring $S$, a multivariable polynomial $p := \sum_{m \in \sigma} a_{\sigma} m$ ($\sigma$ is a set of monomials) with coefficients in $R$, 
+a function $f : R \to S$, and a function $g : \sigma \to S$, \texttt{mv\_polynomial.eval\_2 f g p :=} $\sum_{m \in \sigma} f(a_{\sigma}) g(m)$ returns the evaluation of $p$ with respect to $f$ and $g$. 
+In our case, we get, for $p := \sum_{i, j, k = 0}^{1} a_{i, j ,k} X^i Y^j Z^k$, we get \texttt{mv\_polynomial.eval\_2 polynomial.C singlify p :=} $\sum_{i, j, k = 0}^{1} a_{i, j ,k} X^i$ as an element of $F[X]$.
 
 We now give the definitions of various single and multivariable polynomials :
 \begin{itemize}
@@ -189,9 +196,227 @@ $$ \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} a_i u_i (X) \equiv 1 \
 that is, on dividing the above polynomial by $t$, the remainder obtained is 1. The significance of looking at these sums 
 separately is that the witness information is only available to the prover, not the verifier.
 
-\subsection{Supporting lemmas}
+\section{Supporting lemmas}
 In this section we state some lemmas that shall assist us in the proof of the final theorem.
 
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L158}{\texttt{my\_multivariable\_to\_single\_variable}} 
+states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{eval2}
+  Given a polynomial $p$ in $F[X]$, we have \texttt{(mv\_polynomial.eval\_2 polynomial.C singlify (eval\_2 mv\_polynomial.C X\_poly p)) = p}
+\end{lemma}
+This gives tells us that converting a single variable polynomial to a multivariable polynomial and reducing it to a single variable polynomial returns the original polynomial. 
+The proof remains the same if \texttt{singlify} is replaced with an arbitrary function. Thus we use the lemma 
+\href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/general_lemmas/polynomial_mv_sv_cast.lean#L14}{\texttt{multivariable\_to\_single\_variable}}. The proof of this lemma 
+follows simply by unfolding the definitions, using properties of monomials, and the fact that any polynomial $p$ can be written as $\sum_{n} coeff_{p}(X^n) X^n$, along with some \texttt{simp} lemmas.
+
+The following lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L211}{\texttt{eq\_helper}} 
+is used in \texttt{h2\_1} :
+\theoremstyle{lemma}
+\begin{lemma} 
+    Given natural numbers $x$ and $n$, $x = j \iff x = j \vee (x = 0 \wedge j = 0) $
+\end{lemma}
+
+This lemma seems obvious, however, it is quite useful to state beforehand, so it can be used directly in the next lemma.
+The proof is simple, we split the goal into two statements and get two goals : $x = j \to x = j \vee (x = 0 \wedge j = 0)$ and 
+$x = j \vee (x = 0 \wedge j = 0) \to x = j$. The first implication is trivial. We must split the second implication into 2 cases :
+$x = j \to x = j$ and $x = 0 \wedge j = 0 \to x = j$. Both implications are trivial. 
+
+The next lemma, \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L223}{\texttt{h2\_1}} states that :
+\theoremstyle{lemma} \label{h2_1}
+\begin{lemma}
+    $\forall 0 \le i < m$, the coefficient of $X^{i}$ in $B_{w}$ (or \texttt{B\_wit}) is $b_i$.
+\end{lemma}
+
+The lemma follows by tracking quotients, unfolding various definitions, removing coercions and applying the lemmas \texttt{finsupp.single\_eq\_single\_iff}, \texttt{eq\_helper} and \texttt{fin.eq\_iff\_veq}. This is done by applying the tactics 
+\texttt{simp} and \texttt{unfold\_coes}. For a full list of lemmas that \texttt{simp} uses, one can apply \texttt{squeeze\_simp}.
+
+Following a similar proof as above, the lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L244}{\texttt{h3\_1}} is proved : 
+\theoremstyle{lemma} \label{h3_1}
+\begin{lemma}
+    The coefficient of $Z$ in $B_{w}$ (or \texttt{B\_wit}) is $b_{\gamma}$.
+\end{lemma}
+
+In fact, a single \texttt{simp} proves this, with an addition of \texttt{finsupp.single\_eq\_single\_iff}.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L261}{\texttt{h4\_1}} says :
+\theoremstyle{lemma}
+\begin{lemma} \label{h4_1}
+    Suppose that, $\forall 0 \le i < m, b_{i} = 0$. Then, $b_i X^i = 0$. Equivalently, the function defined as $f(i) := b_i \cdot X^i$ is the same as the zero function.
+\end{lemma}
+
+The lemma is stated in the function form. Here, $\cdot$ represents scalar multiplication of $F$ on $F[X]$.
+The proof uses the tactic \texttt{ext}, which says that functions $f$ and $g$ are equal if and only if $\forall x, f(x) = g(x)$. The conclusion follows from 
+using the hypothesis and applying \texttt{zero\_smul}.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L272}{\texttt{h5\_1}} says :
+\theoremstyle{lemma} \label{h5_1}
+\begin{lemma}
+    $b_{\gamma \beta} \cdot ZY = Y (b_{\gamma \beta} \cdot Z)$
+\end{lemma}
+
+The lemma uses the fact \texttt{mv\_polynomial.smul\_eq\_C\_mul}, which says that scalar multiplication of a polynomial by a constant in $F$ is the same as multiplication of 
+the polynomial by the constant polynomial, that is $b \cdot p(X) = b(X) * p(X)$, where $b \in F$ and a polynomial $p(X) \in F[X]$. The tactic \texttt{ring} then finishes the proof 
+by using associativity and commutativity of multiplication. One can check what \texttt{ring} does by looking at \texttt{show\_term\{ring\}}.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L279}{\texttt{h6\_2}} says : 
+\theoremstyle{lemma}
+\begin{lemma} \label{h6_2}
+  The coefficient of $Z^2$ in $H t + 1$ is 0.
+\end{lemma}
+
+The coefficient of $Z^2$ in $H t + 1$ is precisely the coefficient of $Z^2$ in $H t$, which is the same as $\sum_{i= 0}^2 coeff_{H}(Z^i) coeff_{t}(Z^{2 - i})$.
+We know that $coeff_{t}(Z^i)$ is 0 for every $i$, which concludes the proof.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L311}{\texttt{h6\_3}} says : 
+\theoremstyle{lemma}
+\begin{lemma} \label{h6_3}
+  Given $(a_i)_{i = 0}^{l - 1}$, the coefficient of $Z^2$ in $(b_{\gamma \beta} \cdot Z + \sum_{i = 0}^{l - 1} a_i u_i (X) + \sum_{j = l}^{n - 1} b'_i u_i (X))^2$ is $b_{\gamma \beta}^2$.
+\end{lemma}
+
+The mathematical proof follows by looking at the coefficients. The code relies on first computing the power. This is done by looking at $z^2 = z * z$. One then uses 
+\texttt{mv\_polynomial.coeff\_mul} to write out the coefficients in terms of sums over the \texttt{antidiagonal}, which is the same as using the binomial theorem. Given a 
+finitely supported function $s$ taking values in the natural numbers, \texttt{antidiagonal s} is the set $\{ (m, n) | m + n = s \}$. Given an element $s$ of type $S$, 
+the function \texttt{finsupp.single s n} should be interpreted as taking value $n$ at $s$ and $0$ at all other elements of \texttt{vars}. Then, it is easy to see that the lemma 
+\href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/general_lemmas/single_antidiagonal.lean#L230}{\texttt{single\_2\_antidiagonal}} follows :
+\theoremstyle{lemma}
+\begin{lemma}
+  Given an element $s$ of a random type $S$, 
+  \newline \texttt{antidiagonal (finsupp.single s 2) = 
+\{
+  (finsupp.single s 0, finsupp.single s 2), 
+  (finsupp.single s 1, finsupp.single s 1), 
+  (finsupp.single s 2, finsupp.single s 0), 
+\} }
+
+\end{lemma}
+We then use \texttt{finset.sum\_insert} (writing the sum over a union of sets as an addition of the sums over each of the sets), \texttt{finsupp.single\_eq\_single\_iff} 
+(\texttt{finsupp.single a c} = \texttt{finsupp.single b d} $\iff a = b \wedge c = d \vee c = d = 0$) and \texttt{finset.sum\_singleton} (evaluating sums over singleton sets), along with some \texttt{simp} lemmas.
+%%We then use \texttt{single\_2\_antidiagonal} to convert the set of elements in the sum with a coefficient of \texttt{antidiagonal ()} and then showing that the irrelevant coefficients 
+
+\section{Main theorem}
+Let us first make a definition. We define the \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L346}{\texttt{extractor}} 
+to be the function $b' : \mathbb{Z}/(n - l) \mathbb{Z} \to F$.
+
+We are now ready to prove that the Baby SNARK protocol satisfies the property of knowledge soundness. This means that, if an adversary produces polynomials 
+$B(X, Y, Z), V(X, Y, Z), H(X, Y, Z)$ which satisfy 
+\begin{equation}
+  \label{1} B_w = YV_w
+\end{equation}
+\begin{equation}
+  \label{2} Ht = V^2 - 1  
+\end{equation}
+then one can extract a suitable \texttt{satisfying} witness that the adversary must have knowledge of, which is precisely $b'$.
+
+We now look at Case 1 in the paper \cite{main}, that is, when the above equations hold for all $X, Y, Z$. This is called 
+\href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L351}{\texttt{case\_1}} : 
+\theoremstyle{theorem}
+\begin{theorem}
+  Given $(a_i)_{i = 0}^{l - 1}$, $m > 0$, and $B_w, V_w, H$ satisfy the equations \eqref{1} and \eqref{2} then $a_s$ and the \texttt{extractor} $b'$ are \texttt{satisfying}.
+\end{theorem}
+
+The proof is done combining 12 sub-lemmas.
+
+\subsection{Sub-lemmas}
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L362}{\texttt{h1}} states that :
+\theoremstyle{lemma}
+\begin{lemma}
+  Given a monomial $m$ not having a $Y$-term (thought of as a finitely supported function from \texttt{vars} to $\mathbb{N}$), the coefficient of $m$ in $B_w$ is 0.
+\end{lemma}
+This follows directly from \eqref{1} and \texttt{mul\_var\_no\_constant}, which says that given a monomial $m$ with no $s$-term and a multivariable polynomial $a$, the coefficient of $m$ in $a * s$ is 0.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L366}{h2} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h2}
+  $\forall 0 \le i \le m - 1$, $b_i = 0$.
+\end{lemma}
+Given $0 \le i \le m - 1$, using \ref{h2_1}, we must prove that the coefficient of $X^i$ in $B_w$ is 0. One then uses \refeq{1}, 
+\href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/general_lemmas/mv_divisability.lean#L193}{\texttt{mul\_var\_no\_constant}} and 
+\texttt{finsupp.single\_apply} (\texttt{(finsupp.single a b) a'} is b if \texttt{a = a'}, otherwise it is \texttt{0}), along with some \texttt{simp} lemmas.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L366}{h3} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h3}
+  $b_{\gamma} = 0$
+\end{lemma}
+First, one uses \ref{h3_1}, which reduces to showing that the coefficient of $Z$ in $B_w$ is 0. The proof then follows using \refeq{1}, \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/general_lemmas/mv_divisability.lean#L193}{\texttt{mul\_var\_no\_constant}} and 
+\texttt{finsupp.single\_apply}, along with some \texttt{simp} lemmas.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L381}{h4} states that :
+\theoremstyle{lemma} \label{h4}
+\begin{lemma}
+  $B_w = b_{\gamma \beta} ZY + \sum_{i = l}^{n - 1} b'_i Y u_i(X) $
+\end{lemma}
+It suffices to prove that $\sum_{i = 0}^{m - 1} X^i = b_{\gamma}Z = 0$. The former claim follows from \ref{h4_1} and \ref{h2}, and the latter from \ref{h3}, along with some \texttt{simp} lemmas.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L387}{h5} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h5}
+  $V_w = b_{\gamma \beta} Z + \sum_{i = l}^{n - 1} b'_i u_i(X) $
+\end{lemma}
+We first multiply both sides by $Y$ using \texttt{left\_cancel\_X\_mul vars.Y}. The result then follows by using \refeq{1}, \ref{h4} and \ref{h5_1}, along with some \texttt{simp} lemmas.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L399}{h6} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h6}
+  $V (a_i)_{i = 0}^{l} = b_{\gamma \beta} Z + \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} b'_i u_i(X) $
+\end{lemma}
+This follows easily from the definition of $V$, and using \ref{h5} along with some \texttt{simp} lemmas.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L411}{h7} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h7}
+  $b_{\gamma \beta} = 0$
+\end{lemma}
+Consider \refeq{2}, and expand on it using \ref{h6}. The statement \texttt{h6\_1} then says that the coefficient of $Z^2$ in both sides of the equation must be the same. Finally, 
+using \ref{h6_2} and \ref{h6_3}, one obtains $b_{\gamma \beta}^2 = 0$, from which the result follows easily, since the field $F$ has no zero divisors. 
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L419}{h8} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h8}
+  $V (a_i)_{i = 0}^{l} = \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} b'_i u_i(X) $
+\end{lemma}
+The lemma follows easily using \ref{h6}, \ref{h7} and \texttt{simp}.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L438}{h10} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h10}
+  $ (Ht + 1) \equiv (V (a_i)_{i = 0}^{l})^2 (\text{mod }t) $
+\end{lemma}
+Here, \texttt{singlify} has been used to think of them as single variable polynomials in terms of $X$. This follows directly from \refeq{2}.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L449}{h12} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h12}
+  The multivariable constant polynomial 1 is the same as the multivariable polynomial $\sum_{n} (coeff_{1} (X^n)) X^n$, where, given a polynomial $p \in F[X]$, $coeff_{p} (X^n)$ denotes 
+  the coefficient of $X^n$ in $p$.
+\end{lemma}
+This lemma is dependent on the definition of \texttt{polynomial.eval\_2}. The definition of this is very complicated, however, we shall remark that the proof follows directly from the lemma 
+\texttt{polynomial.eval\_2\_C}.
+
+The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L454}{h13} states that :
+\theoremstyle{lemma}
+\begin{lemma} \label{h13}
+  $ (Ht + 1) \equiv H (\text{mod }t) $ and $ (Ht + 1) \equiv 1 (\text{mod }t) $, where these polynomials are thought of as single variable polynomials.
+\end{lemma}
+We first apply \texttt{polynomial.div\_mod\_by\_monic\_unique}, which says that, given polynomials $f, g, q, r$, with $g$ monic, such that $f = g q + r$ and $deg(r) < deg (g)$, then,
+$f \div_m g = q$ and $f (\text{mod }g) \equiv r$. Here, $\div_m$ means the quotient when $f$ is divided by $g$. We must then prove that $t$ is monic (follows from \ref{monic_t}), and 
+that the degree of the constant polynomial 1 is larger than $deg(t)$ (follows from \ref{t_pos}), along with some \texttt{simp} lemmas.
+
+We are now ready to tackle the proof of the theorem.
+
+\subsection{Proof of main theorem}
+We must prove that, given $(a_i)_{i = 0}^{l - 1}$,
+$$ \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} b'_i u_i (X) \equiv 1 \texttt{mod } t $$
+
+First, we define \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L426}{\texttt{h9}} 
+to be \ref{h8}, seen as an element of $F[X]$. We then use the additivity properties of the \texttt{eval\_2} map, and the lemma \ref{eval2} on \texttt{h9}. Using \texttt{h9}, it now suffices 
+to prove that \newline $\text{mv\_polynomial.eval\_2 polynomial.C singlify (V a\_stmt)} ^ 2 \equiv 1 (\text{mod }t)$.
+
+We then use \ref{h10} and \ref{eval2} to change the statement to \newline $\text{(mv\_polynomial.eval\_2 polynomial.C singlify H * t +
+mv\_polynomial.eval\_2 polynomial.C singlify (mv\_polynomial.C 1))} \equiv 1 (\text{mod }t)$.
+
+Finally, the result follows from applying \ref{h12},\ref{h13} and \ref{eval2} along with some \texttt{simp} lemmas. Yay!
 
 \bibliographystyle{unsrt}
 \bibliography{refs}

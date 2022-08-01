@@ -13,7 +13,7 @@ In particular in this repository we will
 
 ## Contributing
 
-There are two big aspects to this work: the formalization and documentation.
+There are two big aspects to this work: the formalization and documentation. If you contribute to either of these, then please add your name to the [authors list](/authors) with your PR! We are currently organizing authors alphabetically by last name.
 
 ### Formalization
 
