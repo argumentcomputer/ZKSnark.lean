@@ -43,8 +43,11 @@ lemma coefn_funlike {α : vars →₀ ℕ} : coeFn α = FunLike.coe α := by rfl
 
 lemma one_eq_one (n : ℕ) : n - 1 = n - One.one := by rfl 
 
+<<<<<<< HEAD
 -- lemma le_asymm {n m : ℕ} : n > m ↔ m < n := by rfl
 
+=======
+>>>>>>> main
 lemma equal_dec_equal 
   (s : vars) (f g : vars →₀ ℕ) 
   (hf : 0 < f s) 
@@ -74,7 +77,11 @@ lemma inc_dec_nonzero_equal
 by
   apply Finsupp.ext
   intro a
+<<<<<<< HEAD
   by_cases h : s = a -- Not sure what's going on here, why do I need to use `;` but not before?
+=======
+  by_cases h : s = a
+>>>>>>> main
   · change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
     rw [h, Finsupp.single_eq_same]
     rw [← coefn_funlike, h] at hf
@@ -114,6 +121,7 @@ noncomputable def div_X_v2 (p : MvPolynomial vars F) (s : vars)
     intro a
     dsimp
     apply Iff.intro
+<<<<<<< HEAD
     { sorry }
     { sorry }
 
@@ -151,6 +159,33 @@ noncomputable def div_X_v2 (p : MvPolynomial vars F) (s : vars)
 --     exact (p.mem_support_to_fun (increment a s)).2 h1,
 --     exact dec_inc_equal s a,
 --   end
+=======
+    · intro h1
+      have h2 := Finset.mem_image.1 h1
+      rcases h2 with ⟨a_1, H, h3⟩
+      rw [Eq.symm h3]
+      clear h3
+      clear h1
+      have h4 : p.coeff a_1 ≠ 0 := (p.mem_support_to_fun a_1).1 H
+      clear H
+      suffices h6 : increment (decrement a_1 s) s = a_1
+      rw [h6]
+      exact h4
+      have h7 : a_1 s ≠ 0
+      intro foo
+      apply h4
+      apply h
+      exact foo
+      have h8 := Nat.pos_of_ne_zero h7
+      apply inc_dec_nonzero_equal s a_1
+      sorry -- exact h8 -- some annoying LE vs. < issues
+    · intro h1
+      apply Finset.mem_image.2
+      apply Exists.intro (increment a s)
+      apply Exists.intro
+      exact dec_inc_equal s a
+      exact (p.mem_support_to_fun (increment a s)).2 h1
+>>>>>>> main
 
 /-- In the product of a polynomial with a variable, the coefficients of all terms without that variable are zero -/
 lemma coeff_mul_X_eq_zero (a : MvPolynomial vars F) (s : vars) (m : vars →₀ ℕ) :
@@ -177,6 +212,7 @@ by
   apply right_cancel_X_mul s
   rw [_root_.mul_comm, h, _root_.mul_comm]
 
+<<<<<<< HEAD
 -- -- For all monomials with no X component, the coefficient of a is zero
 -- -- a * b = c
 -- -- then for all monomials with no X component, the coefficient of a is zero
@@ -243,3 +279,52 @@ by
 
 -- end
 
+=======
+-- For all monomials with no X component, the coefficient of a is zero
+-- a * b = c
+-- then for all monomials with no X component, the coefficient of a is zero
+lemma mul_no_constant_no_constant (a b c : MvPolynomial vars F) (s : vars) :
+  (∀ m : vars →₀ ℕ, m s = 0 → a.coeff m = 0) → (a * b = c) → ∀ m : vars →₀ ℕ, m s = 0 -> c.coeff m = 0 :=
+by
+  intros ha heq m hc
+  let aDivX := div_X_v2 a s ha
+  have h1 : aDivX * (@x F vars _ s) = a
+  · rw [ext_iff]
+    intro m2
+    rw [coeff_mul_X']
+    by_cases h : HasMem.Mem s m2.support
+    · have h2 : aDivX.coeff (Sub.sub m2 (Finsupp.single s One.one)) = a.coeff m2 := by
+        have h3 : aDivX.coeff (Sub.sub m2 (Finsupp.single s One.one)) = a.coeff (increment (Sub.sub m2 (Finsupp.single s One.one)) s) := rfl
+        rw [h3]
+        clear h3
+        have h4 : a.coeff (increment (Sub.sub m2 (Finsupp.single s One.one)) s) = a.coeff (increment (decrement m2 s) s) := rfl
+        rw [h4]
+        clear h4
+        have h5 := (m2.mem_support_to_fun s).1 h
+        have h6 := inc_dec_nonzero_equal s m2 (sorry) -- (Nat.pos_of_ne_zero h5) -- doesn't work because of LE vs < 
+        rw [h6]
+      change (if HasMem.Mem s m2.support then coeff (Sub.sub m2 (Finsupp.single s One.one)) aDivX else Zero.zero) = coeff m2 a
+      rw [h2]
+      clear h2
+      apply if_pos
+      exact h
+    · have h7 : a.coeff m2 = 0 := by
+        apply ha
+        by_contra a_1
+        apply h ((m2.mem_support_to_fun s).2 a_1)
+      rw [h7]
+      apply if_neg
+      exact h 
+  · have h4 : (aDivX * (@x F vars _ s)) * b = c := by
+      rw [h1]
+      exact heq
+    clear h1
+    rw [←h4]
+    conv => 
+      lhs
+      congr
+      skip
+      rw [_root_.mul_comm, ←_root_.mul_assoc]
+    apply coeff_mul_X_eq_zero
+    exact hc
+>>>>>>> main

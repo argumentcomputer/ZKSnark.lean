@@ -1,5 +1,4 @@
 import Mathbin
-
 import ZkSNARK.GeneralLemmas.MvDivisibility
 import ZkSNARK.GeneralLemmas.PolynomialMvSvCast
 
