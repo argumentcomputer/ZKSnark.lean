@@ -3,11 +3,11 @@ import shutil
 from pathlib import Path
 from invoke import run, task
 
-from blueprint.tasks import web, bp, print, serve
+from blueprint.tasks import web, bp, print, serve, authors
 
 ROOT = Path(__file__).parent
 
-@task
+@task(authors)
 def doc(ctx):
     cwd = os.getcwd()
     os.chdir(ROOT/'docs_src')
