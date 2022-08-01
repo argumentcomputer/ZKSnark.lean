@@ -43,11 +43,6 @@ lemma coefn_funlike {α : vars →₀ ℕ} : coeFn α = FunLike.coe α := by rfl
 
 lemma one_eq_one (n : ℕ) : n - 1 = n - One.one := by rfl 
 
-<<<<<<< HEAD
--- lemma le_asymm {n m : ℕ} : n > m ↔ m < n := by rfl
-
-=======
->>>>>>> main
 lemma equal_dec_equal 
   (s : vars) (f g : vars →₀ ℕ) 
   (hf : 0 < f s) 
@@ -77,11 +72,7 @@ lemma inc_dec_nonzero_equal
 by
   apply Finsupp.ext
   intro a
-<<<<<<< HEAD
-  by_cases h : s = a -- Not sure what's going on here, why do I need to use `;` but not before?
-=======
   by_cases h : s = a
->>>>>>> main
   · change (coeFn f) a - (coeFn $ Finsupp.single s 1) a + (coeFn $ Finsupp.single s 1) a = coeFn f a
     rw [h, Finsupp.single_eq_same]
     rw [← coefn_funlike, h] at hf
@@ -121,45 +112,6 @@ noncomputable def div_X_v2 (p : MvPolynomial vars F) (s : vars)
     intro a
     dsimp
     apply Iff.intro
-<<<<<<< HEAD
-    { sorry }
-    { sorry }
-
---   mem_support_to_fun := begin
---     intro a,
---     apply iff.intro,
---     -- Forward impolication
---     intro h1,
---     have h2 := finset.mem_image.1 h1,
---     rcases h2 with ⟨a_1, H, h3⟩,
---     rw eq.symm h3,
---     clear h3,
---     clear h1,
---     have h4 : p.coeff a_1 ≠ 0,
---       from (p.mem_support_to_fun a_1).1 H,
---     clear H,
---     -- by the contrapositive of h and h4, a_1 s is not zero
---     suffices h6: increment ( decrement a_1 s) s = a_1,
---       rw h6,
---       exact h4,
---     have h7 : a_1 s ≠ 0,
---       intro foo,
---       apply h4,
---       apply h,
---       exact foo,
---     -- use h7 and a lemma
---     have h8 := pos_of_ne_zero h7,
---     exact inc_dec_nonzero_equal s a_1 h8,
---     --
---     intro h1,
---     apply finset.mem_image.2,
---     -- 
---     apply exists.intro (increment a s),
---     apply exists.intro,
---     exact (p.mem_support_to_fun (increment a s)).2 h1,
---     exact dec_inc_equal s a,
---   end
-=======
     · intro h1
       have h2 := Finset.mem_image.1 h1
       rcases h2 with ⟨a_1, H, h3⟩
@@ -185,7 +137,6 @@ noncomputable def div_X_v2 (p : MvPolynomial vars F) (s : vars)
       apply Exists.intro
       exact dec_inc_equal s a
       exact (p.mem_support_to_fun (increment a s)).2 h1
->>>>>>> main
 
 /-- In the product of a polynomial with a variable, the coefficients of all terms without that variable are zero -/
 lemma coeff_mul_X_eq_zero (a : MvPolynomial vars F) (s : vars) (m : vars →₀ ℕ) :
@@ -212,74 +163,6 @@ by
   apply right_cancel_X_mul s
   rw [_root_.mul_comm, h, _root_.mul_comm]
 
-<<<<<<< HEAD
--- -- For all monomials with no X component, the coefficient of a is zero
--- -- a * b = c
--- -- then for all monomials with no X component, the coefficient of a is zero
--- lemma mul_no_constant_no_constant (a b c : mv_polynomial vars F) (s : vars) : 
--- (∀ m : vars →₀ ℕ, m s = 0 -> a.coeff m = 0) -> (a * b = c) -> (∀ m : vars →₀ ℕ, m s = 0 -> c.coeff m = 0) 
--- :=
--- begin
---   intros ha heq,
---   intros m hc,
---   let a_div_X : mv_polynomial vars F := div_X_v2 a s ha,
---   have h1 : a_div_X * (X s) = a,
---   apply (ext_iff (a_div_X * (X s)) a).2,
---   intro,
---   rw coeff_mul_X',
---   by_cases s ∈ m_1.support,
---   have h2 : a_div_X.coeff (m_1 - finsupp.single s 1)  = a.coeff m_1,
---   have h3 : a_div_X.coeff (m_1 - finsupp.single s 1)  = a.coeff (increment (m_1 - finsupp.single s 1) s),
---   refl,
---   rw h3,
---   clear h3,
---   have h4: a.coeff (increment (m_1 - finsupp.single s 1) s) = a.coeff (increment (decrement m_1 s) s),
---   refl,
---   rw h4,
---   clear h4,
---   have h5 : m_1 s ≠ 0, 
---   exact (m_1.mem_support_to_fun s).1 h,
---   have h6 : increment (decrement m_1 s) s = m_1,
---   exact inc_dec_nonzero_equal s m_1 (pos_of_ne_zero h5),
---   rw h6,
---   rw h2,
---   clear h2,
---   apply if_pos,
---   exact h,
---   have h7: a.coeff m_1 = 0,
---   apply ha,
---   by_contradiction a_1,
---   apply h ((m_1.mem_support_to_fun s).2 a_1),
---   rw h7,
---   apply if_neg,
---   exact h,
-
---   have h4 : a_div_X * (X s) * b = c,
---   rw h1,
---   exact heq,
---   clear h1,
---   have h8 : X s * b = b * X s,
---   apply mul_comm,
---   have h9 : a_div_X * X s * b = a_div_X * (X s * b),
---   apply mul_assoc,
---   have h10 : a_div_X * (X s * b) = a_div_X * (b * X s),
---   rw h8,
---   have h11 : a_div_X * b * X s = a_div_X * (b * X s),
---   apply mul_assoc,
---   have h12 : a_div_X * X s * b = a_div_X * b * X s ,
---   rw [h9, h10, eq.symm h11],
---   clear h8 h9 h10 h11,
-
---   rw eq.symm h4,
---   rw h12,
-
---   apply mul_var_no_constant,
---   exact hc,
--- end
-
--- end
-
-=======
 -- For all monomials with no X component, the coefficient of a is zero
 -- a * b = c
 -- then for all monomials with no X component, the coefficient of a is zero
@@ -327,4 +210,3 @@ by
       rw [_root_.mul_comm, ←_root_.mul_assoc]
     apply coeff_mul_X_eq_zero
     exact hc
->>>>>>> main

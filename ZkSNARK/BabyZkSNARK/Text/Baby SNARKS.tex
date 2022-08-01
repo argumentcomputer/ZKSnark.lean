@@ -59,12 +59,7 @@
 
 This file describes the implementation of the soundness proof of the Baby SNARKs program. The aim is to explain the code of the proof of soundness in \cite{code}. The mathematics is given in \cite{main}, and the code shall be explained in the same notation.
 
-<<<<<<< HEAD
 \section{Setup}
-=======
-\section{Code}
-\subsection{Setup}
->>>>>>> main
 Some notes :
 \begin{itemize}
   \item The \texttt{open\_locale big\_operators} command lets us use the local notation for sums ($\sum$) and products ($\prod$), as defined in the file \cite{big_operators}.
@@ -84,11 +79,7 @@ up to $l$, or equivalently, $\mathbb{Z}/l \mathbb{Z}$. \texttt{u\_wit} is define
 The polynomial $t$ is then defined as $t = \prod_{i = 0}^{m - 1} (X - r_i)$ \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L66}{here}. 
 \texttt{polynomial.X} denotes $X$ as a polynomial in $F[X]$, and \texttt{polynomial.C (r i)} denotes the constant polynomial $r_i$.
 
-<<<<<<< HEAD
 \section{Properties of $t$}
-=======
-\subsection{Properties of $t$}
->>>>>>> main
 The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L71}{\texttt{nat\_degree\_t}} says : 
 \theoremstyle{Lemma}
 \begin{lemma}[]
@@ -100,22 +91,14 @@ The proof follows simply by noting that the degree of the product of the polynom
 
 The lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L82}{\texttt{monic\_t}} then says :
 \theoremstyle{lemma}
-<<<<<<< HEAD
 \begin{lemma} \label{monic_t}
-=======
-\begin{lemma}
->>>>>>> main
   The polynomial $t$ is monic.
 \end{lemma}
 The proof follows from the fact that a product of monic polynomials is monic (\texttt{monic\_prod\_of\_monic}), and that each $(X - r_i)$ is monic (\texttt{monic\_X\_sub\_C}).
 
 The next lemma \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L91}{\texttt{degree\_t\_pos}} tells us :
 \theoremstyle{lemma}
-<<<<<<< HEAD
 \begin{lemma} \label{t_pos}
-=======
-\begin{lemma}
->>>>>>> main
   If $0 < m$, then the degree of $t$ is positive.
 \end{lemma}
 Note that this lemma uses \texttt{degree} instead of \texttt{nat\_degree}. As a result, we must prove that $m$ is nonzero implies $t$ being nonzero, in which case \texttt{nat\_degree} and \texttt{degree} coincide. 
@@ -131,11 +114,7 @@ The proof is then by induction on \texttt{degree t}.
 If \texttt{degree t = none}, then a contradiction is derived, since we then have that \texttt{some m = none}, which then implies \texttt{m < m}, which is false. In the other case, we have that \texttt{degree t = some val} 
 for some value \texttt{val}. Then by the definition of \texttt{option.get\_or\_else}, we get that \texttt{m = val}, and the proof follows simply from Lemma 1.
 
-<<<<<<< HEAD
 \section{Some definitions}
-=======
-\subsection{Some definitions}
->>>>>>> main
 One of the fundamental concepts used in this proof is that single variable polynomials can also be thought of as multi-variable polynomials. In this section, we give the mechanism to translate between the two, as well as 
 define the polynomials $V_w$, $V_s$, $B_w$, $V$, $H$ etc, sometimes separately as both single and multivariable polynomials. 
 
@@ -146,7 +125,6 @@ convert 3-variable polynomials to a single variable one : \texttt{singlify} repl
 On the other side, \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L145}{\texttt{X\_poly}}, \texttt{Y\_poly} and 
 \texttt{Z\_poly} are $X$, $Y$ and $Z$ thought of as elements of $F[X, Y, Z]$.
 
-<<<<<<< HEAD
 Any finitely supported function taking values in $\mathbb{N}$ can be thought of as a polynomial. As an example, any finitely supported function 
 $m : \texttt{vars} \to \mathbb{N}$ can be thought of as a monomial of the form $X^{m(\texttt{vars.X})} Y^{m(\texttt{vars.Y})} Z^{m(\texttt{vars.Z})}$. Then, 
 given a multivariable polynomial $p(X, Y, Z)$, \texttt{mv\_polynomial.coeff p m} denotes the coefficient of $p$ at the monomial $m$.
@@ -155,8 +133,6 @@ Given a ring $S$, a multivariable polynomial $p := \sum_{m \in \sigma} a_{\sigma
 a function $f : R \to S$, and a function $g : \sigma \to S$, \texttt{mv\_polynomial.eval\_2 f g p :=} $\sum_{m \in \sigma} f(a_{\sigma}) g(m)$ returns the evaluation of $p$ with respect to $f$ and $g$. 
 In our case, we get, for $p := \sum_{i, j, k = 0}^{1} a_{i, j ,k} X^i Y^j Z^k$, we get \texttt{mv\_polynomial.eval\_2 polynomial.C singlify p :=} $\sum_{i, j, k = 0}^{1} a_{i, j ,k} X^i$ as an element of $F[X]$.
 
-=======
->>>>>>> main
 We now give the definitions of various single and multivariable polynomials :
 \begin{itemize}
   \item \href{https://github.com/BoltonBailey/formal-snarks-project/blob/7fd9cd122f5887f88f6a706b4f2a68a7153c7381/src/snarks/babysnark/knowledge_soundness.lean#L120}{\texttt{V\_wit\_sv}} : Given $a_w = (a_l, \cdots, a_{n - 1})$, returns $V_w(X) := \sum_{i = l}^{n - 1} a_w (i) u_i (X)$ as an element of $F[X]$.
@@ -220,7 +196,6 @@ $$ \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} a_i u_i (X) \equiv 1 \
 that is, on dividing the above polynomial by $t$, the remainder obtained is 1. The significance of looking at these sums 
 separately is that the witness information is only available to the prover, not the verifier.
 
-<<<<<<< HEAD
 \section{Supporting lemmas}
 In this section we state some lemmas that shall assist us in the proof of the final theorem.
 
@@ -442,11 +417,6 @@ We then use \ref{h10} and \ref{eval2} to change the statement to \newline $\text
 mv\_polynomial.eval\_2 polynomial.C singlify (mv\_polynomial.C 1))} \equiv 1 (\text{mod }t)$.
 
 Finally, the result follows from applying \ref{h12},\ref{h13} and \ref{eval2} along with some \texttt{simp} lemmas. Yay!
-=======
-\subsection{Supporting lemmas}
-In this section we state some lemmas that shall assist us in the proof of the final theorem.
-
->>>>>>> main
 
 \bibliographystyle{unsrt}
 \bibliography{refs}
