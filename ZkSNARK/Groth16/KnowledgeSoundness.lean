@@ -28,7 +28,7 @@ variable (w_wit : Finₓ n_wit → F[X] )
 /- The roots of the polynomial t -/
 variable (r : Finₓ n_wit → F)
 /-- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def t : F[X] := 
+def t : Polynomial F := 
   ∏ i in finRange n_wit, (x : F[X]) - c (r i)
 
 lemma nat_degree_t : (t r).natDegree = n_wit := by
@@ -91,7 +91,7 @@ def satisfying (a_stmt : Finₓ n_stmt → F) (a_wit : Finₓ n_wit → F) :=
     + ∑ i in finRange n_wit, a_wit i • v_wit i)
   -
   ((∑ i in finRange n_stmt, a_stmt i • w_stmt i)
-    + ∑ i in finRange n_wit, a_wit i • w_wit i)) %ₘ t r = 0
+    + ∑ i in finRange n_wit, a_wit i • w_wit i) : F[X]) %ₘ (t r) = 0
 
 -- run_cmd mk_simp_attr `crs
 
