@@ -1,0 +1,25 @@
+\documentclass{report}
+
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.svg,.png,.jpg}
+\usepackage[capitalize]{cleveref}
+\usepackage[showmore, dep_graph, coverage, project=../../]{blueprint}
+
+\usepackage{tikz-cd}
+\usepackage{tikz}
+
+\input{macros/macros_common}
+\input{macros/macros_web}
+
+\home{tbd}
+\github{https://github.com/yatima-inc/ZKSnark.lean}
+
+\title{Formalizing ZkSNARKs}
+\author{Ashvni Narayanan, Matej Penciak, Daniel Rogozin, Winston Zhang}
+
+\begin{document}
+\maketitle
+\input{content}
+\end{document}

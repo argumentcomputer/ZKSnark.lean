@@ -1,0 +1,156 @@
+\chapter{Knowledge Soundness for BabySNARK}\label{chap:test2}
+
+Fix natural numbers $n, l$ with $l < n$, and a sequence $a_s = (a_0, \ldots, a_{l-1})$ and $a_w = (a_l, \ldots, a_n)$ (the \emph{statement} and \emph{witness}). 
+
+Fix also a collection of polynomials $u_i(X) \in F[X]$ for $0 \leq i < n$ split up into the first $l$ denoted $u_s$ and the last $l-n$ denoted $u_w$. 
+
+Finally, fix strings $(b_0, \ldots,b_m), (h_0, \ldots, h_m), (v_0, \ldots v_m) \in F^m$ where $m = \deg t$. Similarly fix $(b'_i)_{i = l}^{n - l - 1}$, $(v'_i)_{i = l}^{n - l - 1}$ and $(h'_i)_{i = l}^{n - l - 1} \in F^{n-l}$, and $b_\gamma, v_\gamma, h_\gamma, b_{\gamma\beta}, v_{\gamma\beta}$.
+
+\begin{definition}\label{def:V_B_H}
+\leanok
+Define the polynomials $V_s = \sum_i^{n-1} a_i u_i(X) = V_{ss} + V_{sw}$, and 
+
+\[
+B_w = \sum_{i = 0}^{m - 1} b_i X^i + b_{\gamma}Z + b_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} b'_{i} Y u_{i}(X)
+\]
+
+\[
+V_w = \sum_{i = 0}^{m - 1} v_i X^i + v_{\gamma}Z + v_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} v'_{i} Y u_{i}(X)
+\]
+
+\[
+H = \sum_{i = 0}^{m - 1} h_i X^i + h_{\gamma}Z + h_{\gamma \beta}YZ + \sum_{i = l}^{n - 1} h'_{i} Y u_{i}(X)
+\]
+\end{definition}
+
+\begin{definition}\label{def:satisfying}
+\leanok
+\uses{def:poly_t}
+Call a sequence $(a_i)_{i=0}^{n-1}$ \emph{satisfying} if 
+\[
+\sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} a_i u_i (X) \equiv 1 \mod t
+\]
+\end{definition}
+
+\begin{lemma}\label{lem:B_coeff}
+\leanok
+\uses{def:V_B_H}
+$\forall 0 \le i < m$, the coefficient of $X^{i}$ in $B_{w}$ (or \texttt{B\_wit}) is $b_i$.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+\begin{lemma} \label{lem:Z2_Ht_coeff}
+\uses{def:V_B_H}
+\leanok
+The coefficient of $Z^2$ in $H t + 1$ is 0.
+\end{lemma}
+
+\begin{lemma} \label{lem:B_sq_coeff}
+\leanok
+\uses{def:V_B_H}
+Given $(a_i)_{i = 0}^{l - 1}$, the coefficient of $Z^2$ in $(b_{\gamma \beta} \cdot Z + \sum_{i = 0}^{l - 1} a_i u_i (X) + \sum_{j = l}^{n - 1} b'_i u_i (X))^2$ is $b_{\gamma \beta}^2$.
+\end{lemma}
+  
+For the following lemmas assume we are in the setting of the proof of knowledge soundness. In particular, assume:
+
+\begin{equation}
+B_w = YV_w
+\end{equation}
+\begin{equation}
+Ht = V^2 - 1  
+\end{equation}
+
+Knowledge soundness for BabySNARK follows from the following lemmas:
+
+\begin{lemma}\label{lem:B_Y_coeff}
+\leanok
+\uses{def:V_B_H}
+Then given a monomial $m$ not having a $Y$-term, the coefficient of $m$ in $B_w$ is 0.
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+\begin{lemma}\label{lem:b_i_zero}
+\leanok
+$\forall 0 \le i \le m - 1$, $b_i = 0$.
+\end{lemma}
+\begin{proof}
+\uses{lem:B_Y_coeff}
+\leanok
+\end{proof}
+
+\begin{lemma}\label{lem:b_g_zero}
+$b_{\gamma} = 0$
+\end{lemma}
+\begin{proof}
+\leanok
+\end{proof}
+
+\begin{lemma}\label{lem:B_def}
+\leanok
+$B_w = b_{\gamma \beta} ZY + \sum_{i = l}^{n - 1} b'_i Y u_i(X) $
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:b_i_zero, lem:b_g_zero}
+\end{proof}
+
+\begin{lemma} \label{lem:V_def}
+\leanok
+$V_w = b_{\gamma \beta} Z + \sum_{i = l}^{n - 1} b'_i u_i(X) $
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:B_def}
+\end{proof}
+
+\begin{lemma} \label{lem:V_eval}
+\leanok
+$V (a_i)_{i = 0}^{l} = b_{\gamma \beta} Z + \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} b'_i u_i(X) $
+\end{lemma}
+\begin{proof}
+\uses{lem:V_def}
+\leanok
+\end{proof}
+
+\begin{lemma} \label{lem:b_gb_zero}
+\leanok
+$b_{\gamma \beta} = 0$
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:V_eval,lem:Z2_Ht_coeff, lem:B_sq_coeff}
+\end{proof}
+
+\begin{lemma} \label{lem:V_eval2}
+\leanok
+$V (a_i)_{i = 0}^{l} = \sum_{i = 0}^{l - 1} a_i u_i(X) + \sum_{i = l}^{n - 1} b'_i u_i(X) $
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:b_gb_zero, lem:V_eval}
+\end{proof}
+
+\begin{lemma} \label{lem:Ht_mod_t}
+\leanok
+\uses{def:V_B_H, lem:t_props}
+$ (Ht + 1) \equiv (V (a_i)_{i = 0}^{l})^2 (\text{mod }t) $
+\end{lemma}
+
+\begin{lemma} \label{lem:singlify_Ht}
+$\textrm{singlify} (Ht + 1)/t = \textrm{singlify} H$
+\end{lemma}
+\begin{proof}
+\uses{lem:Ht_mod_t}
+\end{proof}
+
+\begin{theorem}\label{lem:knowledge_soundness}
+\leanok
+If an adversary produces polynomials $B(X,Y,Z), V(X,Y,Z), H(X,Y,Z)$ which satisfy $B_w = Y V_w$ and $H t = V^2 -1$, then the adversary can extract a satisfying witness.
+\end{theorem}
+\begin{proof}
+\uses{def:satisfying,lem:singlify_Ht, lem:V_eval2}
+\end{proof}
