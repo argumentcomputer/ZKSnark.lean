@@ -134,7 +134,7 @@ variable { A_l B_l C_l : Finₓ n_stmt → F }
 variable { A_m B_m C_m : Finₓ n_wit → F }
 variable { A_h B_h C_h : Finₓ (n_var - 1) → F }
 
-/-
+
 /- Polynomial forms of the adversary's proof representation -/
 def A (f : Vars → F) (x : F) : F := 
   (A_α * (crs_α f x : F))
@@ -186,5 +186,6 @@ def C (f : Vars → F) (x : F) : F  :=
   ∑ i in (finRange n_wit), (C_m i) * (crs_m i f x)
   +
   ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n i f x)
--/
+
+
 end Groth16
