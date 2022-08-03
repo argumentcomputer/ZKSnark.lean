@@ -7,7 +7,21 @@ inductive Vars : Type
   | β : Vars
   | γ : Vars
   | δ : Vars
-  deriving BEq
+
+instance : DecidableEq Vars := 
+  fun a b => match a, b with
+   | .α, .α => isTrue rfl
+   | .α, .β => isFalse (fun h => Vars.noConfusion h)
+   | .α, .γ => isFalse (fun h => Vars.noConfusion h)
+   | .α, .δ => isFalse (fun h => Vars.noConfusion h)
+   | .β, .α => isFalse (fun h => Vars.noConfusion h)
+   | .β, .β => isTrue rfl
+   | .β, .γ => isFalse (fun h => Vars.noConfusion h)
+   | .β, .δ => isFalse (fun h => Vars.noConfusion h)
+   | .δ, .α => isFalse (fun h => Vars.noConfusion h)
+   | .δ, .β => isFalse (fun h => Vars.noConfusion h)
+   | .δ, .γ => isFalse (fun h => Vars.noConfusion h)
+   | .δ, .δ => isTrue rfl
 
 lemma finsupp_vars_eq_ext (f g : Vars →₀ ℕ) : (f = g) ↔ 
   (f Vars.α = g Vars.α ∧ f Vars.β = g Vars.β ∧ f Vars.γ = g Vars.γ ∧ f Vars.δ = g Vars.δ) := by
