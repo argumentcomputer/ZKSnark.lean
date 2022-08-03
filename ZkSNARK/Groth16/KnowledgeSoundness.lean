@@ -147,7 +147,7 @@ def A (f : Vars → F) (x : F) : F :=
   +
   ∑ i in (finRange n_var), (A_x i) * (crs_powers_of_x i f x)
   +
-  ∑ i in (finRange n_stmt), (A_l i) * (crs_l i f x)
+  ∑ i in (finRange n_stmt), (A_l i) ⬝ crs_l i f x
   +
   ∑ i in (finRange n_wit), (A_m i) * (crs_m i f x)
   +
@@ -187,40 +187,47 @@ def C (f : Vars → F) (x : F) : F  :=
   +
   ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n i f x)
 
+open MvPolynomial
+
 def Groth16Polynomial := MvPolynomial Vars (Polynomial F)
 
 /- The modified crs elements 
 these are multivariate (non-Laurent!) polynomials of the toxic waste samples, 
 obtained by multiplying the Laurent polynomial forms of the CRS through by γδ. 
 We will later prove that the laurent polynomial equation is equivalent to a similar equation of the modified crs elements, allowing us to construct a proof in terms of polynomials -/
-def crs'_α  : @Groth16Polynomial F field := X Vars.α * X Vars.γ * X Vars.δ
+def crs'_α  : @Groth16Polynomial F field := ((MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)) : @Groth16Polynomial F field
 
-def crs'_β : @Groth16Polynomial F field  := X Vars.β * X Vars.γ * X Vars.δ
+def crs'_β : @Groth16Polynomial F field  := (x Vars.β) * (x Vars.γ) * (x Vars.δ)
 
-def crs'_γ : @Groth16Polynomial F field := X Vars.γ * X Vars.γ * X Vars.δ
+def crs'_γ : @Groth16Polynomial F field := (x Vars.γ) * (x Vars.γ) * (x Vars.δ)
 
-def crs'_δ : @Groth16Polynomial F field  := X Vars.δ * X Vars.γ * X Vars.δ
+def crs'_δ : @Groth16Polynomial F field  := (x Vars.δ) * (x Vars.γ) * (x Vars.δ)
 
 def crs'_powers_of_x (i : Finₓ n_var) : @Groth16Polynomial F field := 
-  (MvPolynomial.c (Polynomial.x ^ (i : ℕ))) * X vars.γ * X vars.δ
+  (MvPolynomial.c (Polynomial.x ^ (i : ℕ))) * (x Vars.γ) * (x Vars.δ)
 -- We define prodcuts of these crs elements without the division, then later claim identities. Is this right?
 
 def crs'_l (i : Finₓ n_stmt) : @Groth16Polynomial F field := 
-  (X vars.β * X vars.δ) * MvPolynomial.c (u_stmt i)
+  ((MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.δ)) * MvPolynomial.c (u_stmt i)
   +
-  (X vars.α * X vars.δ) * MvPolynomial.c (v_stmt i)
+  ((MvPolynomial.x Vars.α) * x Vars.δ) * MvPolynomial.c (v_stmt i)
   +
-  X vars.δ * MvPolynomial.c (w_stmt i)
+  (MvPolynomial.x Vars.δ) * MvPolynomial.c (w_stmt i)
 
 def crs'_m (i : Finₓ n_wit) : @Groth16Polynomial F field := 
-  (X vars.β * X vars.γ) * MvPolynomial.c (u_wit i)
+  ((MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ)) * MvPolynomial.c (u_wit i)
   +
-  (X vars.α * X vars.γ) * MvPolynomial.c (v_wit i)
+  ((MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ)) * MvPolynomial.c (v_wit i)
   +
-  X vars.γ * MvPolynomial.c (w_wit i)
+  (MvPolynomial.x Vars.γ) * MvPolynomial.c (w_wit i)
 
 
 def crs'_t (i : Finₓ (n_var - 1)) : @Groth16Polynomial F field := 
-  X vars.γ * MvPolynomial.c ((Polynomial.x)^(i : ℕ) * t)
+  (x Vars.γ) * MvPolynomial.c ((Polynomial.x)^(i : ℕ) * t)
+
+def verified (a_stmt : Finₓ n_stmt → F ) : Prop := A * B = crs_α * crs_β + (∑ i in finRange n_stmt, a_stmt i • crs_l i ) * crs_γ + C * crs_δ
+
+def verified' (a_stmt : Finₓ n_stmt → F ) : Prop := A' * B' = crs'_α * crs'_β + (∑ i in finRange n_stmt, (Polynomial.c (a_stmt i)) • crs'_l i ) * crs'_γ + C' * crs'_δ
+
 
 end Groth16
