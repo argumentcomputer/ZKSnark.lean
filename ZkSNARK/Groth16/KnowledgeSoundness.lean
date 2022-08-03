@@ -8,7 +8,7 @@ noncomputable section
 namespace Groth16
 open Finset Polynomial
 
-variable {F : Type u} [Field F]
+variable {F : Type u} [field : Field F]
 
 /- n_stmt - the statement size, 
 n_wit - the witness size -/ 
@@ -27,7 +27,8 @@ variable (w_wit : Finₓ n_wit → F[X] )
 
 /- The roots of the polynomial t -/
 variable (r : Finₓ n_wit → F)
-/-- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
+
+/- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
 def t : Polynomial F := 
   ∏ i in finRange n_wit, (x : F[X]) - c (r i)
 
@@ -93,6 +94,97 @@ def satisfying (a_stmt : Finₓ n_stmt → F) (a_wit : Finₓ n_wit → F) :=
   ((∑ i in finRange n_stmt, a_stmt i • w_stmt i)
     + ∑ i in finRange n_wit, a_wit i • w_wit i) : F[X]) %ₘ (t r) = 0
 
--- run_cmd mk_simp_attr `crs
+/- The coefficients of the CRS elements in the algebraic adversary's representation -/
+register_simp_attr crs "Attribute for defintions of CRS elements"
 
+/- The crs elements 
+These funtions are actually multivariate Laurent polynomials of the toxic waste samples, 
+but we represent them here as functions on assignments of the variables to values.
+-/
+def crs_α  (f : Vars → F) (x : F) : F := f Vars.α
+
+def crs_β (f : Vars → F) (x : F) : F := f Vars.β
+
+def crs_γ (f : Vars → F) (x : F) : F := f Vars.γ
+
+def crs_δ (f : Vars → F) (x : F) : F := f Vars.δ
+
+def crs_powers_of_x (i : Finₓ n_var) (f : Vars → F) (x : F) : F := (x)^(i : ℕ)
+
+def crs_l (i : Finₓ n_stmt) (f : Vars → F) (x : F) : F := 
+  ((f Vars.β / f Vars.γ) * (u_stmt i).eval (x)
+  +
+  (f Vars.α / f Vars.γ) * (v_stmt i).eval (x)
+  +
+  (w_stmt i).eval (x)) / f Vars.γ
+
+def crs_m (i : Finₓ n_wit) (f : Vars → F) (x : F) : F := 
+  ((f Vars.β / f Vars.δ) * (u_wit i).eval (x)
+  +
+  (f Vars.α / f Vars.δ) * (v_wit i).eval (x)
+  +
+  (w_wit i).eval (x)) / f Vars.δ
+
+def crs_n (i : Finₓ (n_var - 1)) (f : Vars → F) (x : F) : F := 
+  ((x)^(i : ℕ)) * (t r).eval x / f Vars.δ
+
+variable { A_α A_β A_γ A_δ B_α B_β B_γ B_δ C_α C_β C_γ C_δ  : F }
+variable { A_x B_x C_x : Finₓ n_var → F }
+variable { A_l B_l C_l : Finₓ n_stmt → F }
+variable { A_m B_m C_m : Finₓ n_wit → F }
+variable { A_h B_h C_h : Finₓ (n_var - 1) → F }
+
+/-
+/- Polynomial forms of the adversary's proof representation -/
+def A (f : Vars → F) (x : F) : F := 
+  (A_α * (crs_α f x : F))
+  +
+  (A_β * crs_β f x : F)
+  + 
+  A_γ * crs_γ f x
+  +
+  A_δ * crs_δ f x
+  +
+  ∑ i in (finRange n_var), (A_x i) * (crs_powers_of_x i f x)
+  +
+  ∑ i in (finRange n_stmt), (A_l i) * (crs_l i f x)
+  +
+  ∑ i in (finRange n_wit), (A_m i) * (crs_m i f x)
+  +
+  ∑ i in (finRange (n_var-1)), (A_h i) * (crs_n i f x)
+
+def B (f : Vars → F) (x : F) : F  := 
+  (((B_α * crs_α f x)
+  +
+  B_β * crs_β f x
+  + 
+  B_γ * crs_γ f x
+  +
+  B_δ * crs_δ f x
+  +
+  ∑ i in (finRange n_var), (B_x i) * (crs_powers_of_x i f x)
+  +
+  ∑ i in (finRange n_stmt), (B_l i) * (crs_l i f x)
+  +
+  ∑ i in (finRange n_wit), (B_m i) * (crs_m i f x)
+  +
+  ∑ i in (finRange (n_var - 1)), (B_h i) * (crs_n i f x)) : F)
+
+def C (f : Vars → F) (x : F) : F  := 
+  C_α * crs_α f x
+  +
+  C_β * crs_β f x
+  + 
+  C_γ * crs_γ f x
+  +
+  C_δ * crs_δ f x
+  +
+  ∑ i in (finRange n_var), (C_x i) * (crs_powers_of_x i f x)
+  +
+  ∑ i in (finRange n_stmt), (C_l i) * (crs_l i f x)
+  +
+  ∑ i in (finRange n_wit), (C_m i) * (crs_m i f x)
+  +
+  ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n i f x)
+-/
 end Groth16

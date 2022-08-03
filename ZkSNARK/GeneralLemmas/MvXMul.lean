@@ -184,11 +184,11 @@ lemma rearrange_002 (f : R) (p1 p2 p3 : Polynomial R) :
     { intro h, rw h }
 -/
 
-lemma add_mul_distrib (a b c d : R) : a + b * c + b * d = a + b * (c + d) :=
-by ring
+-- lemma add_mul_distrib (a b c d : R) : a + b * c + b * d = a + b * (c + d) :=
+-- by ring
 
-lemma add_mul_distrib' (a b c d : R) : a + c * b + d * b = a + b * (c + d) :=
-by ring
+-- lemma add_mul_distrib' (a b c d : R) : a + c * b + d * b = a + b * (c + d) :=
+-- by ring
 
 end CommSemiringₓ
 
