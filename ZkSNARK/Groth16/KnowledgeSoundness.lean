@@ -29,8 +29,7 @@ variable {w_wit : Finₓ n_wit → F[X]}
 variable (r : Finₓ n_wit → F)
 
 /- t is the polynomial divisibility by which is used to verify satisfaction of the SSP -/
-def t : Polynomial F := 
-  ∏ i in finRange n_wit, (x : F[X]) - c (r i)
+def t : F[X] := ∏ i in finRange n_wit, (x : F[X]) - c (r i)
 
 lemma nat_degree_t : (t r).natDegree = n_wit := by
   rw [t, Polynomial.nat_degree_prod]
@@ -134,11 +133,9 @@ variable { A_l B_l C_l : Finₓ n_stmt → F }
 variable { A_m B_m C_m : Finₓ n_wit → F }
 variable { A_h B_h C_h : Finₓ (n_var - 1) → F }
 
-#check crs_α
-
 /- Polynomial forms of the adversary's proof representation -/
 def A (f : Vars → F) (x : F) : F := 
-  A_α * @crs_α f x
+  A_α * crs_α f x
   +
   A_β * crs_β f x
   + 
@@ -154,8 +151,8 @@ def A (f : Vars → F) (x : F) : F :=
   +
   ∑ i in (finRange (n_var-1)), (A_h i) * (crs_n i f x)
 
-def B (f : Vars → F) (x : F) : F  := 
-  (B_α * crs_α f x)
+def B (f : Vars → F) (x : F) : F := 
+  B_α * crs_α f x
   +
   B_β * crs_β f x
   + 
@@ -198,11 +195,11 @@ obtained by multiplying the Laurent polynomial forms of the CRS through by γδ.
 We will later prove that the laurent polynomial equation is equivalent to a similar equation of the modified crs elements, allowing us to construct a proof in terms of polynomials -/
 def crs'_α  : @Groth16Polynomial F field := (MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
-def crs'_β : @Groth16Polynomial F field  := (MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_β : @Groth16Polynomial F field := (MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
 def crs'_γ : @Groth16Polynomial F field := (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
-def crs'_δ : @Groth16Polynomial F field  := (MvPolynomial.x Vars.δ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_δ : @Groth16Polynomial F field := (MvPolynomial.x Vars.δ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
 def crs'_powers_of_x (i : Finₓ n_var) : @Groth16Polynomial F field := 
   (MvPolynomial.c (MvPolynomial.x ^ (i : ℕ))) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
@@ -272,18 +269,20 @@ def C'  : @Groth16Polynomial F field :=
   +
   crs'_δ * MvPolynomial.c (Polynomial.c (C_δ))
   +
-  X vars.γ * X vars.δ * MvPolynomial.c ∑ i in (finset.fin_range n_var), (Polynomial.c (C_x i) * Polynomial.x ^ (i : ℕ))
+  MvPolynomial.x vars.γ * X vars.δ * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (C_x i) * Polynomial.x ^ (i : ℕ)))
   +
-  ∑ i in (finset.fin_range n_stmt), (crs'_l i) * mv_polynomial.C (polynomial.C (C_l i))
+  ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (C_l i))
   +
-  ∑ i in (finset.fin_range n_wit), (crs'_m i) * mv_polynomial.C (polynomial.C (C_m i))
+  ∑ i in (finRange n_wit), (crs'_m i) * MvPolynomial.c (Polynomial.c (C_m i))
   +
-  ∑ i in (finset.fin_range (n_var - 1)), (crs'_t i) * mv_polynomial.C (polynomial.C (C_h i))
+  ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (C_h i))
 
 
-def verified (a_stmt : Finₓ n_stmt → F ) : Prop := A * B = crs_α * crs_β + ((∑ i in finRange n_stmt, a_stmt i * crs_l i ) * crs_γ + C * crs_δ : F)
+def verified (a_stmt : Finₓ n_stmt → F ) : Prop := 
+  A * B = crs_α * crs_β + ((∑ i in finRange n_stmt, a_stmt i * crs_l i ) * crs_γ + C * crs_δ : F)
 
-def verified' (a_stmt : Finₓ n_stmt → F ) : Prop := A' * B' = crs'_α * crs'_β + ((∑ i in finRange n_stmt, (Polynomial.c (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ : F)
+def verified' (a_stmt : Finₓ n_stmt → F ) : Prop := 
+  A' * B' = crs'_α * crs'_β + ((∑ i in finRange n_stmt, (Polynomial.c (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ : F)
 
 
 end Groth16
