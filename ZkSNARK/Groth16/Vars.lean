@@ -22,6 +22,10 @@ instance : DecidableEq Vars :=
    | .δ, .β => isFalse (fun h => Vars.noConfusion h)
    | .δ, .γ => isFalse (fun h => Vars.noConfusion h)
    | .δ, .δ => isTrue rfl
+   | .γ, .δ => isFalse (fun h => Vars.noConfusion h)
+   | .γ, .γ => isTrue rfl
+   | .γ, .β => isFalse (fun h => Vars.noConfusion h)
+   | .γ, .α => isFalse (fun h => Vars.noConfusion h)
 
 lemma finsupp_vars_eq_ext (f g : Vars →₀ ℕ) : (f = g) ↔ 
   (f Vars.α = g Vars.α ∧ f Vars.β = g Vars.β ∧ f Vars.γ = g Vars.γ ∧ f Vars.δ = g Vars.δ) := by
