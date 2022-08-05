@@ -100,15 +100,15 @@ register_simp_attr crs "Attribute for defintions of CRS elements"
 These funtions are actually multivariate Laurent polynomials of the toxic waste samples, 
 but we represent them here as functions on assignments of the variables to values.
 -/
-def crs_α  (f : Vars → F) (x : F) : F := f Vars.α
+def crs_α  (f : Vars → F) : F := f Vars.α
 
-def crs_β (f : Vars → F) (x : F) : F := f Vars.β
+def crs_β (f : Vars → F) : F := f Vars.β
 
-def crs_γ (f : Vars → F) (x : F) : F := f Vars.γ
+def crs_γ (f : Vars → F) : F := f Vars.γ
 
-def crs_δ (f : Vars → F) (x : F) : F := f Vars.δ
+def crs_δ (f : Vars → F) : F := f Vars.δ
 
-def crs_powers_of_x (i : Finₓ n_var) (f : Vars → F) (x : F) : F := (x)^(i : ℕ)
+def crs_powers_of_x (i : Finₓ n_var) (x : F) : F := (x)^(i : ℕ)
 
 def crs_l (i : Finₓ n_stmt) (f : Vars → F) (x : F) : F := 
   ((f Vars.β / f Vars.γ) * (u_stmt i).eval (x)
@@ -135,15 +135,15 @@ variable { A_h B_h C_h : Finₓ (n_var - 1) → F }
 
 /- Polynomial forms of the adversary's proof representation -/
 def A (f : Vars → F) (x : F) : F := 
-  A_α * crs_α f x
+  A_α * (crs_α f)
   +
-  A_β * crs_β f x
+  A_β * crs_β f
   + 
-  A_γ * crs_γ f x
+  A_γ * crs_γ f
   +
-  A_δ * crs_δ f x
+  A_δ * crs_δ f
   +
-  ∑ i in (finRange n_var), (A_x i) * (crs_powers_of_x i f x)
+  ∑ i in (finRange n_var), (A_x i) * (crs_powers_of_x i x)
   +
   ∑ i in (finRange n_stmt), (A_l i) * (crs_l i f x)
   +
@@ -152,15 +152,15 @@ def A (f : Vars → F) (x : F) : F :=
   ∑ i in (finRange (n_var-1)), (A_h i) * (crs_n i f x)
 
 def B (f : Vars → F) (x : F) : F := 
-  B_α * crs_α f x
+  B_α * crs_α f
   +
-  B_β * crs_β f x
+  B_β * crs_β f
   + 
-  B_γ * crs_γ f x
+  B_γ * crs_γ f
   +
-  B_δ * crs_δ f x
+  B_δ * crs_δ f
   +
-  ∑ i in (finRange n_var), (B_x i) * (crs_powers_of_x i f x)
+  ∑ i in (finRange n_var), (B_x i) * (crs_powers_of_x i x)
   +
   ∑ i in (finRange n_stmt), (B_l i) * (crs_l i f x)
   +
@@ -169,15 +169,15 @@ def B (f : Vars → F) (x : F) : F :=
   ∑ i in (finRange (n_var - 1)), (B_h i) * (crs_n i f x)
 
 def C (f : Vars → F) (x : F) : F  := 
-  C_α * crs_α f x
+  C_α * crs_α f
   +
-  C_β * crs_β f x
+  C_β * crs_β f
   + 
-  C_γ * crs_γ f x
+  C_γ * crs_γ f
   +
-  C_δ * crs_δ f x
+  C_δ * crs_δ f
   +
-  ∑ i in (finRange n_var), (C_x i) * (crs_powers_of_x i f x)
+  ∑ i in (finRange n_var), (C_x i) * (crs_powers_of_x i x)
   +
   ∑ i in (finRange n_stmt), (C_l i) * (crs_l i f x)
   +
@@ -185,34 +185,32 @@ def C (f : Vars → F) (x : F) : F  :=
   +
   ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n i f x)
 
-open MvPolynomial
 
-def Groth16Polynomial := MvPolynomial Vars (Polynomial F)
 
 /- The modified crs elements 
 these are multivariate (non-Laurent!) polynomials of the toxic waste samples, 
 obtained by multiplying the Laurent polynomial forms of the CRS through by γδ. 
 We will later prove that the laurent polynomial equation is equivalent to a similar equation of the modified crs elements, allowing us to construct a proof in terms of polynomials -/
-def crs'_α  : @Groth16Polynomial F field := (MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_α  : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
-def crs'_β : @Groth16Polynomial F field := (MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_β : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
-def crs'_γ : @Groth16Polynomial F field := (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_γ : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
-def crs'_δ : @Groth16Polynomial F field := (MvPolynomial.x Vars.δ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_δ : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.δ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 
-def crs'_powers_of_x (i : Finₓ n_var) : @Groth16Polynomial F field := 
+def crs'_powers_of_x (i : Finₓ n_var) : MvPolynomial Vars (Polynomial F) := 
   (MvPolynomial.c (MvPolynomial.x ^ (i : ℕ))) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
 -- We define prodcuts of these crs elements without the division, then later claim identities. Is this right?
 
-def crs'_l (i : Finₓ n_stmt) : @Groth16Polynomial F field := 
+def crs'_l (i : Finₓ n_stmt) : MvPolynomial Vars (Polynomial F) := 
   ((MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.δ)) * MvPolynomial.c (u_stmt i)
   +
   ((MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.δ)) * MvPolynomial.c (v_stmt i)
   +
   (MvPolynomial.x Vars.δ) * (MvPolynomial.c (w_stmt i))
 
-def crs'_m (i : Finₓ n_wit) : @Groth16Polynomial F field := 
+def crs'_m (i : Finₓ n_wit) : MvPolynomial Vars (Polynomial F) := 
   ((MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ)) * MvPolynomial.c (u_wit i)
   +
   ((MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ)) * MvPolynomial.c (v_wit i)
@@ -220,20 +218,20 @@ def crs'_m (i : Finₓ n_wit) : @Groth16Polynomial F field :=
   (MvPolynomial.x Vars.γ) * MvPolynomial.c (w_wit i)
 
 
-def crs'_t (i : Finₓ (n_var - 1)) : @Groth16Polynomial F field := 
+def crs'_t (i : Finₓ (n_var - 1)) : MvPolynomial Vars (Polynomial F) := 
   (MvPolynomial.x Vars.γ) * MvPolynomial.c ((MvPolynomial.x)^(i : ℕ) * t)
 
 /- Polynomial form of A in the adversary's proof representation -/
-def A'  : @Groth16Polynomial F field := 
-  crs'_α * MvPolynomial.c (Polynomial.c (A_α))
+def A'  : MvPolynomial Vars (Polynomial F) := 
+  crs'_α * (MvPolynomial.c (Polynomial.c A_α))
   + -- TODO
-  crs'_β * MvPolynomial.c (Polynomial.c (A_β))
+  crs'_β * MvPolynomial.c (Polynomial.c A_β)
   + 
-  crs'_γ * MvPolynomial.c (Polynomial.c (A_γ))
+  crs'_γ * MvPolynomial.c (Polynomial.c A_γ)
   +
-  crs'_δ * MvPolynomial.c (Polynomial.c (A_δ))
+  crs'_δ * MvPolynomial.c (Polynomial.c A_δ)
   +
-  X vars.γ * X vars.δ * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c  (A_x i) * Polynomial.x ^ (i : ℕ)))
+  (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ) * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c  (A_x i) * Polynomial.x ^ (i : ℕ)))
   +
   ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (A_l i))
   +
@@ -242,16 +240,16 @@ def A'  : @Groth16Polynomial F field :=
   ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (A_h i))
 
 /- Polynomial form of B in the adversary's proof representation -/
-def B'  : @Groth16Polynomial F field := 
+def B'  : MvPolynomial Vars (Polynomial F) := 
   crs'_α * MvPolynomial.c (Polynomial.c (B_α))
-  + -- TODO
+  +
   crs'_β * MvPolynomial.c (Polynomial.c (B_β))
   + 
   crs'_γ * MvPolynomial.c (Polynomial.c (B_γ))
   +
   crs'_δ * MvPolynomial.c (Polynomial.c (B_δ))
   +
-  Polynomial.x vars.γ * X vars.δ * mv_polynomial.C (∑ i in (finRange n_var), (Polynomial.c (B_x i) * Polynomial.x ^ (i : ℕ)))
+  Polynomial.x vars.γ * X vars.δ * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (B_x i) * Polynomial.x ^ (i : ℕ)))
   +
   ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (B_l i))
   +
@@ -260,7 +258,7 @@ def B'  : @Groth16Polynomial F field :=
   ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (B_h i))
 
 /- Polynomial form of C in the adversary's proof representation -/
-def C'  : @Groth16Polynomial F field := 
+def C'  : MvPolynomial Vars (Polynomial F) := 
   crs'_α * MvPolynomial.c (Polynomial.c (C_α))
   + -- TODO
   crs'_β * MvPolynomial.c (Polynomial.c (C_β))
@@ -278,11 +276,13 @@ def C'  : @Groth16Polynomial F field :=
   ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (C_h i))
 
 
-def verified (a_stmt : Finₓ n_stmt → F ) : Prop := 
+def  verified (a_stmt : Finₓ n_stmt → F ) : Prop := 
   A * B = crs_α * crs_β + ((∑ i in finRange n_stmt, a_stmt i * crs_l i ) * crs_γ + C * crs_δ : F)
 
 def verified' (a_stmt : Finₓ n_stmt → F ) : Prop := 
   A' * B' = crs'_α * crs'_β + ((∑ i in finRange n_stmt, (Polynomial.c (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ : F)
 
+lemma modification_equivalence (a_stmt : Finₓ n_stmt → F) : 
+  verified a_stmt -> verified' a_stmt := by sorry
 
 end Groth16
