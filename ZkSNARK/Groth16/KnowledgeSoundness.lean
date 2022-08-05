@@ -8,7 +8,7 @@ noncomputable section
 namespace Groth16
 open Finset Polynomial BigOperators
 
-variable {F : Type} [field : Field F]
+variable {F : Type u} [field : Field F]
 
 /- n_stmt - the statement size, 
 n_wit - the witness size -/ 
@@ -223,7 +223,7 @@ def crs'_m (i : Finₓ n_wit) : MvPolynomial Vars (Polynomial F) :=
 
 
 def crs'_t (i : Finₓ (n_var - 1)) : MvPolynomial Vars (Polynomial F) := 
-  (MvPolynomial.x Vars.γ) * MvPolynomial.c ((MvPolynomial.x)^(i : ℕ) * t)
+  (MvPolynomial.x Vars.γ) *(MvPolynomial.c (((MvPolynomial.x)^(i : ℕ)) * t))
 
 /- Polynomial form of A in the adversary's proof representation -/
 def A'  : MvPolynomial Vars (Polynomial F) := 
@@ -376,7 +376,7 @@ lemma coeff0022 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
           (Polynomial.c A_γ) * (∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (B_l x)) +
         (Polynomial.c A_δ) * (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (B_m x)) +
       (Polynomial.c A_δ) * (∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (B_h x))) =
-    ∑ (x : Finₓ n_stmt) in finRange n_stmt, Polynomial.c (a_stmt x) * w_stmt x +
+    ∑ (x : Finₓ n_stmt) in finRange n_stmt, Polynomial.c (a_stmt x) * (w_stmt x) +
       (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (C_m x) +
          ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (C_h x)))
 := by sorry
@@ -397,8 +397,8 @@ lemma coeff0111 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
              ∑ (x : Finₓ n_wit) in finRange n_wit, (u_wit x) * Polynomial.c (B_m x) +
            (∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (A_l x)) *
              ∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (B_m x)) +
-      (∑ (x : Finₓ n_stmt) in finRange n_stmt, u_stmt x * Polynomial.c (A_l x)) *
-        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * polynomial.C (B_h x)) =
+      (∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (A_l x)) *
+        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (B_h x)) =
     0 := by sorry
 
 end Groth16
