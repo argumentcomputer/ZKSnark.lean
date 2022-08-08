@@ -197,54 +197,99 @@ def C (f : Vars → F) (x : F) : F  :=
 /- The modified crs elements 
 these are multivariate (non-Laurent!) polynomials of the toxic waste samples, 
 obtained by multiplying the Laurent polynomial forms of the CRS through by γδ. 
-We will later prove that the laurent polynomial equation is equivalent to a similar equation of the modified crs elements, allowing us to construct a proof in terms of polynomials -/
-def crs'_α  : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+We will later prove that the laurent polynomial equation is equivalent to a 
+similar equation of the modified crs elements, allowing us to construct a proof in terms of polynomials -/
+def crs'_α  : MvPolynomial Vars (Polynomial F) := 
+  let pol₁ := (MvPolynomial.x Vars.α : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₃ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  (pol₁ * pol₂) * pol₃
 
-def crs'_β : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_β : MvPolynomial Vars (Polynomial F) := 
+  let pol₁ := (MvPolynomial.x Vars.β : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₃ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  (pol₁ * pol₂) * pol₃
 
-def crs'_γ : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_γ : MvPolynomial Vars (Polynomial F) :=
+  let pol₁ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₃ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  (pol₁ * pol₂) * pol₃
 
-def crs'_δ : MvPolynomial Vars (Polynomial F) := (MvPolynomial.x Vars.δ) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+def crs'_δ : MvPolynomial Vars (Polynomial F) :=
+  let pol₁ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₃ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  (pol₁ * pol₂) * pol₃
 
 def crs'_powers_of_x (i : Finₓ n_var) : MvPolynomial Vars (Polynomial F) := 
-  (MvPolynomial.c ((MvPolynomial.x)^(i : ℕ))) * (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)
+  let pol₁ := (MvPolynomial.c ((Polynomial.x)^(i : ℕ)) : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₃ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  (pol₁ * pol₂) * pol₃
 -- We define prodcuts of these crs elements without the division, then later claim identities. Is this right?
 
-def crs'_l (i : Finₓ n_stmt) : MvPolynomial Vars (Polynomial F) := 
-  ((MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.δ)) * MvPolynomial.c (u_stmt i)
+def crs'_l (i : Finₓ n_stmt) : MvPolynomial Vars (Polynomial F) :=
+  let pol₁ := (MvPolynomial.x Vars.α : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.β : MvPolynomial Vars (Polynomial F))
+  let pol₃ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  let pol₄ := (MvPolynomial.c (u_stmt i) : MvPolynomial Vars (Polynomial F))
+  let pol₅ := (MvPolynomial.c (v_stmt i) : MvPolynomial Vars (Polynomial F))
+  let pol₆ := (MvPolynomial.c (w_stmt i) : MvPolynomial Vars (Polynomial F))
+  (pol₂ * pol₃) * pol₄
   +
-  ((MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.δ)) * MvPolynomial.c (v_stmt i)
+  (pol₁  * pol₃) * pol₅
   +
-  (MvPolynomial.x Vars.δ) * (MvPolynomial.c (w_stmt i))
+  pol₃ * pol₆
 
-def crs'_m (i : Finₓ n_wit) : MvPolynomial Vars (Polynomial F) := 
-  ((MvPolynomial.x Vars.β) * (MvPolynomial.x Vars.γ)) * MvPolynomial.c (u_wit i)
+def crs'_m (i : Finₓ n_wit) : MvPolynomial Vars (Polynomial F) :=
+  let pol₁ := (MvPolynomial.x Vars.α : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.β : MvPolynomial Vars (Polynomial F))
+  let pol₃ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₄ := (MvPolynomial.c (u_wit i) : MvPolynomial Vars (Polynomial F))
+  let pol₅ := (MvPolynomial.c (v_wit i) : MvPolynomial Vars (Polynomial F))
+  let pol₆ := (MvPolynomial.c (w_wit i) : MvPolynomial Vars (Polynomial F))
+  (pol₂ * pol₃) * pol₄
   +
-  ((MvPolynomial.x Vars.α) * (MvPolynomial.x Vars.γ)) * MvPolynomial.c (v_wit i)
+  (pol₁ * pol₃) * pol₅
   +
-  (MvPolynomial.x Vars.γ) * MvPolynomial.c (w_wit i)
+  pol₃ * pol₆
 
 
-def crs'_t (i : Finₓ (n_var - 1)) : MvPolynomial Vars (Polynomial F) := 
-  (MvPolynomial.x Vars.γ) *(MvPolynomial.c (((MvPolynomial.x)^(i : ℕ)) * t))
+def crs'_t (i : Finₓ (n_var - 1)) : MvPolynomial Vars (Polynomial F) :=
+  let pol₁ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₂ := ((((Polynomial.x)^(i : ℕ)) * (t r)) : Polynomial F)
+  let pol₃ := (MvPolynomial.c pol₂ : MvPolynomial Vars (Polynomial F))
+  pol₁ * pol₃
+
+#check @crs'_α F field
 
 /- Polynomial form of A in the adversary's proof representation -/
-def A'  : MvPolynomial Vars (Polynomial F) := 
-  crs'_α * (MvPolynomial.c (Polynomial.c A_α))
+def A'  : MvPolynomial Vars (Polynomial F) :=
+  let pol₁ := 
+    let polₐ := (Polynomial.c A_α : Polynomial F)
+    (MvPolynomial.c polₐ : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (@crs'_α F field : MvPolynomial Vars (Polynomial F))
+  pol₂ * pol₁
   + -- TODO
-  crs'_β * MvPolynomial.c (Polynomial.c A_β)
+  (@crs'_β F field) * MvPolynomial.c (Polynomial.c A_β)
   + 
-  crs'_γ * MvPolynomial.c (Polynomial.c A_γ)
+  (@crs'_γ F field) * MvPolynomial.c (Polynomial.c A_γ)
   +
-  crs'_δ * MvPolynomial.c (Polynomial.c A_δ)
+  (@crs'_δ F field) * MvPolynomial.c (Polynomial.c A_δ)
   +
-  (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ) * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c  (A_x i) * Polynomial.x ^ (i : ℕ)))
+  ((MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ)) * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c  (A_x i) * Polynomial.x ^ (i : ℕ)))
   +
-  ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (A_l i))
+  ∑ i in (finRange n_stmt), 
+    let pol₁ := (crs'_l i : MvPolynomial Vars (Polynomial F))
+    pol₁ * MvPolynomial.c (Polynomial.c (A_l i))
   +
   ∑ i in (finRange n_wit), (crs'_m i) * MvPolynomial.c (Polynomial.c (A_m i))
   +
-  ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (A_h i))
+  ∑ i in (finRange (n_var - 1)),
+    let pol₁ := (crs'_t i : MvPolynomial Vars (Polynomial F))
+    pol₁ * MvPolynomial.c (Polynomial.c (A_h i))
 
 /- Polynomial form of B in the adversary's proof representation -/
 def B'  : MvPolynomial Vars (Polynomial F) := 
