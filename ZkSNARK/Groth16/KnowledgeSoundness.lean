@@ -33,7 +33,7 @@ def t : F[X] := ∏ i in finRange n_wit, (x : F[X]) - c (r i)
 
 lemma nat_degree_t : (t r).natDegree = n_wit := by
   rw [t, Polynomial.nat_degree_prod]
-  have h1 : ∀ x : F, RingHom.toFun Polynomial.c x = coeFn Polynomial.c x
+  have h1 : ∀ x : F, RingHom.toFun c x = coeFn Polynomial.c x
   · intro
     rw [RingHom.to_fun_eq_coe]
   conv_lhs =>
@@ -173,21 +173,21 @@ def B (f : Vars → F) (x : F) : F :=
   ∑ i in (finRange (n_var - 1)), (B_h i) * (crs_n F i f x)
 
 def C (f : Vars → F) (x : F) : F  := 
-  C_α * crs_α f
+  C_α * crs_α F f
   +
-  C_β * crs_β f
+  C_β * crs_β F f
   + 
-  C_γ * crs_γ f
+  C_γ * crs_γ F f
   +
-  C_δ * crs_δ f
+  C_δ * crs_δ F f
   +
-  ∑ i in (finRange n_var), (C_x i) * (crs_powers_of_x i x)
+  ∑ i in (finRange n_var), (C_x i) * (crs_powers_of_x F i x)
   +
-  ∑ i in (finRange n_stmt), (C_l i) * (crs_l i f x)
+  ∑ i in (finRange n_stmt), (C_l i) * (crs_l F i f x)
   +
-  ∑ i in (finRange n_wit), (C_m i) * (crs_m i f x)
+  ∑ i in (finRange n_wit), (C_m i) * (crs_m F i f x)
   +
-  ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n i f x)
+  ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n F i f x)
 
 
 
@@ -245,15 +245,15 @@ def A'  : MvPolynomial Vars (Polynomial F) :=
 
 /- Polynomial form of B in the adversary's proof representation -/
 def B'  : MvPolynomial Vars (Polynomial F) := 
-  crs'_α * MvPolynomial.c (Polynomial.c (B_α))
+  crs'_α * MvPolynomial.c (c (B_α))
   +
-  crs'_β * MvPolynomial.c (Polynomial.c (B_β))
+  crs'_β * MvPolynomial.c (c (B_β))
   + 
-  crs'_γ * MvPolynomial.c (Polynomial.c (B_γ))
+  crs'_γ * MvPolynomial.c (c (B_γ))
   +
-  crs'_δ * MvPolynomial.c (Polynomial.c (B_δ))
+  crs'_δ * MvPolynomial.c (c (B_δ))
   +
-  Polynomial.x vars.γ * X vars.δ * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (B_x i) * Polynomial.x ^ (i : ℕ)))
+  (Polynomial.x Vars.γ) * (Polynomial.x Vars.δ) * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (B_x i) * Polynomial.x ^ (i : ℕ)))
   +
   ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (B_l i))
   +
@@ -271,7 +271,7 @@ def C'  : MvPolynomial Vars (Polynomial F) :=
   +
   crs'_δ * MvPolynomial.c (Polynomial.c (C_δ))
   +
-  MvPolynomial.x vars.γ * X vars.δ * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (C_x i) * Polynomial.x ^ (i : ℕ)))
+  (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ) * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (C_x i) * Polynomial.x ^ (i : ℕ)))
   +
   ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (C_l i))
   +
@@ -284,7 +284,7 @@ def  verified (a_stmt : Finₓ n_stmt → F ) : Prop :=
   A * B = crs_α * crs_β + ((∑ i in finRange n_stmt, a_stmt i * crs_l i ) * crs_γ + C * crs_δ : F)
 
 def verified' (a_stmt : Finₓ n_stmt → F ) : Prop := 
-  A' * B' = crs'_α * crs'_β + ((∑ i in finRange n_stmt, (Polynomial.c (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ : F)
+  A' * B' = crs'_α * crs'_β + ((∑ i in finRange n_stmt, (c (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ : F)
 
 lemma modification_equivalence (a_stmt : Finₓ n_stmt → F) : 
   verified a_stmt -> verified' a_stmt := by sorry
@@ -292,32 +292,29 @@ lemma modification_equivalence (a_stmt : Finₓ n_stmt → F) :
 open Finsupp
 
 lemma coeff0023 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
-  (∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (A_x i)) * Polynomial.x ^ (i : ℕ)) *
-        Polynomial.c B_γ +
-      (Polynomial.c A_γ) *
-        (∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (B_x i)) * Polynomial.x ^ (i : Nat)) =
+  (∑ (i : Finₓ n_var) in finRange n_var, (c (A_x i)) * Polynomial.x ^ (i : ℕ)) *
+        c B_γ + (c A_γ) *
+        (∑ (i : Finₓ n_var) in finRange n_var, (c (B_x i)) * x ^ (i : Nat)) =
     0 := by sorry
 
 lemma coeff0013 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
-  (∑ (x : Finₓ n_wit) in finRange n_wit, w_wit x * Polynomial.c (A_m x)) * Polynomial.c B_γ +
+  (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (c (A_m x))) * (c B_γ) +
           (∑ (x : Finₓ (n_var - 1)) in
                finRange (n_var - 1),
-               (Polynomial.x)^(x : ℕ) * (t * Polynomial.c (A_h x))) *
-            Polynomial.c B_γ +
-        Polynomial.c A_γ * (∑ (x : Finₓ n_wit) in finRange n_wit, w_wit x * Polynomial.c (B_m x)) +
-      Polynomial.c A_γ *
-        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (B_h x)) = 
+               ((Polynomial.x)^(x : ℕ)) * (t * c (A_h x))) *
+            c B_γ + (c A_γ) * (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (c (B_m x))) +
+      (c A_γ) * (∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * (t * c (B_h x))) = 
     0 := by sorry
 
 lemma coeff0012 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
-  (∑ (x : Finₓ n_wit) in finRange n_wit, w_wit x * (Polynomial.c (A_m x))) *
-            (∑ (i : Finₓ n_var) in finRange n_var, Polynomial.c (B_x i) * Polynomial.x ^ (i : ℕ)) +
+  (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (c (A_m x))) *
+            (∑ (i : Finₓ n_var) in finRange n_var, (c (B_x i)) * (Polynomial.x ^ (i : ℕ))) +
           (∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (A_h x))) *
-            ∑ (i : Finₓ n_var) in finRange n_var, Polynomial.c (B_x i) * (Polynomial.x ^ (i : ℕ)) +
-        (∑ (i : Finₓ n_var) in finRange n_var, Polynomial.c (A_x i) * (Polynomial.x ^ (i : ℕ))) *
-          ∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.x (B_m x) +
-      (∑ (i : Finₓ n_var) in finRange n_var, Polynomial.c (A_x i) * Polynomial.x ^ (i : ℕ)) *
-        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (B_h x)) =
+            ∑ (i : Finₓ n_var) in finRange n_var, (c (B_x i)) * (Polynomial.x ^ (i : ℕ)) +
+        (∑ (i : Finₓ n_var) in finRange n_var, (c (A_x i)) * (Polynomial.x ^ (i : ℕ))) *
+          ∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (Polynomial.x (B_m x)) +
+      (∑ (i : Finₓ n_var) in finRange n_var, (c (A_x i)) * Polynomial.x ^ (i : ℕ)) *
+        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * (t * Polynomial.c (B_h x)) =
     0 := by sorry
 
 lemma coeff0002 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
@@ -378,15 +375,14 @@ lemma coeff0022 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
       (Polynomial.c A_δ) * (∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (B_h x))) =
     ∑ (x : Finₓ n_stmt) in finRange n_stmt, Polynomial.c (a_stmt x) * (w_stmt x) +
       (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (C_m x) +
-         ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (C_h x)))
-:= by sorry
+         ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (C_h x))) := by sorry
 
 lemma coeff0024 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
  Polynomial.c A_γ = 0 ∨ Polynomial.c B_γ = 0 := by sorry
 
-lemma coeff0111 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0111 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) : Prop
   (∑ (x : Finₓ n_wit) in finRange n_wit, w_wit x * Polynomial.c (A_m x)) *
-              ∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (B_l x) +
+              (∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (B_l x) +
             (∑ (x : Finₓ (n_var - 1)) in
                  finRange (n_var - 1),
                  (Polynomial.x ^ (x : ℕ)) * (t * Polynomial.c (A_h x))) *
@@ -398,7 +394,24 @@ lemma coeff0111 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
            (∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (A_l x)) *
              ∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (B_m x)) +
       (∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (A_l x)) *
-        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (B_h x)) =
+        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * (t * Polynomial.c (B_h x)) = 0 := by sorry
+
+lemma coeff0033 (a_stmt :  Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+  (c A_δ) * c B_γ + (c A_γ) * c B_δ = c C_γ := by sorry
+
+lemma coeff0102 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+  (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit) x * c (A_m x)) *
+            ∑ (x : Finₓ n_wit) in finRange n_wit, (u_wit x) * c (B_m x) +
+          (∑ (x : Finₓ (n_var - 1)) in
+               finRange (n_var - 1),
+               Polynomial.x ^ (x : nat) * (t * c (A_h x))) *
+            ∑ (x : Finₓ n_wit) in finRange n_wit, (u_wit x) * c (B_m x) +
+        (∑ (x : Finₓ n_wit) in finRange n_wit, (u_wit x) * c (A_m x)) *
+          ∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * c (B_m x) +
+      (∑ (x : Finₓ n_wit) in finRange n_wit, (u_wit x) * c (A_m x)) *
+        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * (t * c (B_h x)) =
     0 := by sorry
+
+
 
 end Groth16
