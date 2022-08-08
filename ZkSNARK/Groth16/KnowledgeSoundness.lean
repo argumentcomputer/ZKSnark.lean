@@ -331,8 +331,12 @@ def C'  : MvPolynomial Vars (Polynomial F) :=
   ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (C_h i))
 
 
-def verified (a_stmt : Finₓ n_stmt → F ) : Prop := 
-  A * B = crs_α * crs_β + ((∑ i in finRange n_stmt, a_stmt i * crs_l i ) * crs_γ + C * crs_δ)
+#check A
+#check B
+
+def verified (f : Vars → F) (x : F) (a_stmt : Finₓ n_stmt → F ) : Prop := 
+  (A f x) * (B f x) = 
+    crs_α F f * crs_β F f + ((∑ i in finRange n_stmt, a_stmt i * crs_l i ) * crs_γ + C * crs_δ)
 
 def verified' (a_stmt : Finₓ n_stmt → F ) : Prop := 
   A' * B' = crs'_α * crs'_β + ((∑ i in finRange n_stmt, (Polynomial.c (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ)
@@ -340,7 +344,7 @@ def verified' (a_stmt : Finₓ n_stmt → F ) : Prop :=
 lemma modification_equivalence (a_stmt : Finₓ n_stmt → F) : 
   verified a_stmt -> verified' a_stmt := by sorry
 
--- open Finsupp
+open Finsupp
 
 lemma coeff0023 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
   (∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (A_x i)) * Polynomial.x ^ (i : ℕ)) *
@@ -400,8 +404,8 @@ lemma coeff0011 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
     0 := by sorry
 
 lemma coeff0020 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
-  (∑ (x : Finₓ n_stmt) in finRange n_stmt, w_stmt x * Polynomial.c (A_l x) = 0) ∨
-    (∑ (x : Finₓ n_stmt) in finRange n_stmt, w_stmt x * Polynomial.c (B_l x) = 0) :=
+  (∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (A_l x) = 0) ∨
+    (∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (B_l x) = 0) :=
   by sorry
 
 lemma coeff0021 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
@@ -451,7 +455,7 @@ lemma coeff0033 (a_stmt :  Finₓ n_stmt → F) (eqn : verified' a_stmt) :
   (Polynomial.c A_δ) * Polynomial.c B_γ + (Polynomial.c A_γ) * Polynomial.c B_δ = Polynomial.c C_γ := by sorry
 
 lemma coeff0102 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
-  (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit) x * Polynomial.c (A_m x)) *
+  (∑ (x : Finₓ n_wit) in finRange n_wit, ((w_wit) x) * (Polynomial.c (A_m x))) *
             ∑ (x : Finₓ n_wit) in finRange n_wit, (u_wit x) * Polynomial.c (B_m x) +
           (∑ (x : Finₓ (n_var - 1)) in
                finRange (n_var - 1),
