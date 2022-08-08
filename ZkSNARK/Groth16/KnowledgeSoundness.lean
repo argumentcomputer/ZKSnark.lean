@@ -136,6 +136,9 @@ variable { A_m B_m C_m : Finₓ n_wit → F }
 variable { A_h B_h C_h : Finₓ (n_var - 1) → F }
 
 #check crs_α
+#check crs_n
+#check crs_l
+#check crs_m
 
 /- Polynomial forms of the adversary's proof representation -/
 def A (f : Vars → F) (x : F) : F := 
@@ -149,11 +152,11 @@ def A (f : Vars → F) (x : F) : F :=
   +
   ∑ i in (finRange n_var), (A_x i) * (crs_powers_of_x F i x)
   +
-  ∑ i in (finRange n_stmt), (A_l i) * (crs_l F i f x)
+  ∑ i in (finRange n_stmt), (A_l i) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f x)
   +
-  ∑ i in (finRange n_wit), (A_m i) * (crs_m F i f x)
+  ∑ i in (finRange n_wit), (A_m i) * (@crs_m F field n_wit u_wit v_wit w_wit i f x)
   +
-  ∑ i in (finRange (n_var - 1)), (A_h i) * (crs_n F i f x)
+  ∑ i in (finRange (n_var - 1)), (A_h i) * (crs_n F r i f x)
 
 def B (f : Vars → F) (x : F) : F := 
   B_α * crs_α F f
@@ -166,11 +169,11 @@ def B (f : Vars → F) (x : F) : F :=
   +
   ∑ i in (finRange n_var), (B_x i) * (crs_powers_of_x F i x)
   +
-  ∑ i in (finRange n_stmt), (B_l i) * (crs_l F i f x)
+  ∑ i in (finRange n_stmt), (B_l i) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f x)
   +
-  ∑ i in (finRange n_wit), (B_m i) * (crs_m F i f x)
+  ∑ i in (finRange n_wit), (B_m i) * (@crs_m F field n_wit u_wit v_wit w_wit i f x)
   +
-  ∑ i in (finRange (n_var - 1)), (B_h i) * (crs_n F i f x)
+  ∑ i in (finRange (n_var - 1)), (B_h i) * (crs_n F r i f x)
 
 def C (f : Vars → F) (x : F) : F  := 
   C_α * crs_α F f
@@ -183,11 +186,11 @@ def C (f : Vars → F) (x : F) : F  :=
   +
   ∑ i in (finRange n_var), (C_x i) * (crs_powers_of_x F i x)
   +
-  ∑ i in (finRange n_stmt), (C_l i) * (crs_l F i f x)
+  ∑ i in (finRange n_stmt), (C_l i) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f x)
   +
-  ∑ i in (finRange n_wit), (C_m i) * (crs_m F i f x)
+  ∑ i in (finRange n_wit), (C_m i) * (@crs_m F field n_wit u_wit v_wit w_wit i f x)
   +
-  ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n F i f x)
+  ∑ i in (finRange (n_var - 1)), (C_h i) * (crs_n F r i f x)
 
 
 
