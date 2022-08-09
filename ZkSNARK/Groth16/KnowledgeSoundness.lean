@@ -304,55 +304,86 @@ def B'  : MvPolynomial Vars (Polynomial F) :=
   (@crs'_δ F field) * MvPolynomial.c (Polynomial.c B_δ)
   +
   ((pol_γ * pol_δ) * 
-    MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (B_x i) * Polynomial.x ^ (i : ℕ))))
+    MvPolynomial.c (∑ i in (finRange n_var), ((Polynomial.c (B_x i)) * (Polynomial.x ^ (i : ℕ)))))
   +
-  ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (B_l i))
+  ∑ i in (finRange n_stmt), 
+    (crs'_l i) * MvPolynomial.c (Polynomial.c (B_l i))
   +
-  ∑ i in (finRange n_wit), (crs'_m i) * MvPolynomial.c (Polynomial.c (B_m i))
+  ∑ i in (finRange n_wit),
+    (@crs'_m F field n_wit u_wit v_wit w_wit i) * MvPolynomial.c (Polynomial.c (B_m i))
   +
-  ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (B_h i))
+  ∑ i in (finRange (n_var - 1)), 
+    (@crs'_t F field n_wit n_var r i) * MvPolynomial.c (Polynomial.c (B_h i))
 
 /- Polynomial form of C in the adversary's proof representation -/
-def C'  : MvPolynomial Vars (Polynomial F) := 
-  crs'_α * MvPolynomial.c (Polynomial.c C_α)
+def C'  : MvPolynomial Vars (Polynomial F) :=
+  let pol_α := (MvPolynomial.c (Polynomial.c C_α) : MvPolynomial Vars (Polynomial F))
+  let pol_β := (MvPolynomial.c (Polynomial.c C_β) : MvPolynomial Vars (Polynomial F))
+  let pol_γ := (MvPolynomial.c (Polynomial.c C_γ) : MvPolynomial Vars (Polynomial F))
+  let pol_δ := (MvPolynomial.c (Polynomial.c C_δ) : MvPolynomial Vars (Polynomial F))
+  let pol₁ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
+  let pol₂ := (MvPolynomial.x Vars.δ : MvPolynomial Vars (Polynomial F))
+  (@crs'_α F field) * pol_α
   + -- TODO
-  crs'_β * MvPolynomial.c (Polynomial.c C_β)
+  (@crs'_β F field) * pol_β
   + 
-  crs'_γ * MvPolynomial.c (Polynomial.c (C_γ))
+  (@crs'_γ F field) * pol_γ
   +
-  crs'_δ * MvPolynomial.c (Polynomial.c (C_δ))
+  (@crs'_δ F field) * pol_δ
   +
-  (MvPolynomial.x Vars.γ) * (MvPolynomial.x Vars.δ) * MvPolynomial.c (∑ i in (finRange n_var), (Polynomial.c (C_x i) * Polynomial.x ^ (i : ℕ)))
+  ((pol₁ * pol₂) * 
+    MvPolynomial.c (∑ i in (finRange n_var), ((Polynomial.c (C_x i)) * Polynomial.x ^ (i : ℕ))))
   +
-  ∑ i in (finRange n_stmt), (crs'_l i) * MvPolynomial.c (Polynomial.c (C_l i))
+  ∑ i in (finRange n_stmt),
+    (@crs'_l F field n_stmt u_stmt v_stmt w_stmt i) * MvPolynomial.c (Polynomial.c (C_l i))
   +
-  ∑ i in (finRange n_wit), (crs'_m i) * MvPolynomial.c (Polynomial.c (C_m i))
+  ∑ i in (finRange n_wit), 
+    (crs'_m i) * MvPolynomial.c (Polynomial.c (C_m i))
   +
-  ∑ i in (finRange (n_var - 1)), (crs'_t i) * MvPolynomial.c (Polynomial.c (C_h i))
+  ∑ i in (finRange (n_var - 1)),
+    (@crs'_t F field n_wit n_var r i) * MvPolynomial.c (Polynomial.c (C_h i))
 
+def verified (f : Vars → F) (x : F) (a_stmt : Finₓ n_stmt → F ) : Prop :=
+  let A_inst := 
+    @A F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r A_α A_β A_γ A_δ A_x A_l A_m A_h f x
+  let B_inst :=
+    @B F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r B_α B_β B_γ B_δ B_x B_l B_m B_h f x
+  let C_inst :=
+    @C F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r C_α C_β C_γ C_δ C_x C_l C_m C_h f x
+  let crs_α_inst := @crs_α F f
+  let crs_β_inst := @crs_β F f
+  A_inst * B_inst = 
+    (crs_α_inst * crs_β_inst) + 
+    ((∑ i in finRange n_stmt, (a_stmt i) * @crs_l F field n_stmt u_stmt v_stmt w_stmt i f x) * (crs_γ F f) + C_inst * (crs_δ F f))
 
-#check A
-#check B
+def verified' (a_stmt : Finₓ n_stmt → F ) : Prop :=
+  let A'_inst := (@A' F field A_α A_β A_γ A_δ : MvPolynomial Vars (Polynomial F))
+  let B'_inst := (@B' F field B_α : MvPolynomial Vars (Polynomial F))
+  let C'_inst := (@C' F field C_α C_β C_γ C_δ : MvPolynomial Vars (Polynomial F))
+  let crs'_α_inst := (@crs'_α F field : MvPolynomial Vars (Polynomial F))
+  let crs'_β_inst := (@crs'_β F field : MvPolynomial Vars (Polynomial F))
+  A'_inst * B'_inst = (crs'_α_inst * crs'_β_inst) + 
+    ((∑ i in finRange n_stmt, (MvPolynomial.c (Polynomial.c (a_stmt i))) * crs'_l i ) * (@crs'_γ F field) + C'_inst * (@crs'_δ F field))
 
-def verified (f : Vars → F) (x : F) (a_stmt : Finₓ n_stmt → F ) : Prop := 
-  (A f x) * (B f x) = 
-    crs_α F f * crs_β F f + ((∑ i in finRange n_stmt, a_stmt i * crs_l i ) * crs_γ + C * crs_δ)
+#check @verified'
 
-def verified' (a_stmt : Finₓ n_stmt → F ) : Prop := 
-  A' * B' = crs'_α * crs'_β + ((∑ i in finRange n_stmt, (Polynomial.c (a_stmt i)) * crs'_l i ) * crs'_γ + C' * crs'_δ)
-
-lemma modification_equivalence (a_stmt : Finₓ n_stmt → F) : 
-  verified a_stmt -> verified' a_stmt := by sorry
+lemma modification_equivalence (f : Vars → F) (x : F) (a_stmt : Finₓ n_stmt → F) :
+  let verified_inst :=
+    @verified F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r A_α A_β A_γ A_δ B_α B_β B_γ B_δ C_α C_β C_γ C_δ A_x B_x C_x A_l B_l C_l A_m B_m C_m A_h B_h C_h f x a_stmt
+  let verified'_inst := @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt
+  verified_inst → verified'_inst := by sorry
 
 open Finsupp
 
-lemma coeff0023 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0023 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (A_x i)) * Polynomial.x ^ (i : ℕ)) *
         Polynomial.c B_γ + (Polynomial.c A_γ) *
         (∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (B_x i)) * x ^ (i : Nat)) =
     0 := by sorry
 
-lemma coeff0013 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0013 (a_stmt : Finₓ n_stmt → F)
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (Polynomial.c (A_m x))) * (Polynomial.c B_γ) +
           (∑ (x : Finₓ (n_var - 1)) in
                finRange (n_var - 1),
@@ -361,7 +392,8 @@ lemma coeff0013 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
       (Polynomial.c A_γ) * (∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * ((t r) * Polynomial.c (B_h x))) = 
     0 := by sorry
 
-lemma coeff0012 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0012 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (Polynomial.c (A_m x))) *
             (∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (B_x i)) * (Polynomial.x ^ (i : ℕ))) +
           (∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * ((t r) * Polynomial.c (A_h x))) *
@@ -372,7 +404,8 @@ lemma coeff0012 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
         ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * ((t r) * Polynomial.c (B_h x)) =
     0 := by sorry
 
-lemma coeff0002 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0002 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   ((∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (A_m x)) *
           ∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (B_m x) +
         (∑ (x : Finₓ (n_var - 1)) in
@@ -390,7 +423,8 @@ lemma coeff0002 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
              finRange (n_var - 1),
              (Polynomial.x ^ (x : ℕ)) * ((t r) * Polynomial.c (B_h x)))) = 0 := by sorry
 
-lemma coeff0011 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0011 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (Polynomial.c (A_m x))) *
             ∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (B_l x) +
           (∑ (x : Finₓ (n_var - 1)) in
@@ -403,19 +437,22 @@ lemma coeff0011 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
         ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * ((t r) * Polynomial.c (B_h x)) =
     0 := by sorry
 
-lemma coeff0020 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0020 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (A_l x) = 0) ∨
     (∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (B_l x) = 0) :=
   by sorry
 
-lemma coeff0021 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0021 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (A_l x)) *
         ∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (B_x i)) * Polynomial.x ^ (i : ℕ) +
       (∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.c (A_x i)) * Polynomial.x ^ (i : ℕ)) *
         ∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (B_l x) =
     0 := by sorry
 
-lemma coeff0022 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0022 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (x : Finₓ n_stmt) in finRange n_stmt, (w_stmt x) * Polynomial.c (A_l x)) * Polynomial.c B_γ +
               ((∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (A_m x)) *
                    Polynomial.c B_δ +
@@ -432,10 +469,12 @@ lemma coeff0022 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
       (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * Polynomial.c (C_m x) +
          ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * ((t r) * Polynomial.c (C_h x))) := by sorry
 
-lemma coeff0024 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0024 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
  Polynomial.c A_γ = 0 ∨ Polynomial.c B_γ = 0 := by sorry
 
-lemma coeff0111 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) : Prop
+lemma coeff0111 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) : Prop
   (∑ (x : Finₓ n_wit) in finRange n_wit, w_wit x * Polynomial.c (A_m x)) *
               (∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (B_l x) +
             (∑ (x : Finₓ (n_var - 1)) in
@@ -451,11 +490,13 @@ lemma coeff0111 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) : Prop
       (∑ (x : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (A_l x)) *
         ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * ((t r) * Polynomial.c (B_h x)) = 0 := by sorry
 
-lemma coeff0033 (a_stmt :  Finₓ n_stmt → F) (eqn : verified' a_stmt) :
+lemma coeff0033 (a_stmt :  Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (Polynomial.c A_δ) * Polynomial.c B_γ + (Polynomial.c A_γ) * Polynomial.c B_δ = Polynomial.c C_γ := by sorry
 
-lemma coeff0102 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
-  (∑ (x : Finₓ n_wit) in finRange n_wit, ((w_wit) x) * (Polynomial.c (A_m x))) *
+lemma coeff0102 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
+  (∑ (x : Finₓ n_wit) in finRange n_wit, (w_wit x) * (Polynomial.c (A_m x))) *
             ∑ (x : Finₓ n_wit) in finRange n_wit, (u_wit x) * Polynomial.c (B_m x) +
           (∑ (x : Finₓ (n_var - 1)) in
                finRange (n_var - 1),
@@ -467,6 +508,24 @@ lemma coeff0102 (a_stmt : Finₓ n_stmt → F) (eqn : verified' a_stmt) :
         ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), (Polynomial.x ^ (x : ℕ)) * ((t r) * Polynomial.c (B_h x)) =
     0 := by sorry
 
+lemma coeff0042 (a_stmt : Finₓ n_stmt → F)
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
+ (Polynomial.c A_δ) * Polynomial.c B_δ = Polynomial.c C_δ := by sorry
 
+lemma coeff0112 (a_stmt : Finₓ n_stmt → F) 
+                (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
+  (∑ (x : Finₓ n_wit) in finRange n_wit, w_wit x * Polynomial.c (A_m x)) * Polynomial.c B_β +
+            (∑ (x : Finₓ (n_var - 1)) in
+                 finRange (n_var - 1),
+                 Polynomial.x ^ (x : ℕ) * ((t r) * Polynomial.c (A_h x))) *
+              Polynomial.c B_β +
+          (∑ (x : Finₓ n_wit) in finRange n_wit, u_wit x * Polynomial.c (A_m x)) *
+            ∑ (i : Finₓ n_var) in finRange n_var, Polynomial.c (B_x i) * Polynomial.x ^ (i : ℕ) +
+        ((∑ (i : Finₓ n_var) in finRange n_var, Polynomial.c (A_x i) * Polynomial.x ^ (i : ℕ)) *
+             ∑ (x : Finₓ n_wit) in finRange n_wit, u_wit x * Polynomial.c (B_m x) +
+           Polynomial.c A_β * ∑ (x : Finₓ n_wit) in finRange n_wit, w_wit x * Polynomial.c (B_m x)) +
+      Polynomial.c A_β *
+        ∑ (x : Finₓ (n_var - 1)) in finRange (n_var - 1), Polynomial.x ^ (x : ℕ) * ((t r) * Polynomial.c (B_h x)) =
+    0 := by sorry
 
 end Groth16
