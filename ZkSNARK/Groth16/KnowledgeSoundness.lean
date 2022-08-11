@@ -931,7 +931,7 @@ lemma simplifier2 (i : Finₓ n_stmt) (a_stmt : Finₓ n_stmt → F )
 
 theorem soundness (a_stmt : Finₓ n_stmt → F ) (f : Vars → F) (x : F) :
   let verified_inst := @verified F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r A_α A_β A_γ A_δ B_α B_β B_γ B_δ C_α C_β C_γ C_δ A_x B_x C_x A_l B_l C_l A_m B_m C_m A_h B_h C_h f x
-  let satisfying := @satisfying F field n_stmt n_wit u_stmt
+  let satisfying := @satisfying F field n_stmt n_wit u_stmt u_wit v_stmt v_wit w_stmt w_wit r
   verified_inst a_stmt
-  -> (satisfying a_stmt C_m) := by sorry
+  → (satisfying a_stmt C_m) := by sorry
 end Groth16
