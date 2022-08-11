@@ -615,7 +615,7 @@ lemma coeff0211 (a_stmt : Finₓ n_stmt → F)
 lemma coeff0220 (a_stmt : Finₓ n_stmt → F) 
                 (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
   (∑ (i : Finₓ n_stmt) in finRange n_stmt, (u_stmt i) * Polynomial.c (A_l i)) = 0 ∨
-    (∑ (i : Finₓ n_stmt) in finRange n_stmt, (u_stmt x) * Polynomial.c (B_l i)) = 0 := by sorry
+    (∑ (i : Finₓ n_stmt) in finRange n_stmt, (u_stmt i) * Polynomial.c (B_l i)) = 0 := by sorry
 
 lemma coeff0221 (a_stmt : Finₓ n_stmt → F) 
                 (eqn : @verified' F field n_stmt A_α A_β A_γ A_δ B_α C_α C_β C_γ C_δ a_stmt) :
@@ -833,7 +833,9 @@ lemma coeff0022reformat (a_stmt : Finₓ n_stmt → F) :
            finRange (n_var - 1),
            (Polynomial.x ^ (i : ℕ)) * ((t r) * Polynomial.c (C_h i))) := by sorry
 
--- @[atom]
+register_simp_attr atom "Attribute for defintions of atoms in the proof"
+
+-- @[atom] 
 def p_A_α := Polynomial.c A_α
 -- @[atom]
 def p_A_β := Polynomial.c A_β
@@ -882,7 +884,7 @@ def p_u_wit_A_m := ∑ (i : Finₓ n_wit) in finRange n_wit, (u_wit i) * Polynom
 -- @[atom]
 def p_v_wit_A_m := ∑ (i : Finₓ n_wit) in finRange n_wit, (v_wit i) * Polynomial.c (A_m i)
 -- @[atom]
-def p_w_wit_A_m := ∑ (i : Finₓ n_wit) in finRange n_wit, (w_wit i * Polynomial.c (A_m i)
+def p_w_wit_A_m := ∑ (i : Finₓ n_wit) in finRange n_wit, (w_wit i) * Polynomial.c (A_m i)
 -- @[atom]
 def p_u_wit_B_m := ∑ (i : Finₓ n_wit) in finRange n_wit, (u_wit i) * Polynomial.c (B_m i)
 -- @[atom]
@@ -916,20 +918,20 @@ def p_C_x := ∑ (i : Finₓ n_var) in finRange n_var, (Polynomial.x ^ (i : ℕ)
 
 lemma simplifier1 (i : Finₓ n_stmt) (a_stmt : Finₓ n_stmt → F ) 
   : (Polynomial.c (a_stmt i)) * (u_stmt i) = (u_stmt i) * (Polynomial.c (a_stmt i))
-  := by sorry
-  -- by ring
+  := sorry
 
 lemma simplifier2 (i : Finₓ n_stmt) (a_stmt : Finₓ n_stmt → F ) 
   : (Polynomial.c (a_stmt i)) * v_stmt i = (v_stmt i) * Polynomial.c (a_stmt i)
-  := by sorry
-  -- by ring
+  := sorry
 
--- lemma polynomial.mul_mod_by_monic (t p : Polynomial F) (mt : Polynomial.Monic (t r)) : ((t r) * p) %ₘ (t r) = 0 := by sorry
---  rw polynomial.dvd_iff_mod_by_monic_eq_zero,
---  apply dvd_mul_right,
---  exact mt,
+lemma polynomial.mul_mod_by_monic (t p : F[X]) (mt : Polynomial.Monic t) : 
+  let prod := (t * p : F[X])
+  prod %ₘ t = 0 := by sorry
+-- rw [Polynomial.dvd_iff_mod_by_monic_eq_zero]
+--  apply dvd_mul_right
+--  exact mt
 
-theorem soundness (a_stmt : Finₓ n_stmt → F ) (f : Vars → F) (x : F) :
+theorem soundness (a_stmt : Finₓ n_stmt → F) (f : Vars → F) (x : F) :
   let verified_inst := @verified F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r A_α A_β A_γ A_δ B_α B_β B_γ B_δ C_α C_β C_γ C_δ A_x B_x C_x A_l B_l C_l A_m B_m C_m A_h B_h C_h f x
   let satisfying := @satisfying F field n_stmt n_wit u_stmt u_wit v_stmt v_wit w_stmt w_wit r
   verified_inst a_stmt
