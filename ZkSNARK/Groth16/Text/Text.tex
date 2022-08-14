@@ -1,0 +1,151 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath} % Required for some math elements
+\usepackage{amsfonts}
+\usepackage{amsthm} % for proof pkg
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{parskip} % Remove paragraph indentation
+\usepackage[margin=1in]{geometry}
+\usepackage[inline]{enumitem}
+\usepackage{mathtools}
+\usepackage{multirow}
+\usepackage{listings}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{theorem}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{fact}{Fact}[section]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\anote}[1]{{\color{magenta} [AM: #1]}}
+\newcommand{\Gen}{\mathsf{Gen}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\pk}{\mathit{pk}}
+\newcommand{\sk}{\mathit{sk}}
+\newcommand{\bbZ}{\mathbb{Z}}
+\newcommand{\bit}{\{0,1\}}
+\newcommand{\la}{\leftarrow}
+\newcommand{\ninN}{{n \in \mathbf{N}}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\RF}{\mathsf{RF}}
+\newcommand{\Half}{\frac{1}{2}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Adv}{\mathcal{A}}
+\newcommand{\Ext}{\mathcal{E}}
+
+\newcommand{\ignore}[1]{{}}
+
+\newcommand{\samples}{\overset{\$}{\leftarrow}}
+\newcommand{\hash}{\ensuremath{\mathcal{H}}}
+\newcommand{\doubleplus}{+\kern-1.3ex+\kern0.8ex}
+\newcommand{\mdoubleplus}{\ensuremath{\mathbin{+\mkern-10mu+}}}
+
+\title{Formalising Groth16 in Lean 4}
+\author{Daniel Rogozin, for Yatima Inc}
+\date{\today\footnote{This document may be updated frequently.}}
+
+\begin{document}
+
+\maketitle
+
+In this document, we describe the Groth16 soundness formalisation in Lean 4.
+The text contains the protocol description as well as some comments to its implementation.
+
+\section{Preliminary definitions}
+
+We have a fixed finite field $F$, and $F[X]$ stands for the ring of polynomials over $F$ as usual. The corresponding listing:
+
+\begin{lstlisting}
+variable {F : Type u} [field : Field F]
+\end{lstlisting}
+
+In Groth16, we have random values $\alpha, \beta, \gamma, \delta \in F$ that we introduce separately as an inductive data type:
+\begin{lstlisting}
+inductive Vars : Type
+  | alpha : Vars
+  | beta : Vars
+  | gamma : Vars
+  | delta : Vars
+\end{lstlisting}
+
+We also introduce the following parameters:
+
+\begin{itemize}
+\item $n_{stmt} \in \mathbb{N}$ --- the statement size;
+\item $n_{wit} \in \mathbb{N}$ --- the witness size;
+\item $n_{var} \in \mathbb{N}$ --- the number of variables.
+\end{itemize}
+
+In Lean 4, we introduce those parameters as variables in the following way:
+
+\begin{lstlisting}
+variable {n_stmt n_wit n_var : Nat}
+\end{lstlisting}
+
+We also define several finite collections of polynomials:
+
+\begin{itemize}
+\item $u_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
+\item $u_{wit} = \{ f_{i} \in F[X] \: | \: i < n_{wit} \}$
+\item $v_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
+\item $v_{wit} = \{ f_{i} \in F[X] \: | \: i < n_{wit} \}$
+\item $w_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
+\item $w_{wit} = \{ f_{i} \in F[X] \: | \: i < n_{wit} \}$
+\end{itemize}
+
+We introduce those collections in Lean 4 as variables as well:
+
+\begin{lstlisting}
+variable {u_stmt : Fin n_stmt -> F[X]}
+variable {u_wit : Fin n_wit -> F[X]}
+variable {v_stmt : Fin n_stmt -> F[X]}
+variable {v_wit : Fin n_wit -> F[X]}
+variable {w_stmt : Fin n_stmt -> F[X]}
+variable {w_wit : Fin n_wit -> F[X]}
+\end{lstlisting}
+
+Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised by elements of $n_{wit}$. Define a polynomial $t \in F[X]$ as:
+\begin{center}
+$t = \prod \limits_{i \in n_{wit}} (x - r_i)$.
+\end{center}
+
+Crearly, these $r_i$'s are roots of $t$. The definition in Lean 4:
+\begin{lstlisting}
+variable (r : Fin n_wit -> F)
+
+def t : F[X] := Pi i in finRange n_wit,
+  (x : F[X]) - Polynomial.c (r i)
+\end{lstlisting}
+
+\section{Properties of $t$}
+
+The polynomial $t$ has the following properties:
+
+\begin{lemma}
+$ $
+
+\begin{enumerate}
+\item $deg(t) = n_{wit}$;
+\item $t$ is monic, that is, its leading coefficient is equal to $0$;
+\item If $n_{wit} > 0$, then $deg(t) > 0$.
+\end{enumerate}
+\end{lemma}
+
+We formalise these statements as follows (but we drop proofs):
+\begin{lstlisting}
+lemma nat_degree_t : (t r).natDegree = n_wit
+lemma monic_t : Polynomial.Monic (t r)
+lemma degree_t_pos (hm : 0 < n_wit) : 0 < (t r).degree
+\end{lstlisting}
+
+\end{document}
