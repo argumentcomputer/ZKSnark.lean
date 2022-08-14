@@ -148,4 +148,102 @@ lemma monic_t : Polynomial.Monic (t r)
 lemma degree_t_pos (hm : 0 < n_wit) : 0 < (t r).degree
 \end{lstlisting}
 
+Let $\{ a_{{wit}_i} \: | \: i < n_{wit}\}$ and $\{ a_{{stmt}_i} \: | \: i < n_{stmt} \}$ be collections of elements of $F$. A stamenent witness polynomial pair is a pair of single variable polynomials $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$
+such that $F_{{wit}_{sv}}, F_{{stmt}_{sv}} \in F[X]$ and
+\begin{itemize}
+\item $F_{{wit}_{sv}} = \sum \limits_{i < n_{wit}} a_{{wit}_i} u_{{wit}_{i}}(x)$
+\item $F_{{stmt}_{sv}} = \sum \limits_{i < n_{stmt}} a_{{stmt}_i} u_{{stmt}_{i}}(x)$
+\end{itemize}
+
+Their Lean 4 counterparts:
+\begin{lstlisting}
+def V_wit_sv (a_wit : Fin n_wit -> F) : Polynomial F :=
+  \sum i in finRange n_wit, a_wit i \bullet u_wit i
+
+def V_stmt_sv (a_stmt : Fin n_stmt -> F) : Polynomial F :=
+  \sum i in finRange n_stmt, a_stmt i \bullet u_stmt i
+\end{lstlisting}
+
+
+Define a polynomial $sat$ as:
+\begin{multline}
+sat = (V_{{stmt}_{sv}} + V_wit_sv) \cdot \\ \cdot ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
+\end{multline}
+A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies the square span program, if the remainder of division of $sat$ by $t$ is equal to $0$.
+
+The Lean 4 analogue of the property defined above:
+\begin{lstlisting}
+def satisfying (a_stmt : Fin n_stmt -> F) (a_wit : Fin n_wit -> F) :=
+  (((\sum i in finRange n_stmt, a_stmt i \bullet u_stmt i)
+    + \sum i in finRange n_wit, a_wit i \bullet u_wit i)
+  *
+  ((\sum i in finRange n_stmt, a_stmt i \bullet v_stmt i)
+    + \sum i in finRange n_wit, a_wit i \bullet v_wit i)
+  -
+  ((\sum i in finRange n_stmt, a_stmt i \bullet w_stmt i)
+    + \sum i in finRange n_wit, a_wit i \bullet w_wit i) : F[X]) %_m (t r) = 0
+\end{lstlisting}
+
+\section{Common reference string elements}
+
+Assume we interpreted $\alpha$, $\beta$, $\gamma$, and $\delta$ somehow with elements of $F$, say $crs_{\alpha}$, $crs_{\beta}$, $crs_{\gamma}$, and $crs_{\delta}$, that is, in Lean 4:
+
+\begin{lstlisting}
+def crs_alpha  (f : Vars -> F) : F := f Vars.alpha
+
+def crs_beta (f : Vars -> F) : F := f Vars.beta
+
+def crs_gamma (f : Vars -> F) : F := f Vars.gamma
+
+def crs_delta (f : Vars -> F) : F := f Vars.delta
+\end{lstlisting}
+
+For simplicity, we write this interpretation as a function $f :  \{ \alpha,\beta,\gamma, \delta \} \to F$ defined by equations:
+\begin{center}
+$f(a) = crs_{a}$ for $a \in \{ \alpha,\beta,\gamma, \delta \}$.
+\end{center}
+
+In addition to those four elements of $F$ we have a collection of degrees for $a \in F$/
+\begin{center}
+$\{ a^i \: | \: i < n_{var} \}$
+\end{center}
+formalised as:
+\begin{lstlisting}
+def crs_powers_of_x (i : Fin n_var) (a : F) : F := (a)^(i : Nat)
+\end{lstlisting}
+
+We also introduce collections $crs_l$, $crs_m$, and $crs_n$ for $a \in F$:
+\begin{multline}
+crs_l = \frac{((f(\beta) / f(\gamma)) \cdot (u_{{stmt}_i})(a)) + ((f(\alpha) / f(\gamma)) \cdot (v_{{stmt}_i})(a)) + w_{{stmt}_i}(a)}{f(\gamma)} \\ \text{for $i < n_{stmt}$}
+\end{multline}
+
+\begin{multline}
+crs_l = \frac{((f(\beta) / f(\delta)) \cdot (u_{{wit}_i})(a)) + ((f(\alpha) / f(\delta)) \cdot (v_{{wit}_i})(a)) + w_{{wit}_i}(a)}{f(\delta)} \\ \text{for $i < n_{wit}$}
+\end{multline}
+
+\begin{center}
+$crs_l = \frac{a^i \cdot t(a)}{f(\delta)}, \text{for $i < n_{var}$}$
+\end{center}
+
+Their Lean 4 version:
+
+\begin{lstlisting}
+def crs_l (i : Fin n_stmt) (f : Vars -> F) (a : F) : F :=
+  ((f Vars.beta / f Vars.gamma) * (u_stmt i).eval (a)
+  +
+  (f Vars.alpha / f Vars.gamma) * (v_stmt i).eval (a)
+  +
+  (w_stmt i).eval (a)) / f Vars.gamma.
+
+def crs_m (i : Fin n_wit) (f : Vars -> F) (a : F) : F :=
+  ((f Vars.beta / f Vars.delta) * (u_wit i).eval (a)
+  +
+  (f Vars.alpha / f Vars.delta) * (v_wit i).eval (a)
+  +
+  (w_wit i).eval (a)) / f Vars.delta
+
+def crs_n (i : Fin (n_var - 1)) (f : Vars -> F) (a : F) : F :=
+  ((a)^(i : Nat)) * (t r).eval a / f Vars.delta
+\end{lstlisting}
+
 \end{document}

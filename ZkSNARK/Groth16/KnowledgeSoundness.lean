@@ -78,7 +78,8 @@ lemma degree_t_pos (hm : 0 < n_wit) : 0 < (t r).degree := by
 def V_wit_sv (a_wit : Finₓ n_wit → F) : Polynomial F := 
   ∑ i in finRange n_wit, a_wit i • u_wit i
 
-/- The statement polynomial that the verifier computes from the statement bits, as a single variable polynomial -/
+/- The statement polynomial that the verifier computes from the statement bits, 
+as a single variable polynomial -/
 def V_stmt_sv (a_stmt : Finₓ n_stmt → F) : Polynomial F := 
   ∑ i in finRange n_stmt, a_stmt i • u_stmt i
 
@@ -96,7 +97,7 @@ def satisfying (a_stmt : Finₓ n_stmt → F) (a_wit : Finₓ n_wit → F) :=
 /- The coefficients of the CRS elements in the algebraic adversary's representation -/
 register_simp_attr crs "Attribute for defintions of CRS elements"
 
-/- The crs elements 
+/- The CRS elements 
 These funtions are actually multivariate Laurent polynomials of the toxic waste samples, 
 but we represent them here as functions on assignments of the variables to values.
 -/
@@ -109,24 +110,24 @@ def crs_γ (f : Vars → F) : F := f Vars.γ
 
 def crs_δ (f : Vars → F) : F := f Vars.δ
 
-def crs_powers_of_x (i : Finₓ n_var) (x : F) : F := (x)^(i : ℕ)
+def crs_powers_of_x (i : Finₓ n_var) (a : F) : F := (a)^(i : ℕ)
 
-def crs_l (i : Finₓ n_stmt) (f : Vars → F) (x : F) : F := 
-  ((f Vars.β / f Vars.γ) * (u_stmt i).eval (x)
+def crs_l (i : Finₓ n_stmt) (f : Vars → F) (a : F) : F := 
+  ((f Vars.β / f Vars.γ) * (u_stmt i).eval (a)
   +
-  (f Vars.α / f Vars.γ) * (v_stmt i).eval (x)
+  (f Vars.α / f Vars.γ) * (v_stmt i).eval (a)
   +
-  (w_stmt i).eval (x)) / f Vars.γ
+  (w_stmt i).eval (a)) / f Vars.γ
 
-def crs_m (i : Finₓ n_wit) (f : Vars → F) (x : F) : F := 
-  ((f Vars.β / f Vars.δ) * (u_wit i).eval (x)
+def crs_m (i : Finₓ n_wit) (f : Vars → F) (a : F) : F := 
+  ((f Vars.β / f Vars.δ) * (u_wit i).eval (a)
   +
-  (f Vars.α / f Vars.δ) * (v_wit i).eval (x)
+  (f Vars.α / f Vars.δ) * (v_wit i).eval (a)
   +
-  (w_wit i).eval (x)) / f Vars.δ
+  (w_wit i).eval (a)) / f Vars.δ
 
-def crs_n (i : Finₓ (n_var - 1)) (f : Vars → F) (x : F) : F := 
-  ((x)^(i : ℕ)) * (t r).eval x / f Vars.δ
+def crs_n (i : Finₓ (n_var - 1)) (f : Vars → F) (a : F) : F := 
+  ((a)^(i : ℕ)) * (t r).eval a / f Vars.δ
 
 variable {F}
 variable { A_α A_β A_γ A_δ B_α B_β B_γ B_δ C_α C_β C_γ C_δ  : F }
