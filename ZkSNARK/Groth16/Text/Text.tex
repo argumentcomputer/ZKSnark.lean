@@ -58,7 +58,7 @@
 
 \maketitle
 
-\section{Intro}
+\section{Introduction}
 
 In this document, we describe the Groth16 soundness formalisation in Lean 4.
 The text contains the protocol description as well as some comments to its implementation.
@@ -77,9 +77,35 @@ Protocols of this kind have the core characteristics such as:
 \item \emph{Zero-knowledge}, i.e., the only thing is needed is the truth of a statement.
 \end{itemize}
 
+Generally, non-interactive zero-knowledge proofs relies on the \emph{common reference string} model, that is, a model where a public string is generated in a trusted way and all parties have an access to it.
+
+Let us describe the commond scheme that non-interactive zero-knowledge protocols obey. Before that, we need some bits of terminology. Let $p \in F[X]$ be a polynomial, a prover is going to convince that he/she knows $p$. In turn, knowing $p$ means that a prover knows some of its roots. As it is well-known, any polynomial might be decomposed as follows whenever it has roots (since fields we consider are finite and they are not algebraically closed):
+\begin{equation}
+p(x) = \prod_{i < deg(p)} (x - a_i)
+\end{equation}
+for some $a_i$, $i < deg(p)$.
+
+Assume that a prover has some values $\{ r_i \: | \: i < n\}$ where each $r_i \in F$ for some $n \leq deg(p)$. A prover wants to convince a verifier that $p(r_i)$ for each $a_i$ from that set.
+
+If there $a_i$'s are really roots of $p$, then the polynomial $p$ can be rewritten as:
+\begin{equation}
+p(x) = (\prod_{i < n} (x - r_i)) \cdot h(x)
+\end{equation}
+
+Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$ that we call further a \emph{target polynomial}.
+
+for some $h \in F[X]$.
+\begin{itemize}
+\item
+\item
+\item
+\item
+\end{itemize}
+
+
 \section{Preliminary definitions}
 
-We have a fixed finite field $F$, and $F[X]$ stands for the ring of polynomials over $F$ as usual. The corresponding listing:
+We have a fixed finite field $F$, and $F[X]$ stands for the ring of polynomials over $F$ as usual. The corresponding listing written in Lean:
 
 \begin{lstlisting}
 variable {F : Type u} [field : Field F]
@@ -130,7 +156,7 @@ variable {w_stmt : Fin n_stmt -> F[X]}
 variable {w_wit : Fin n_wit -> F[X]}
 \end{lstlisting}
 
-Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised by elements of $n_{wit}$. Define a polynomial $t \in F[X]$ as:
+Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised by elements of $\{0, \dots, n_{wit} \}$. Define a polynomial $t \in F[X]$ as:
 \begin{center}
 $t = \prod \limits_{i \in n_{wit}} (x - r_i)$.
 \end{center}
@@ -152,12 +178,12 @@ $ $
 
 \begin{enumerate}
 \item $deg(t) = n_{wit}$;
-\item $t$ is monic, that is, its leading coefficient is equal to $0$;
+\item $t$ is monic, that is, its leading coefficient is equal to $1$;
 \item If $n_{wit} > 0$, then $deg(t) > 0$.
 \end{enumerate}
 \end{lemma}
 
-We formalise these statements as follows (but we drop proofs):
+We formalise these statements as follows (but we skip proofs):
 \begin{lstlisting}
 lemma nat_degree_t : (t r).natDegree = n_wit
 lemma monic_t : Polynomial.Monic (t r)
