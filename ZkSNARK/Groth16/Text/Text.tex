@@ -63,6 +63,20 @@
 In this document, we describe the Groth16 soundness formalisation in Lean 4.
 The text contains the protocol description as well as some comments to its implementation.
 
+Groth16 is a kind of ZK-SNARK protocol. The latter means that:
+
+\begin{itemize}
+\item It is \emph{zero-knowledge}. In other words, a prover only has a particular piece of information.
+\item It is \emph{non-interactive} in order to make secret parameters reusable.
+\end{itemize}
+
+Protocols of this kind have the core characteristics such as:
+\begin{itemize}
+\item \emph{Soundness}, i.e., if a statement does not hold, then the prover cannot convince the verifier.
+\item \emph{Completeness}, i.e., the verifier is convinced whenever a statement is true.
+\item \emph{Zero-knowledge}, i.e., the only thing is needed is the truth of a statement.
+\end{itemize}
+
 \section{Preliminary definitions}
 
 We have a fixed finite field $F$, and $F[X]$ stands for the ring of polynomials over $F$ as usual. The corresponding listing:
@@ -263,12 +277,6 @@ variable { A_h B_h C_h : Fin (n_var - 1) -> F }
 \end{lstlisting}
 
 The adversary's proof representation is defined as the following three sums, for $x \in F$:
-
-\begin{multline}
-A = A_{\alpha} \cdot crs_{\alpha} + A_{\beta} \cdot crs_{\beta} + A_{\gamma} \cdot crs_{\gamma} + A_{\delta} \cdot crs_{\delta} + \\
-    + \sum \limits_{i < n_{var}} A_{x_i} * x^i + \sum \limits_{i < n_{stmt}} A_{l_i} * crs_l(x) + \\
-    + \sum \limits_{i < n_{wit}} A_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} A_{h_i} * crs_n(x)
-\end{multline}
 
 \begin{multline}
 A = A_{\alpha} \cdot crs_{\alpha} + A_{\beta} \cdot crs_{\beta} + A_{\gamma} \cdot crs_{\gamma} + A_{\delta} \cdot crs_{\delta} + \\
