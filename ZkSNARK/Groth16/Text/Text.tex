@@ -60,10 +60,10 @@
 
 \section{Introduction}
 
-In this document, we describe the Groth16 soundness formalisation in Lean 4.
+In this document, we describe \href{https://github.com/yatima-inc/ZKSnark.lean/blob/daniel/groth16-protocol/ZkSNARK/Groth16/KnowledgeSoundness.lean}{the Groth16 soundness formalisation} in Lean 4.
 The text contains the protocol description as well as some comments to its implementation.
 
-Groth16 is a kind of ZK-SNARK protocol. The latter means that:
+Groth16 is a kind of ZK-SNARK protocol introduced in \cite{groth2016size}. The latter means that:
 
 \begin{itemize}
 \item It is \emph{zero-knowledge}. In other words, a prover only has a particular piece of information.
@@ -79,7 +79,9 @@ Protocols of this kind have the core characteristics such as:
 
 Generally, non-interactive zero-knowledge proofs relies on the \emph{common reference string} model, that is, a model where a public string is generated in a trusted way and all parties have an access to it.
 
-Let us describe the commond scheme that non-interactive zero-knowledge protocols obey. Before that, we need some bits of terminology. Let $p \in F[X]$ be a polynomial, a prover is going to convince that he/she knows $p$. In turn, knowing $p$ means that a prover knows some of its roots. As it is well-known, any polynomial might be decomposed as follows whenever it has roots (since fields we consider are finite and they are not algebraically closed):
+Let us describe the commond scheme that non-interactive zero-knowledge protocols obey, see \cite{petkus2019and} and \cite{bitansky2012extractable} to have more details. Before that, we need a bit of terminology.
+
+Let $p \in F[X]$ be a polynomial, a prover is going to convince a verifier that they know $p$. In turn, knowing $p$ means that a prover knows some of its roots. As it is well-known, any polynomial might be decomposed as follows whenever it has roots (since fields we consider are finite and they are not algebraically closed):
 \begin{equation}
 p(x) = \prod_{i < deg(p)} (x - a_i)
 \end{equation}
@@ -91,10 +93,11 @@ If there $a_i$'s are really roots of $p$, then the polynomial $p$ can be rewritt
 \begin{equation}
 p(x) = (\prod_{i < n} (x - r_i)) \cdot h(x)
 \end{equation}
-
-Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$ that we call further a \emph{target polynomial}.
-
 for some $h \in F[X]$.
+
+Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$.
+
+
 \begin{itemize}
 \item
 \item
@@ -102,6 +105,13 @@ for some $h \in F[X]$.
 \item
 \end{itemize}
 
+Now we discuss specific aspects of Groth16 in addition the aforedescribed general ZK-SNARK scheme.
+We emphasise such properties of Groth16 as:
+\begin{itemize}
+\item
+\item
+\item
+\end{itemize}
 
 \section{Preliminary definitions}
 
@@ -110,8 +120,10 @@ We have a fixed finite field $F$, and $F[X]$ stands for the ring of polynomials 
 \begin{lstlisting}
 variable {F : Type u} [field : Field F]
 \end{lstlisting}
+TODO: listings are rather ugly
 
-In Groth16, we have random values $\alpha, \beta, \gamma, \delta \in F$ that we introduce separately as an inductive data type:
+
+In Groth16, we have random values $\alpha, \beta, \gamma, \delta \in F$ that we introduce separately as a data type:
 \begin{lstlisting}
 inductive Vars : Type
   | alpha : Vars
@@ -211,7 +223,7 @@ Define a polynomial $sat$ as:
 \begin{multline}
 sat = (V_{{stmt}_{sv}} + V_{{wit}_{sv}}) \cdot \\ \cdot ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
 \end{multline}
-A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies the square span program, if the remainder of division of $sat$ by $t$ is equal to $0$.
+A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies \emph{the square span program}, if the remainder of division of $sat$ by $t$ is equal to $0$. This requirement is common for ZK-SNARK protocols as we discussed in the first section.
 
 The Lean 4 analogue of the property defined above:
 \begin{lstlisting}
@@ -363,5 +375,10 @@ def verified (f : Vars -> F) (x : F) (a_stmt : Fin n_stmt -> F ) : Prop :=
 We modify common reference string elements from the previous section as multivariate polynomials.
 
 \section{Coefficient lemmas}
+
+\section{Formalised soundness}
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
 
 \end{document}
