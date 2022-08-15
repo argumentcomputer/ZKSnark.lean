@@ -58,6 +58,8 @@
 
 \maketitle
 
+\section{Intro}
+
 In this document, we describe the Groth16 soundness formalisation in Lean 4.
 The text contains the protocol description as well as some comments to its implementation.
 
@@ -167,7 +169,7 @@ def V_stmt_sv (a_stmt : Fin n_stmt -> F) : Polynomial F :=
 
 Define a polynomial $sat$ as:
 \begin{multline}
-sat = (V_{{stmt}_{sv}} + V_wit_sv) \cdot \\ \cdot ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
+sat = (V_{{stmt}_{sv}} + V_{{wit}_{sv}}) \cdot \\ \cdot ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
 \end{multline}
 A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies the square span program, if the remainder of division of $sat$ by $t$ is equal to $0$.
 
@@ -203,7 +205,7 @@ For simplicity, we write this interpretation as a function $f :  \{ \alpha,\beta
 $f(a) = crs_{a}$ for $a \in \{ \alpha,\beta,\gamma, \delta \}$.
 \end{center}
 
-In addition to those four elements of $F$ we have a collection of degrees for $a \in F$/
+In addition to those four elements of $F$ we have a collection of degrees for $a \in F$:
 \begin{center}
 $\{ a^i \: | \: i < n_{var} \}$
 \end{center}
@@ -221,9 +223,9 @@ crs_l = \frac{((f(\beta) / f(\gamma)) \cdot (u_{{stmt}_i})(a)) + ((f(\alpha) / f
 crs_l = \frac{((f(\beta) / f(\delta)) \cdot (u_{{wit}_i})(a)) + ((f(\alpha) / f(\delta)) \cdot (v_{{wit}_i})(a)) + w_{{wit}_i}(a)}{f(\delta)} \\ \text{for $i < n_{wit}$}
 \end{multline}
 
-\begin{center}
-$crs_l = \frac{a^i \cdot t(a)}{f(\delta)}, \text{for $i < n_{var}$}$
-\end{center}
+\begin{equation}
+crs_l = \frac{a^i \cdot t(a)}{f(\delta)}, \text{for $i < n_{var}$}
+\end{equation}
 
 Their Lean 4 version:
 
@@ -245,5 +247,87 @@ def crs_m (i : Fin n_wit) (f : Vars -> F) (a : F) : F :=
 def crs_n (i : Fin (n_var - 1)) (f : Vars -> F) (a : F) : F :=
   ((a)^(i : Nat)) * (t r).eval a / f Vars.delta
 \end{lstlisting}
+
+Assume we have fixed elements of a field $A_{\alpha}$, $A_{\beta}$, $A_{\gamma}$, $A_{\delta}$, $B_{\alpha}$, $B_{\beta}$, $B_{\gamma}$, $B_{\delta}$, $C_{\alpha}$, $C_{\beta}$, $C_{\gamma}$, $C_{\delta}$.
+
+We also have indexed collections $\{ A_x \in F \: | \: x < n_{var} \}$, $\{ B_x \in F \: | \: x < n_{var} \}$, $\{ C_x \in F \: | \: x < n_{var} \}$, $\{ A_l \in F \: | \: l < n_{stmt} \}$, $\{ B_l \in F \: | \: l < n_{stmt} \}$, $\{ C_l \in F \: | \: l < n_{stmt} \}$, $\{ A_m \in F \: | \: m < n_{wit} \}$, $\{ B_m \in F \: | \: m < n_{wit} \}$, $\{ C_m \in F \: | \: m < n_{wit} \}$, $\{ A_h \in F \: | \: h < n_{var - 1} \}$, $\{ B_h \in F \: | \: h < n_{var - 1} \}$, $\{ C_h \in F \: | \: h < n_{var - 1} \}$.
+
+\begin{lstlisting}
+variable { A_alpha A_beta A_gamma A_delta : F }
+variable { B_alpha B_beta B_gamma B_delta : F }
+variable { C_alpha C_beta C_gamma C_delta : F }
+variable { A_x B_x C_x : Fin n_var -> F }
+variable { A_l B_l C_l : Fin n_stmt -> F }
+variable { A_m B_m C_m : Fin n_wit -> F }
+variable { A_h B_h C_h : Fin (n_var - 1) -> F }
+\end{lstlisting}
+
+The adversary's proof representation is defined as the following three sums, for $x \in F$:
+
+\begin{multline}
+A = A_{\alpha} \cdot crs_{\alpha} + A_{\beta} \cdot crs_{\beta} + A_{\gamma} \cdot crs_{\gamma} + A_{\delta} \cdot crs_{\delta} + \\
+    + \sum \limits_{i < n_{var}} A_{x_i} * x^i + \sum \limits_{i < n_{stmt}} A_{l_i} * crs_l(x) + \\
+    + \sum \limits_{i < n_{wit}} A_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} A_{h_i} * crs_n(x)
+\end{multline}
+
+\begin{multline}
+A = A_{\alpha} \cdot crs_{\alpha} + A_{\beta} \cdot crs_{\beta} + A_{\gamma} \cdot crs_{\gamma} + A_{\delta} \cdot crs_{\delta} + \\
+    + \sum \limits_{i < n_{var}} A_{x_i} * x^i + \sum \limits_{i < n_{stmt}} A_{l_i} * crs_l(x) + \\
+    + \sum \limits_{i < n_{wit}} A_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} A_{h_i} * crs_n(x)
+\end{multline}
+
+\begin{multline}
+B = B_{\alpha} \cdot crs_{\alpha} + B_{\beta} \cdot crs_{\beta} + B_{\gamma} \cdot crs_{\gamma} + B_{\delta} \cdot crs_{\delta} + \\
+    + \sum \limits_{i < n_{var}} B_{x_i} * x^i + \sum \limits_{i < n_{stmt}} B_{l_i} * crs_l(x) + \\
+    + \sum \limits_{i < n_{wit}} B_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} B_{h_i} * crs_n(x)
+\end{multline}
+
+\begin{multline}
+C = C_{\alpha} \cdot crs_{\alpha} + C_{\beta} \cdot crs_{\beta} + C_{\gamma} \cdot crs_{\gamma} + C_{\delta} \cdot crs_{\delta} + \\
+    + \sum \limits_{i < n_{var}} C_{x_i} * x^i + \sum \limits_{i < n_{stmt}} C_{l_i} * crs_l(x) + \\
+    + \sum \limits_{i < n_{wit}} C_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} C_{h_i} * crs_n(x)
+\end{multline}
+
+Here, we provide the Lean 4 version of $A$ only.
+
+\begin{lstlisting}
+def A (f : Vars -> F) (x : F) : F :=
+  (A_alpha * crs_alpha F f)
+  +
+  A_beta * crs_beta F f
+  +
+  A_gamma * crs_gamma F f
+  +
+  A_delta * crs_delta F f
+  +
+  \sum i in (finRange n_var), (A_x i) * (crs_powers_of_x F i x)
+  +
+  \sum i in (finRange n_stmt),
+    (A_l i) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f x)
+  +
+  \sum i in (finRange n_wit),
+    (A_m i) * (@crs_m F field n_wit u_wit v_wit w_wit i f x)
+  +
+  \sum i in (finRange (n_var - 1)), (A_h i) * (crs_n F r i f x)
+\end{lstlisting}
+
+A proof is called \emph{verified}, if the following equation holds:
+\begin{equation}
+A \cdot B = crs_{\alpha} \cdot crs_{\beta} + (\sum \limits_{i < n_{stmt}} a_{{stmt}_i} \cdot crs_{l_i}(x)) \cdot crs_{\gamma} + C \cdot crs_{\delta}
+\end{equation}
+
+\begin{lstlisting}
+def verified (f : Vars -> F) (x : F) (a_stmt : Fin n_stmt -> F ) : Prop :=
+  A f x * B f x =
+    (crs_alpha F f * crs_beta F f) +
+    ((\sum i in finRange n_stmt, (a_stmt i) * @crs_l i f x) *
+      (crs_gamma F f) + C f x * (crs_delta F f))
+\end{lstlisting}
+
+\section{Modified common reference string elements}
+
+We modify common reference string elements from the previous section as multivariate polynomials.
+
+\section{Coefficient lemmas}
 
 \end{document}

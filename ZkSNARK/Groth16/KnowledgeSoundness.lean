@@ -193,8 +193,9 @@ def C (f : Vars → F) (x : F) : F  :=
 /- The modified crs elements 
 these are multivariate (non-Laurent!) polynomials of the toxic waste samples, 
 obtained by multiplying the Laurent polynomial forms of the CRS through by γδ. 
-We will later prove that the laurent polynomial equation is equivalent to a 
-similar equation of the modified crs elements, allowing us to construct a proof in terms of polynomials -/
+We will later prove that the Laurent polynomial equation is equivalent to a 
+similar equation of the modified crs elements, allowing us to construct 
+a proof in terms of polynomials -/
 def crs'_α  : MvPolynomial Vars (Polynomial F) := 
   let pol₁ := (MvPolynomial.x Vars.α : MvPolynomial Vars (Polynomial F))
   let pol₂ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
@@ -261,7 +262,8 @@ def crs'_t (i : Finₓ (n_var - 1)) : MvPolynomial Vars (Polynomial F) :=
 
 /- Polynomial form of A in the adversary's proof representation -/
 def A'  : MvPolynomial Vars (Polynomial F) :=
-  let pol₁ := (MvPolynomial.c (Polynomial.c A_α) : MvPolynomial Vars (Polynomial F))
+  let pol_c := (Polynomial.c A_α : Polynomial F)
+  let pol₁ := (MvPolynomial.c pol_c : MvPolynomial Vars (Polynomial F))
   let pol₂ := (@crs'_α F field : MvPolynomial Vars (Polynomial F))
   let pol_γ := (MvPolynomial.x Vars.γ : MvPolynomial Vars (Polynomial F))
   let pol_aβ := (MvPolynomial.c (Polynomial.c A_β) : MvPolynomial Vars (Polynomial F))
