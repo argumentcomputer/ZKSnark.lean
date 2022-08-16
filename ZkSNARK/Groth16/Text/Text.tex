@@ -95,7 +95,9 @@ p(x) = (\prod_{i < n} (x - r_i)) \cdot h(x)
 \end{equation}
 for some $h \in F[X]$.
 
-Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$.
+Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that means that all those $r_i$'s are roots of $p$.
+
+The next notion we need is a square span program (see \cite{danezis2014square}) for verification of which the target polynomial is used. Originally, it has been introduced as a simpler version of quadratic span programs for an alternative characterisation of $\operatorname{NP}$.
 
 
 \begin{itemize}
@@ -108,6 +110,7 @@ Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$. We shall call $t(x)$ further a \em
 Now we discuss specific aspects of Groth16 in addition the aforedescribed general ZK-SNARK scheme.
 We emphasise such properties of Groth16 as:
 \begin{itemize}
+\item
 \item
 \item
 \item
@@ -146,7 +149,7 @@ In Lean 4, we introduce those parameters as variables in the following way:
 variable {n_stmt n_wit n_var : Nat}
 \end{lstlisting}
 
-We also define several finite collections of polynomials:
+We also define several finite collections of polynomials from the square span program:
 
 \begin{itemize}
 \item $u_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
@@ -168,7 +171,7 @@ variable {w_stmt : Fin n_stmt -> F[X]}
 variable {w_wit : Fin n_wit -> F[X]}
 \end{lstlisting}
 
-Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised by elements of $\{0, \dots, n_{wit} \}$. Define a polynomial $t \in F[X]$ as:
+Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised by elements of $\{0, \dots, n_{wit} \}$. Define the target polynomial $t \in F[X]$ of degree $n_{wit}$ as:
 \begin{center}
 $t = \prod \limits_{i \in n_{wit}} (x - r_i)$.
 \end{center}
@@ -177,13 +180,13 @@ Crearly, these $r_i$'s are roots of $t$. The definition in Lean 4:
 \begin{lstlisting}
 variable (r : Fin n_wit -> F)
 
-def t : F[X] := Pi i in finRange n_wit,
+def t : F[X] := \prod i in finRange n_wit,
   (x : F[X]) - Polynomial.c (r i)
 \end{lstlisting}
 
-\section{Properties of $t$}
+We think of the collection \verb"r" as roots of the polynomial \verb"t" as it can be observed from the definition.
 
-The polynomial $t$ has the following properties:
+The polynomial $t$ has the following self-evident properties:
 
 \begin{lemma}
 $ $
@@ -218,8 +221,7 @@ def V_stmt_sv (a_stmt : Fin n_stmt -> F) : Polynomial F :=
   \sum i in finRange n_stmt, a_stmt i \bullet u_stmt i
 \end{lstlisting}
 
-
-Define a polynomial $sat$ as:
+Define the polynomial $sat$ as:
 \begin{multline}
 sat = (V_{{stmt}_{sv}} + V_{{wit}_{sv}}) \cdot \\ \cdot ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
 \end{multline}
