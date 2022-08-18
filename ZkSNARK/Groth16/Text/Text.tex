@@ -66,7 +66,7 @@ The text contains the protocol description as well as some comments to its imple
 Groth16 is a kind of ZK-SNARK protocol introduced in \cite{groth2016size}. The latter means that:
 
 \begin{itemize}
-\item It is \emph{zero-knowledge}. In other words, a prover only has a particular piece of information.
+\item It is \emph{zero-knowledge}. In other words, a prover has only a particular piece of information.
 \item It is \emph{non-interactive} in order to make secret parameters reusable.
 \end{itemize}
 
@@ -83,11 +83,12 @@ Let us describe the commond scheme that non-interactive zero-knowledge protocols
 
 Let $p \in F[X]$ be a polynomial, a prover is going to convince a verifier that they know $p$. In turn, knowing $p$ means that a prover knows some of its roots. As it is well-known, any polynomial might be decomposed as follows whenever it has roots (since fields we consider are finite and they are not algebraically closed):
 \begin{equation}
-p(x) = \prod_{i < deg(p)} (x - a_i)
+p(x) = \prod_{i < \deg(p)} (x - a_i)
 \end{equation}
-for some $a_i$, $i < deg(p)$.
+for some $a_i$, $i < \deg(p)$.
 
-Assume that a prover has some values $\{ r_i \: | \: i < n\}$ where each $r_i \in F$ for some $n \leq deg(p)$. A prover wants to convince a verifier that $p(r_i)$ for each $a_i$ from that set.
+Assume that a prover has some values $\{ r_i \: | \: i < n\}$ where each $r_i \in F$ for some $n \leq \deg(p)$.
+A prover wants to convince a verifier that $p(r_i)$ for each $a_i$ from that set.
 
 If there $a_i$'s are really roots of $p$, then the polynomial $p$ can be rewritten as:
 \begin{equation}
@@ -98,6 +99,8 @@ for some $h \in F[X]$.
 Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that means that all those $r_i$'s are roots of $p$.
 
 The next notion we need is a square span program (see \cite{danezis2014square}) for verification of which the target polynomial is used. Originally, it has been introduced as a simpler version of quadratic span programs for an alternative characterisation of $\operatorname{NP}$.
+
+To be more precise, a square span program
 
 
 \begin{itemize}
@@ -171,7 +174,8 @@ variable {w_stmt : Fin n_stmt -> F[X]}
 variable {w_wit : Fin n_wit -> F[X]}
 \end{lstlisting}
 
-Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised by elements of $\{0, \dots, n_{wit} \}$. Define the target polynomial $t \in F[X]$ of degree $n_{wit}$ as:
+Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised with $\{0, \dots, n_{wit} \}$.
+Define the target polynomial $t \in F[X]$ of degree $n_{wit}$ as:
 \begin{center}
 $t = \prod \limits_{i \in n_{wit}} (x - r_i)$.
 \end{center}
@@ -192,9 +196,9 @@ The polynomial $t$ has the following self-evident properties:
 $ $
 
 \begin{enumerate}
-\item $deg(t) = n_{wit}$;
+\item $\deg(t) = n_{wit}$;
 \item $t$ is monic, that is, its leading coefficient is equal to $1$;
-\item If $n_{wit} > 0$, then $deg(t) > 0$.
+\item If $n_{wit} > 0$, then $\deg(t) > 0$.
 \end{enumerate}
 \end{lemma}
 
@@ -225,7 +229,9 @@ Define the polynomial $sat$ as:
 \begin{multline}
 sat = (V_{{stmt}_{sv}} + V_{{wit}_{sv}}) \cdot \\ \cdot ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
 \end{multline}
-A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies \emph{the square span program}, if the remainder of division of $sat$ by $t$ is equal to $0$. This requirement is common for ZK-SNARK protocols as we discussed in the first section.
+A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies \emph{the square span program},
+if the remainder of division of $sat$ by $t$ is equal to $0$.
+This requirement is common for ZK-SNARK protocols as we discussed in the first section.
 
 The Lean 4 analogue of the property defined above:
 \begin{lstlisting}
