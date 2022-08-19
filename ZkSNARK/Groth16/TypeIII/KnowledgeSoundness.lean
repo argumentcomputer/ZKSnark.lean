@@ -269,8 +269,6 @@ def C'  : MvPolynomial Vars F[X] :=
   +
   sum₄
 
-#check crs_l
-
 def verified (a_stmt : Finₓ n_stmt → F) (f : Vars → F) : Prop :=
   let A_inst := 
     @A F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r A_α A_β A_δ A_x A_l A_m A_h f
@@ -299,7 +297,5 @@ lemma modification_implication (a_stmt : Finₓ n_stmt → F) (f : Vars → F) :
   let verified'_inst :=
     @verified' F field n_stmt n_wit n_var u_stmt u_wit v_stmt v_wit w_stmt w_wit r A_α A_β A_δ B_β B_γ B_δ C_α C_β C_δ A_x B_x C_x A_l C_l A_m C_m A_h C_h a_stmt
   verified_inst → verified'_inst := by sorry
-
-
 
 end TypeIII
