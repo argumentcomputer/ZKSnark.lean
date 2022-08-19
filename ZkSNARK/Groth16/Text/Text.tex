@@ -1,0 +1,392 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath} % Required for some math elements
+\usepackage{amsfonts}
+\usepackage{amsthm} % for proof pkg
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{parskip} % Remove paragraph indentation
+\usepackage[margin=1in]{geometry}
+\usepackage[inline]{enumitem}
+\usepackage{mathtools}
+\usepackage{multirow}
+\usepackage{listings}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{theorem}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{fact}{Fact}[section]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\anote}[1]{{\color{magenta} [AM: #1]}}
+\newcommand{\Gen}{\mathsf{Gen}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\pk}{\mathit{pk}}
+\newcommand{\sk}{\mathit{sk}}
+\newcommand{\bbZ}{\mathbb{Z}}
+\newcommand{\bit}{\{0,1\}}
+\newcommand{\la}{\leftarrow}
+\newcommand{\ninN}{{n \in \mathbf{N}}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\RF}{\mathsf{RF}}
+\newcommand{\Half}{\frac{1}{2}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Adv}{\mathcal{A}}
+\newcommand{\Ext}{\mathcal{E}}
+
+\newcommand{\ignore}[1]{{}}
+
+\newcommand{\samples}{\overset{\$}{\leftarrow}}
+\newcommand{\hash}{\ensuremath{\mathcal{H}}}
+\newcommand{\doubleplus}{+\kern-1.3ex+\kern0.8ex}
+\newcommand{\mdoubleplus}{\ensuremath{\mathbin{+\mkern-10mu+}}}
+
+\title{Formalising Groth16 in Lean 4}
+\author{Daniel Rogozin, for Yatima Inc}
+\date{\today\footnote{This document may be updated frequently.}}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+In this document, we describe \href{https://github.com/yatima-inc/ZKSnark.lean/blob/daniel/groth16-protocol/ZkSNARK/Groth16/KnowledgeSoundness.lean}{the Groth16 soundness formalisation} in Lean 4.
+The text contains the protocol description as well as some comments to its implementation.
+
+Groth16 is a kind of ZK-SNARK protocol introduced in \cite{groth2016size}. The latter means that:
+
+\begin{itemize}
+\item It is \emph{zero-knowledge}. In other words, a prover has only a particular piece of information.
+\item It is \emph{non-interactive} in order to make secret parameters reusable.
+\end{itemize}
+
+Protocols of this kind have the core characteristics such as:
+\begin{itemize}
+\item \emph{Soundness}, i.e., if a statement does not hold, then the prover cannot convince the verifier.
+\item \emph{Completeness}, i.e., the verifier is convinced whenever a statement is true.
+\item \emph{Zero-knowledge}, i.e., the only thing is needed is the truth of a statement.
+\end{itemize}
+
+Generally, non-interactive zero-knowledge proofs relies on the \emph{common reference string} model, that is, a model where a public string is generated in a trusted way and all parties have an access to it.
+
+Let us describe the commond scheme that non-interactive zero-knowledge protocols obey, see \cite{petkus2019and} and \cite{bitansky2012extractable} to have more details. Before that, we need a bit of terminology.
+
+Let $p \in F[X]$ be a polynomial, a prover is going to convince a verifier that they know $p$. In turn, knowing $p$ means that a prover knows some of its roots. As it is well-known, any polynomial might be decomposed as follows whenever it has roots (since fields we consider are finite and they are not algebraically closed):
+\begin{equation}
+p(x) = \prod_{i < \deg(p)} (x - a_i)
+\end{equation}
+for some $a_i$, $i < \deg(p)$.
+
+Assume that a prover has some values $\{ r_i \: | \: i < n\}$ where each $r_i \in F$ for some $n \leq \deg(p)$.
+A prover wants to convince a verifier that $p(r_i)$ for each $a_i$ from that set.
+
+If there $a_i$'s are really roots of $p$, then the polynomial $p$ can be rewritten as:
+\begin{equation}
+p(x) = (\prod_{i < n} (x - r_i)) \cdot h(x)
+\end{equation}
+for some $h \in F[X]$.
+
+Denote $(\prod_{i < n} (x - r_i))$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that means that all those $r_i$'s are roots of $p$.
+
+The next notion we need is a square span program (see \cite{danezis2014square}) for verification of which the target polynomial is used. Originally, it has been introduced as a simpler version of quadratic span programs for an alternative characterisation of $\operatorname{NP}$.
+
+To be more precise, a square span program
+
+
+\begin{itemize}
+\item
+\item
+\item
+\item
+\end{itemize}
+
+Now we discuss specific aspects of Groth16 in addition the aforedescribed general ZK-SNARK scheme.
+We emphasise such properties of Groth16 as:
+\begin{itemize}
+\item
+\item
+\item
+\item
+\end{itemize}
+
+\section{Preliminary definitions}
+
+We have a fixed finite field $F$, and $F[X]$ stands for the ring of polynomials over $F$ as usual. The corresponding listing written in Lean:
+
+\begin{lstlisting}
+variable {F : Type u} [field : Field F]
+\end{lstlisting}
+TODO: listings are rather ugly
+
+
+In Groth16, we have random values $\alpha, \beta, \gamma, \delta \in F$ that we introduce separately as a data type:
+\begin{lstlisting}
+inductive Vars : Type
+  | alpha : Vars
+  | beta : Vars
+  | gamma : Vars
+  | delta : Vars
+\end{lstlisting}
+
+We also introduce the following parameters:
+
+\begin{itemize}
+\item $n_{stmt} \in \mathbb{N}$ --- the statement size;
+\item $n_{wit} \in \mathbb{N}$ --- the witness size;
+\item $n_{var} \in \mathbb{N}$ --- the number of variables.
+\end{itemize}
+
+In Lean 4, we introduce those parameters as variables in the following way:
+
+\begin{lstlisting}
+variable {n_stmt n_wit n_var : Nat}
+\end{lstlisting}
+
+We also define several finite collections of polynomials from the square span program:
+
+\begin{itemize}
+\item $u_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
+\item $u_{wit} = \{ f_{i} \in F[X] \: | \: i < n_{wit} \}$
+\item $v_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
+\item $v_{wit} = \{ f_{i} \in F[X] \: | \: i < n_{wit} \}$
+\item $w_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
+\item $w_{wit} = \{ f_{i} \in F[X] \: | \: i < n_{wit} \}$
+\end{itemize}
+
+We introduce those collections in Lean 4 as variables as well:
+
+\begin{lstlisting}
+variable {u_stmt : Fin n_stmt -> F[X]}
+variable {u_wit : Fin n_wit -> F[X]}
+variable {v_stmt : Fin n_stmt -> F[X]}
+variable {v_wit : Fin n_wit -> F[X]}
+variable {w_stmt : Fin n_stmt -> F[X]}
+variable {w_wit : Fin n_wit -> F[X]}
+\end{lstlisting}
+
+Let $(r_i)_{i < n_{wit}}$ be a collection of elements of $F$ (that is, each $r_i \in F$) parametrised with $\{0, \dots, n_{wit} \}$.
+Define the target polynomial $t \in F[X]$ of degree $n_{wit}$ as:
+\begin{center}
+$t = \prod \limits_{i \in n_{wit}} (x - r_i)$.
+\end{center}
+
+Crearly, these $r_i$'s are roots of $t$. The definition in Lean 4:
+\begin{lstlisting}
+variable (r : Fin n_wit -> F)
+
+def t : F[X] := \prod i in finRange n_wit,
+  (x : F[X]) - Polynomial.c (r i)
+\end{lstlisting}
+
+We think of the collection \verb"r" as roots of the polynomial \verb"t" as it can be observed from the definition.
+
+The polynomial $t$ has the following self-evident properties:
+
+\begin{lemma}
+$ $
+
+\begin{enumerate}
+\item $\deg(t) = n_{wit}$;
+\item $t$ is monic, that is, its leading coefficient is equal to $1$;
+\item If $n_{wit} > 0$, then $\deg(t) > 0$.
+\end{enumerate}
+\end{lemma}
+
+We formalise these statements as follows (but we skip proofs):
+\begin{lstlisting}
+lemma nat_degree_t : (t r).natDegree = n_wit
+lemma monic_t : Polynomial.Monic (t r)
+lemma degree_t_pos (hm : 0 < n_wit) : 0 < (t r).degree
+\end{lstlisting}
+
+Let $\{ a_{{wit}_i} \: | \: i < n_{wit}\}$ and $\{ a_{{stmt}_i} \: | \: i < n_{stmt} \}$ be collections of elements of $F$. A stamenent witness polynomial pair is a pair of single variable polynomials $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$
+such that $F_{{wit}_{sv}}, F_{{stmt}_{sv}} \in F[X]$ and
+\begin{itemize}
+\item $F_{{wit}_{sv}} = \sum \limits_{i < n_{wit}} a_{{wit}_i} u_{{wit}_{i}}(x)$
+\item $F_{{stmt}_{sv}} = \sum \limits_{i < n_{stmt}} a_{{stmt}_i} u_{{stmt}_{i}}(x)$
+\end{itemize}
+
+Their Lean 4 counterparts:
+\begin{lstlisting}
+def V_wit_sv (a_wit : Fin n_wit -> F) : Polynomial F :=
+  \sum i in finRange n_wit, a_wit i \bullet u_wit i
+
+def V_stmt_sv (a_stmt : Fin n_stmt -> F) : Polynomial F :=
+  \sum i in finRange n_stmt, a_stmt i \bullet u_stmt i
+\end{lstlisting}
+
+Define the polynomial $sat$ as:
+\begin{multline}
+sat = (V_{{stmt}_{sv}} + V_{{wit}_{sv}}) \cdot \\ \cdot ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i < n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i < n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
+\end{multline}
+A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies \emph{the square span program},
+if the remainder of division of $sat$ by $t$ is equal to $0$.
+This requirement is common for ZK-SNARK protocols as we discussed in the first section.
+
+The Lean 4 analogue of the property defined above:
+\begin{lstlisting}
+def satisfying (a_stmt : Fin n_stmt -> F) (a_wit : Fin n_wit -> F) :=
+  (((\sum i in finRange n_stmt, a_stmt i \bullet u_stmt i)
+    + \sum i in finRange n_wit, a_wit i \bullet u_wit i)
+  *
+  ((\sum i in finRange n_stmt, a_stmt i \bullet v_stmt i)
+    + \sum i in finRange n_wit, a_wit i \bullet v_wit i)
+  -
+  ((\sum i in finRange n_stmt, a_stmt i \bullet w_stmt i)
+    + \sum i in finRange n_wit, a_wit i \bullet w_wit i) : F[X]) %_m (t r) = 0
+\end{lstlisting}
+
+\section{Common reference string elements}
+
+Assume we interpreted $\alpha$, $\beta$, $\gamma$, and $\delta$ somehow with elements of $F$, say $crs_{\alpha}$, $crs_{\beta}$, $crs_{\gamma}$, and $crs_{\delta}$, that is, in Lean 4:
+
+\begin{lstlisting}
+def crs_alpha  (f : Vars -> F) : F := f Vars.alpha
+
+def crs_beta (f : Vars -> F) : F := f Vars.beta
+
+def crs_gamma (f : Vars -> F) : F := f Vars.gamma
+
+def crs_delta (f : Vars -> F) : F := f Vars.delta
+\end{lstlisting}
+
+For simplicity, we write this interpretation as a function $f :  \{ \alpha,\beta,\gamma, \delta \} \to F$ defined by equations:
+\begin{center}
+$f(a) = crs_{a}$ for $a \in \{ \alpha,\beta,\gamma, \delta \}$.
+\end{center}
+
+In addition to those four elements of $F$ we have a collection of degrees for $a \in F$:
+\begin{center}
+$\{ a^i \: | \: i < n_{var} \}$
+\end{center}
+formalised as:
+\begin{lstlisting}
+def crs_powers_of_x (i : Fin n_var) (a : F) : F := (a)^(i : Nat)
+\end{lstlisting}
+
+We also introduce collections $crs_l$, $crs_m$, and $crs_n$ for $a \in F$:
+\begin{multline}
+crs_l = \frac{((f(\beta) / f(\gamma)) \cdot (u_{{stmt}_i})(a)) + ((f(\alpha) / f(\gamma)) \cdot (v_{{stmt}_i})(a)) + w_{{stmt}_i}(a)}{f(\gamma)} \\ \text{for $i < n_{stmt}$}
+\end{multline}
+
+\begin{multline}
+crs_l = \frac{((f(\beta) / f(\delta)) \cdot (u_{{wit}_i})(a)) + ((f(\alpha) / f(\delta)) \cdot (v_{{wit}_i})(a)) + w_{{wit}_i}(a)}{f(\delta)} \\ \text{for $i < n_{wit}$}
+\end{multline}
+
+\begin{equation}
+crs_l = \frac{a^i \cdot t(a)}{f(\delta)}, \text{for $i < n_{var}$}
+\end{equation}
+
+Their Lean 4 version:
+
+\begin{lstlisting}
+def crs_l (i : Fin n_stmt) (f : Vars -> F) (a : F) : F :=
+  ((f Vars.beta / f Vars.gamma) * (u_stmt i).eval (a)
+  +
+  (f Vars.alpha / f Vars.gamma) * (v_stmt i).eval (a)
+  +
+  (w_stmt i).eval (a)) / f Vars.gamma.
+
+def crs_m (i : Fin n_wit) (f : Vars -> F) (a : F) : F :=
+  ((f Vars.beta / f Vars.delta) * (u_wit i).eval (a)
+  +
+  (f Vars.alpha / f Vars.delta) * (v_wit i).eval (a)
+  +
+  (w_wit i).eval (a)) / f Vars.delta
+
+def crs_n (i : Fin (n_var - 1)) (f : Vars -> F) (a : F) : F :=
+  ((a)^(i : Nat)) * (t r).eval a / f Vars.delta
+\end{lstlisting}
+
+Assume we have fixed elements of a field $A_{\alpha}$, $A_{\beta}$, $A_{\gamma}$, $A_{\delta}$, $B_{\alpha}$, $B_{\beta}$, $B_{\gamma}$, $B_{\delta}$, $C_{\alpha}$, $C_{\beta}$, $C_{\gamma}$, $C_{\delta}$.
+
+We also have indexed collections $\{ A_x \in F \: | \: x < n_{var} \}$, $\{ B_x \in F \: | \: x < n_{var} \}$, $\{ C_x \in F \: | \: x < n_{var} \}$, $\{ A_l \in F \: | \: l < n_{stmt} \}$, $\{ B_l \in F \: | \: l < n_{stmt} \}$, $\{ C_l \in F \: | \: l < n_{stmt} \}$, $\{ A_m \in F \: | \: m < n_{wit} \}$, $\{ B_m \in F \: | \: m < n_{wit} \}$, $\{ C_m \in F \: | \: m < n_{wit} \}$, $\{ A_h \in F \: | \: h < n_{var - 1} \}$, $\{ B_h \in F \: | \: h < n_{var - 1} \}$, $\{ C_h \in F \: | \: h < n_{var - 1} \}$.
+
+\begin{lstlisting}
+variable { A_alpha A_beta A_gamma A_delta : F }
+variable { B_alpha B_beta B_gamma B_delta : F }
+variable { C_alpha C_beta C_gamma C_delta : F }
+variable { A_x B_x C_x : Fin n_var -> F }
+variable { A_l B_l C_l : Fin n_stmt -> F }
+variable { A_m B_m C_m : Fin n_wit -> F }
+variable { A_h B_h C_h : Fin (n_var - 1) -> F }
+\end{lstlisting}
+
+The adversary's proof representation is defined as the following three sums, for $x \in F$:
+
+\begin{multline}
+A = A_{\alpha} \cdot crs_{\alpha} + A_{\beta} \cdot crs_{\beta} + A_{\gamma} \cdot crs_{\gamma} + A_{\delta} \cdot crs_{\delta} + \\
+    + \sum \limits_{i < n_{var}} A_{x_i} * x^i + \sum \limits_{i < n_{stmt}} A_{l_i} * crs_l(x) + \\
+    + \sum \limits_{i < n_{wit}} A_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} A_{h_i} * crs_n(x)
+\end{multline}
+
+\begin{multline}
+B = B_{\alpha} \cdot crs_{\alpha} + B_{\beta} \cdot crs_{\beta} + B_{\gamma} \cdot crs_{\gamma} + B_{\delta} \cdot crs_{\delta} + \\
+    + \sum \limits_{i < n_{var}} B_{x_i} * x^i + \sum \limits_{i < n_{stmt}} B_{l_i} * crs_l(x) + \\
+    + \sum \limits_{i < n_{wit}} B_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} B_{h_i} * crs_n(x)
+\end{multline}
+
+\begin{multline}
+C = C_{\alpha} \cdot crs_{\alpha} + C_{\beta} \cdot crs_{\beta} + C_{\gamma} \cdot crs_{\gamma} + C_{\delta} \cdot crs_{\delta} + \\
+    + \sum \limits_{i < n_{var}} C_{x_i} * x^i + \sum \limits_{i < n_{stmt}} C_{l_i} * crs_l(x) + \\
+    + \sum \limits_{i < n_{wit}} C_{m_i} * crs_m(x) + \sum \limits_{i < n_{var} - 1} C_{h_i} * crs_n(x)
+\end{multline}
+
+Here, we provide the Lean 4 version of $A$ only.
+
+\begin{lstlisting}
+def A (f : Vars -> F) (x : F) : F :=
+  (A_alpha * crs_alpha F f)
+  +
+  A_beta * crs_beta F f
+  +
+  A_gamma * crs_gamma F f
+  +
+  A_delta * crs_delta F f
+  +
+  \sum i in (finRange n_var), (A_x i) * (crs_powers_of_x F i x)
+  +
+  \sum i in (finRange n_stmt),
+    (A_l i) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f x)
+  +
+  \sum i in (finRange n_wit),
+    (A_m i) * (@crs_m F field n_wit u_wit v_wit w_wit i f x)
+  +
+  \sum i in (finRange (n_var - 1)), (A_h i) * (crs_n F r i f x)
+\end{lstlisting}
+
+A proof is called \emph{verified}, if the following equation holds:
+\begin{equation}
+A \cdot B = crs_{\alpha} \cdot crs_{\beta} + (\sum \limits_{i < n_{stmt}} a_{{stmt}_i} \cdot crs_{l_i}(x)) \cdot crs_{\gamma} + C \cdot crs_{\delta}
+\end{equation}
+
+\begin{lstlisting}
+def verified (f : Vars -> F) (x : F) (a_stmt : Fin n_stmt -> F ) : Prop :=
+  A f x * B f x =
+    (crs_alpha F f * crs_beta F f) +
+    ((\sum i in finRange n_stmt, (a_stmt i) * @crs_l i f x) *
+      (crs_gamma F f) + C f x * (crs_delta F f))
+\end{lstlisting}
+
+\section{Modified common reference string elements}
+
+We modify common reference string elements from the previous section as multivariate polynomials.
+
+\section{Coefficient lemmas}
+
+\section{Formalised soundness}
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+
+\end{document}

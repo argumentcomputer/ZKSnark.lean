@@ -65,9 +65,8 @@ by sorry
   --   rw [add_apply, single_apply, if_pos rfl],
   --   finish, }
 
--- lemma coeff_X_pow_mul' (m) (n : ℕ) (s : σ) (p : MvPolynomial σ R) :
---   coeff m ((x s : MvPolynomial σ R) ^ n * p) = if n ≤ m s then coeff (m - finsupp.single s n : σ →₀ ℕ) p else 0 := by 
---   sorry
+lemma coeff_X_pow_mul' (m) (n : ℕ) (s : σ) (p : MvPolynomial σ R) :
+  coeff m (((x s : MvPolynomial σ R) ^ n) * p : MvPolynomial σ R) = if n ≤ m s then coeff (m - Finsupp.single s n : σ →₀ ℕ) p else 0 := by sorry
 -- begin
 --   rw mul_comm,
 --   rw coeff_mul_X_pow',
@@ -184,11 +183,11 @@ lemma rearrange_002 (f : R) (p1 p2 p3 : Polynomial R) :
     { intro h, rw h }
 -/
 
-lemma add_mul_distrib (a b c d : R) : a + b * c + b * d = a + b * (c + d) :=
-by ring
+-- lemma add_mul_distrib (a b c d : R) : a + b * c + b * d = a + b * (c + d) :=
+-- by ring
 
-lemma add_mul_distrib' (a b c d : R) : a + c * b + d * b = a + b * (c + d) :=
-by ring
+-- lemma add_mul_distrib' (a b c d : R) : a + c * b + d * b = a + b * (c + d) :=
+-- by ring
 
 end CommSemiringₓ
 
