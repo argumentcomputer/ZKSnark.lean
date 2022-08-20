@@ -105,11 +105,11 @@ A prover wants to convince a verifier that $p(r_i)$ for each $a_i$ from that set
 
 If there $a_i$'s are really roots of $p$, then the polynomial $p$ can be rewritten as:
 \begin{equation}
-p(x) = (\prod_{i = 0}^n (x - r_i)) \cdot h(x)
+p(x) = \left( \prod_{i = 0}^n (x - r_i) \right) \cdot h(x)
 \end{equation}
 for some $h \in F[X]$.
 
-Denote $(\prod_{i = 0}^n (x - r_i))$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that means that all those $r_i$'s are roots of $p$.
+Denote $\prod_{i = 0}^n (x - r_i)$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that means that all those $r_i$'s are roots of $p$.
 
 The next notion we need is a square span program (see \cite{danezis2014square}) for verification of which the target polynomial is used. Originally, it has been introduced as a simpler version of quadratic span programs for an alternative characterisation of $\operatorname{NP}$.
 
@@ -171,6 +171,7 @@ We also introduce the following parameters:
 \item $n_{wit} \in \mathbb{N}$ --- the witness size;
 \item $n_{var} \in \mathbb{N}$ --- the number of variables.
 \end{itemize}
+where $n_{wit}$ is the degree of the target polynomial
 
 In Lean 4, we introduce those parameters as variables in the following way:
 
@@ -213,6 +214,7 @@ def t : F[X] := ∏ i in finRange n_wit, (x : F[X]) - Polynomial.c (r i)
 \end{lstlisting}
 
 We think of the collection \verb"r" as roots of the polynomial \verb"t" as it can be observed from the definition.
+We use divisibility of $t$ to verify the square span program condition.
 
 The polynomial $t$ has the following self-evident properties:
 
@@ -251,9 +253,9 @@ def V_stmt_sv (a_stmt : Finₓ n_stmt → F) : F[X] :=
 \end{lstlisting}
 
 Define the polynomial $sat$ as:
-\begin{multline}
-sat = (V_{{stmt}_{sv}} + V_{{wit}_{sv}}) \cdot \\ \cdot ((\sum \limits_{i = 0}^{n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x)) + (\sum \limits_{i = 0}^{n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) )) - \\ - ((\sum \limits_{i = 0}^{n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x)) + (\sum \limits_{i = 0}^{n_{wit}} a_{{wit}_i} w_{{wit}_i}(x) ))
-\end{multline}
+\begin{equation}
+sat = \sum \limits_{i = 0}^{n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x) + \sum \limits_{i = 0}^{n_{wit}} a_{{wit}_i} v_{{wit}_i}(x) - \sum \limits_{i = 0}^{n_{stmt}} a_{{stmt}_i} w_{{stmt}_i}(x) + \sum \limits_{i = 0}^{n_{wit}} a_{{wit}_i} w_{{wit}_i}(x)
+\end{equation}
 A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies \emph{the square span program},
 if the remainder of division of $sat$ by $t$ is equal to $0$.
 This requirement is common for ZK-SNARK protocols and the square span program in general as we discussed in the introduction.
@@ -262,11 +264,9 @@ The Lean 4 analogue of the property defined above:
 \begin{lstlisting}
 def satisfying (a_stmt : Finₓ n_stmt → F) (a_wit : Finₓ n_wit → F) :=
   (((∑ i in finRange n_stmt, a_stmt i • u_stmt i)
-    + ∑ i in finRange n_wit, a_wit i • u_wit i)
-  *
+    + ∑ i in finRange n_wit, a_wit i • u_wit i) *
   ((∑ i in finRange n_stmt, a_stmt i • v_stmt i)
-    + ∑ i in finRange n_wit, a_wit i • v_wit i)
-  -
+    + ∑ i in finRange n_wit, a_wit i • v_wit i) -
   ((∑ i in finRange n_stmt, a_stmt i • w_stmt i)
     + ∑ i in finRange n_wit, a_wit i • w_wit i) : F[X]) %ₘ (t r) = 0
 \end{lstlisting}
@@ -313,17 +313,13 @@ Their Lean 4 versions:
 
 \begin{lstlisting}
 def crs_l (i : Finₓ n_stmt) (f : Vars → F) (a : F) : F :=
-  ((f Vars.β / f Vars.γ) * (u_stmt i).eval (a)
-  +
-  (f Vars.α / f Vars.γ) * (v_stmt i).eval (a)
-  +
+  ((f Vars.β / f Vars.γ) * (u_stmt i).eval (a) +
+  (f Vars.α / f Vars.γ) * (v_stmt i).eval (a) +
   (w_stmt i).eval (a)) / f Vars.γ
 
 def crs_m (i : Finₓ n_wit) (f : Vars → F) (a : F) : F :=
-  ((f Vars.β / f Vars.δ) * (u_wit i).eval (a)
-  +
-  (f Vars.α / f Vars.δ) * (v_wit i).eval (a)
-  +
+  ((f Vars.β / f Vars.δ) * (u_wit i).eval (a) +
+  (f Vars.α / f Vars.δ) * (v_wit i).eval (a) +
   (w_wit i).eval (a)) / f Vars.δ
 
 def crs_n (i : Finₓ (n_var - 1)) (f : Vars → F) (a : F) : F :=
@@ -333,31 +329,20 @@ def crs_n (i : Finₓ (n_var - 1)) (f : Vars → F) (a : F) : F :=
 Assume we have fixed elements of a field $A_{\alpha}$, $A_{\beta}$, $A_{\gamma}$, $A_{\delta}$, $B_{\alpha}$, $B_{\beta}$, $B_{\gamma}$, $B_{\delta}$, $C_{\alpha}$, $C_{\beta}$, $C_{\gamma}$, $C_{\delta} \in F$.
 
 We also have indexed collections:
-\begin{center}
-$\{ A_x \in F \: | \: x < n_{var} \}$
-
-$\{ B_x \in F \: | \: x < n_{var} \}$
-
-$\{ C_x \in F \: | \: x < n_{var} \}$
-
-$\{ A_l \in F \: | \: l < n_{stmt} \}$
-
-$\{ B_l \in F \: | \: l < n_{stmt} \}$
-
-$\{ C_l \in F \: | \: l < n_{stmt} \}$
-
-$\{ A_m \in F \: | \: m < n_{wit} \}$
-
-$\{ B_m \in F \: | \: m < n_{wit} \}$
-
-$\{ C_m \in F \: | \: m < n_{wit} \}$
-
-$\{ A_h \in F \: | \: h < n_{var - 1} \}$
-
-$\{ B_h \in F \: | \: h < n_{var - 1} \}$
-
-$\{ C_h \in F \: | \: h < n_{var - 1} \}$
-\end{center}
+\begin{itemize}
+\item $\{ A_x \in F \: | \: x < n_{var} \}$
+\item $\{ B_x \in F \: | \: x < n_{var} \}$
+\item $\{ C_x \in F \: | \: x < n_{var} \}$
+\item $\{ A_l \in F \: | \: l < n_{stmt} \}$
+\item $\{ B_l \in F \: | \: l < n_{stmt} \}$
+\item $\{ C_l \in F \: | \: l < n_{stmt} \}$
+\item $\{ A_m \in F \: | \: m < n_{wit} \}$
+\item $\{ B_m \in F \: | \: m < n_{wit} \}$
+\item $\{ C_m \in F \: | \: m < n_{wit} \}$
+\item $\{ A_h \in F \: | \: h < n_{var - 1} \}$
+\item $\{ B_h \in F \: | \: h < n_{var - 1} \}$
+\item $\{ C_h \in F \: | \: h < n_{var - 1} \}$
+\end{itemize}
 
 \begin{lstlisting}
 variable { A_α A_β A_γ A_δ B_α B_β B_γ B_δ C_α C_β C_γ C_δ  : F }
@@ -391,20 +376,10 @@ Here, we provide the Lean 4 version of $A$ only.
 
 \begin{lstlisting}
 def A (f : Vars → F) (x : F) : F :=
-  (A_α * crs_α F f)
-  +
-  A_β * crs_β F f
-  +
-  A_γ * crs_γ F f
-  +
-  A_δ * crs_δ F f
-  +
-  ∑ i in (finRange n_var), (A_x i) * (crs_powers_of_x F i x)
-  +
-  ∑ i in (finRange n_stmt), (A_l i) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f x)
-  +
-  ∑ i in (finRange n_wit), (A_m i) * (@crs_m F field n_wit u_wit v_wit w_wit i f x)
-  +
+  A_α * crs_α F f + A_β * crs_β F f + A_γ * crs_γ F f + A_δ * crs_δ F f +
+  ∑ i in (finRange n_var), (A_x i) * (crs_powers_of_x F i x) +
+  ∑ i in (finRange n_stmt), (A_l i) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f x) +
+  ∑ i in (finRange n_wit), (A_m i) * (@crs_m F field n_wit u_wit v_wit w_wit i f x) +
   ∑ i in (finRange (n_var - 1)), (A_h i) * (crs_n F r i f x)
 \end{lstlisting}
 
@@ -425,56 +400,41 @@ def verified (f : Vars -> F) (x : F) (a_stmt : Fin n_stmt -> F ) : Prop :=
 
 We modify common reference string elements from the previous section as multivariate polynomials.
 
-\section{Coefficient lemmas}
+\subsection{Coefficient lemmas}
 
 \section{Formalised soundness}
 
+
+
 \section{Groth16, Type III}
 
-In this section, we describe the Lean 4 formalisation of a Groth16 version called type III, see \cite{baghery2021another}. It has certain specific moments.
+In this section, we describe the Lean 4 formalisation of a Groth16 version called Type III, see \cite{baghery2021another}. It has certain specific moments.
 
+In Type III, polynomials $A$, $B$, $C$ have a slightly more simple form:
 \begin{lstlisting}
   def A (f : Vars → F) : F[X] :=
-  (Polynomial.c A_α) * crs_α F f
-  +
-  (Polynomial.c A_β) * crs_β F f
-  +
-  (Polynomial.c A_δ) * crs_δ F f
-  +
-  ∑ i in (finRange n_var), (Polynomial.c (A_x i)) * (crs_powers_of_x F i)
-  +
-  ∑ i in (finRange n_stmt), (Polynomial.c (A_l i)) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f)
-  +
-  ∑ i in (finRange n_wit), (Polynomial.c (A_m i)) * (@crs_m F field n_wit u_wit v_wit w_wit i f)
-  +
+  (Polynomial.c A_α) * crs_α F f + (Polynomial.c A_β) * crs_β F f +
+  (Polynomial.c A_δ) * crs_δ F f +
+  ∑ i in (finRange n_var), (Polynomial.c (A_x i)) * (crs_powers_of_x F i) +
+  ∑ i in (finRange n_stmt), (Polynomial.c (A_l i)) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f) +
+  ∑ i in (finRange n_wit), (Polynomial.c (A_m i)) * (@crs_m F field n_wit u_wit v_wit w_wit i f) +
   ∑ i in (finRange (n_var-1)), (Polynomial.c (A_h i)) * (crs_n F r i f)
 \end{lstlisting}
 
 \begin{lstlisting}
 def B (f : Vars → F) : F[X] :=
-  (Polynomial.c B_β) * (crs_β F f)
-  +
-  (Polynomial.c B_γ) * (crs_γ F f)
-  +
-  (Polynomial.c B_δ) * (crs_δ F f)
-  +
+  (Polynomial.c B_β) * (crs_β F f) + (Polynomial.c B_γ) * (crs_γ F f) +
+  (Polynomial.c B_δ) * (crs_δ F f) +
   ∑ i in (finRange n_var), (Polynomial.c (B_x i)) * (crs_powers_of_x F i)
 \end{lstlisting}
 
 \begin{lstlisting}
 def C (f : Vars → F) : F[X]  :=
-  (Polynomial.c C_α) * crs_α F f
-  +
-  (Polynomial.c C_β) * crs_β F f
-  +
-  (Polynomial.c C_δ) * crs_δ F f
-  +
-  ∑ i in (finRange n_var), (Polynomial.c (C_x i)) * (crs_powers_of_x F i)
-  +
-  ∑ i in (finRange n_stmt), (Polynomial.c (C_l i)) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f)
-  +
-  ∑ i in (finRange n_wit), (Polynomial.c (C_m i)) * (@crs_m F field n_wit u_wit v_wit w_wit i f)
-  +
+  (Polynomial.c C_α) * crs_α F f + (Polynomial.c C_β) * crs_β F f +
+  (Polynomial.c C_δ) * crs_δ F f +
+  ∑ i in (finRange n_var), (Polynomial.c (C_x i)) * (crs_powers_of_x F i) +
+  ∑ i in (finRange n_stmt), (Polynomial.c (C_l i)) * (@crs_l F field n_stmt u_stmt v_stmt w_stmt i f) +
+  ∑ i in (finRange n_wit), (Polynomial.c (C_m i)) * (@crs_m F field n_wit u_wit v_wit w_wit i f) +
   ∑ i in (finRange (n_var - 1)), (Polynomial.c (C_h i)) * (crs_n F r i f)
 \end{lstlisting}
 
