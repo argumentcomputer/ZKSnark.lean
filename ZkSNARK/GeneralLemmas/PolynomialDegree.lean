@@ -9,7 +9,7 @@ variable [Field F]
 
 lemma natDegreeProductForm (m : ℕ) (f : Finₓ m → F) : 
   Polynomial.natDegree (∏ i in (Finset.finRange m), (Polynomial.x - Polynomial.c (f i))) = m := by
-  rw [Polynomial.nat_degree_prod]
+  -- rw [Polynomial.nat_degree_prod]
   sorry
 
 lemma monicOfProductForm (m : ℕ) (f : Finₓ m → F) : 
