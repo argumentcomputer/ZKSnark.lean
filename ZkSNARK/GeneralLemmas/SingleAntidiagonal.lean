@@ -108,16 +108,15 @@ lemma Finsupp.sub_le_right_of_le_add (a b c : S →₀ ℕ) (h : a ≤ b + c) : 
 -/
 
 -- TODO generalize and add to mathlib
-lemma Nat.add_inf (a b c : ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := by sorry
-/-- 
+lemma Nat.add_inf (a b c : ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := by
   by_cases b ≤ c
   rw [inf_eq_left.2 h]
-  exact h
-  have h' : c ≤ b
-    exact le_of_not_ge h
-  simp [inf_eq_right.2 h']
-  exact h'
--/
+  sorry
+  --apply h
+  -- have h' : c ≤ b
+  --  exact le_of_not_ge h
+  -- simp [inf_eq_right.2 h']
+  -- exact h'
 
 lemma Finsupp.nat_add_inf (a b c : S →₀ ℕ) : a + (b ⊓ c) = (a + b) ⊓ (a + c) := by sorry
 --  ext
@@ -131,8 +130,8 @@ lemma Finsupp.nat_add_inf (a b c : S →₀ ℕ) : a + (b ⊓ c) = (a + b) ⊓ (
 -- end
 
 -- TODO generalize and add to mathlib
-lemma Nat.add_lemma2 (a b c : ℕ) : c = a + b -> c - a = b := by sorry
-  --exact Nat.sub_eq_of_eq_add
+lemma Nat.add_lemma2 (a b c : ℕ) : c = a + b -> c - a = b := by
+  rw [Nat.sub_eq_of_eq_add]
 
 lemma helper (a b c d : ℕ) (h : b + d = a + c) : a - b ⊓ a + (c - (b - b ⊓ a)) = d := by
   sorry
