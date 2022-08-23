@@ -13,7 +13,7 @@ lemma natDegreeProductForm (m : ℕ) (f : Finₓ m → F) :
   sorry
 
 lemma monicOfProductForm (m : ℕ) (f : Finₓ m → F) : 
-  (∏ i in (Finset.finRange m), (x - Polynomial.c (f i))).Monic := by
+  (∏ i in (Finset.finRange m), (Polynomial.x - Polynomial.c (f i))).Monic := by
   apply Polynomial.monic_prod_of_monic
   intros i hi
   sorry
