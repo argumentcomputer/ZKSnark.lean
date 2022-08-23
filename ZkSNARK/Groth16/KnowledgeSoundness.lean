@@ -383,7 +383,8 @@ def verified (f : Vars → F) (x : F) (a_stmt : Finₓ n_stmt → F ) : Prop :=
   let crs_β_inst := @crs_β F f
   A_inst * B_inst = 
     (crs_α_inst * crs_β_inst) + 
-    ((∑ i in finRange n_stmt, (a_stmt i) * @crs_l F field n_stmt u_stmt v_stmt w_stmt i f x) * (crs_γ F f) + C_inst * (crs_δ F f))
+    ((∑ i in finRange n_stmt, (a_stmt i) * 
+      @crs_l F field n_stmt u_stmt v_stmt w_stmt i f x) * (crs_γ F f) + C_inst * (crs_δ F f))
 
 def verified' (a_stmt : Finₓ n_stmt → F) : Prop :=
   let A'_inst :=
