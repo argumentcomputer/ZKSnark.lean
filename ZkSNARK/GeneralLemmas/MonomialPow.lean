@@ -11,7 +11,7 @@ variable {_ : Type_}
 
 -- open MvPolynomial
 
-/- Converting a single variable polynomial to a multivariable polynomial 
+/- Converting a single variable polynomial to a multivariable polynomial  
 and back yields the same polynomial 
 lemma monomial_pow {s : Finsupp S →₀ ℕ} {a : R} {n : ℕ} :
   monomial s a ^ n = monomial (n • s) (a ^ n) := by
@@ -23,6 +23,6 @@ lemma monomial_pow {s : Finsupp S →₀ ℕ} {a : R} {n : ℕ} :
   rw [n_ih]
   rw [monomial_mul]
   -- library_search,
--/
+
 
 end MonomialPow

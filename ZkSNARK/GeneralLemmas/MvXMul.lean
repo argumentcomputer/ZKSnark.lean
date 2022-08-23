@@ -136,38 +136,46 @@ lemma rearrange1 (n : ℕ) (v1 v2 : σ) (p : MvPolynomial σ R) :
   by sorry
   --by ring
 
-/--
 lemma rearrange2 (n : ℕ) (f : R) (v1 : σ) (p : MvPolynomial σ R) :
-  (MvPolynomial.x v1 ^ n) * ((MvPolynomial.c f) * p) = (MvPolynomial.c f) * ((MvPolynomial.x v1 ^ n) * p) :=
+  let f₁ := (MvPolynomial.x v1 : MvPolynomial σ R)
+  let f₂ := (MvPolynomial.c f : MvPolynomial σ R)
+  (f₁ ^ n) * (f₂ * p) = f₂ * ((f₁ ^ n) * p) :=
   by sorry
-  -- by ring
 
 -- -- move constants right of X
 lemma rearrange_constants_right (f : R) (v1 : σ) :
-  (MvPolynomial.c f) * MvPolynomial.x v1 = (MvPolynomial.x v1) * (MvPolynomial.c f)
+  let f₁ := (MvPolynomial.x v1 : MvPolynomial σ R)
+  let f₂ := (MvPolynomial.c f : MvPolynomial σ R)
+  f₂ * f₁ = f₁ * f₂
 := by sorry
 -- by ring
 
 lemma rearrange_constants_right_with_extra (f : R) (v1 : σ) (p : MvPolynomial σ R) :
-  (MvPolynomial.c f) * ((MvPolynomial.x v1) * p) = (MvPolynomial.X v1) * (MvPolynomial.C f * p)
-:= by ring
-
-lemma rearrange_constants_right_hard (f : R) (p : R[X]) :
-   Polynomial.c f * p = (p) * (Polynomial.c f)
+  let f₁ := (MvPolynomial.x v1 : MvPolynomial σ R)
+  let f₂ := (MvPolynomial.c f : MvPolynomial σ R)
+  f₂ * (f₁ * p) = f₁ * (f₂ * p)
 := by sorry
 
 lemma rearrange_sums_right_with_extra {α : Type u} {r : Finset α} {f : α → MvPolynomial σ R} (s : σ) (p : MvPolynomial σ R) :
-   (∑ x in r, f x) * ((MvPolynomial.x s) * p) = MvPolynomial.x s * (∑ x in r, f x) * p
+   let f₁ := (MvPolynomial.x s : MvPolynomial σ R)
+   (∑ x in r, f x) * (f₁ * p) = (f₁ * (∑ x in r, f x)) * p
 := by sorry
 
 lemma rearrange_sums_right {α : Type u} {r : Finset α} {f : α → MvPolynomial σ R} (s : σ) :
-   (∑ x in r, f x) * MvPolynomial.x s = MvPolynomial.x s * (∑ x in r, f x)
+   let f₁ := (MvPolynomial.x s : MvPolynomial σ R)
+   (∑ x in r, f x) * f₁ = f₁ * (∑ x in r, f x)
 := by sorry
 
 -- -- move constants right of X
 lemma rearrange_smul_right (n : ℕ) (a : R) (v1 : σ) (p : MvPolynomial σ R) :
-  a • (MvPolynomial.x v1 * p) = (MvPolynomial.x v1) * (a • p)
-:= by rw [mul_smul_comm]
+  let f₁ := (MvPolynomial.x v1 : MvPolynomial σ R)
+  a • (f₁ * p) = f₁ * (a • p)
+:= by sorry -- rw [mul_smul_comm]
+
+/-
+lemma rearrange_constants_right_hard (f : R) (p : R[X]) :
+   Polynomial.c f * p = (p) * (Polynomial.c f)
+:= by sorry
 
 lemma rearrange_001 (f : R) (p1 p2 p3 : Polynomial R) :
   (Polynomial.c f) * p1 = p2 + p3 ↔ p2 + p3 = (Polynomial.c f) * p1 := by
@@ -176,7 +184,7 @@ lemma rearrange_001 (f : R) (p1 p2 p3 : Polynomial R) :
     { intro h, rw h }
 
 lemma rearrange_002 (f : R) (p1 p2 p3 : Polynomial R) :
-  p1 * (Polynomial.c f) = p2 + p3 ↔ p2 + p3 = p1 * (Polynomial.c f) := by
+  p1 * (c f) = p2 + p3 ↔ p2 + p3 = p1 * (c f) := by
    split
     { intro h, rw h }
     { intro h, rw h }
