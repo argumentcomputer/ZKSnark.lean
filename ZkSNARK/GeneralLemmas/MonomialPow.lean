@@ -23,6 +23,6 @@ lemma monomial_pow {s : Finsupp S →₀ ℕ} {a : R} {n : ℕ} :
   rw [n_ih]
   rw [monomial_mul]
   -- library_search,
-
+-/
 
 end MonomialPow
