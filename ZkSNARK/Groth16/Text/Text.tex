@@ -76,11 +76,15 @@
 In this document, we describe \href{https://github.com/yatima-inc/ZKSnark.lean/blob/main/ZkSNARK/Groth16/KnowledgeSoundness.lean}{the Groth16 soundness formalisation} in Lean 4.
 The text contains the protocol description as well as some comments to its implementation.
 
-Groth16 is a kind of ZK-SNARK protocol introduced in \cite{groth2016size}. The latter means that:
+Groth16 is a kind of ZK-SNARK protocol introduced in~\cite{groth2016size}. The latter means that:
 
 \begin{itemize}
-\item It is \emph{zero-knowledge}. In other words, a prover has only a particular piece of information.
-\item It is \emph{non-interactive} in order to make secret parameters reusable.
+\item It is \emph{zero-knowledge}.
+  In other words, a prover has only a particular piece of information.
+  A prover proves that they know some value but the value itself remains disclosed.
+\item It is \emph{non-interactive}, that is, there is no back and forth interaction
+between a prover and a verifier. A proved sends a \emph{single} message to a verifier. Generally, this allows reusing secret parameters,
+having efficient performance, and verifying statements at a small cost one.
 \end{itemize}
 
 Protocols of this kind have the core characteristics such as:
@@ -89,16 +93,20 @@ Protocols of this kind have the core characteristics such as:
 \item \emph{Completeness}, i.e., the verifier is convinced whenever a statement is true.
 \item \emph{Zero-knowledge}, i.e., the only thing is needed is the truth of a statement.
 \end{itemize}
+The first two requirements can be formulated in a more precise way in terms of probabilities, but we omit that.
 
-Generally, non-interactive zero-knowledge proofs relies on the \emph{common reference string} model, that is, a model where a public string is generated in a trusted way and all parties have an access to it.
+Generally, non-interactive zero-knowledge proofs relies on the \emph{common reference string} model,
+that is, a model where a public string is generated in a trusted way and all parties have an access to it.
+One can think of a common reference string as a public set of parameters or as a public key.
 
 Let us describe the commond scheme that non-interactive zero-knowledge protocols obey, see~\cite{petkus2019and} and~\cite{bitansky2012extractable} to have more details. Before that, we need a bit of terminology.
 
-Let $p \in F[X]$ be a polynomial, a prover is going to convince a verifier that they know $p$. In turn, knowing $p$ means that a prover knows some of its roots. As it is well-known, any polynomial might be decomposed as follows whenever it has roots (since fields we consider are finite and they are not algebraically closed):
+Let $p \in F[X]$ be a polynomial, a prover is going to convince a verifier that they know $p$. In turn, knowing $p$ means that a prover knows some of its roots. 
+As it is well-known, any polynomial might be decomposed as follows whenever it has roots \footnote{Since fields we consider are finite and they are not algebraically closed}:
 \begin{equation}
-p(x) = \prod_{i = 0}^{\deg(p)} (x - a_i)
+p(x) = \prod_{i = 0}^{\deg(p)} (x - r_i)
 \end{equation}
-for some $a_i$, $i < \deg(p)$.
+for some $r_i \in F$, for all $i < \deg(p)$.
 
 Assume that a prover has some values $\{ r_i \: | \: i < n\}$ where each $r_i \in F$ for some $n \leq \deg(p)$.
 A prover wants to convince a verifier that $p(r_i)$ for each $a_i$ from that set.
@@ -109,16 +117,21 @@ p(x) = \left( \prod_{i = 0}^n (x - r_i) \right) \cdot h(x)
 \end{equation}
 for some $h \in F[X]$.
 
-Denote $\prod_{i = 0}^n (x - r_i)$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}. So, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that means that all those $r_i$'s are roots of $p$.
+Denote $\prod_{i = 0}^n (x - r_i)$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}.
+In this approach, the original polynomial remains disclosed, so a prover has a slightly weaker claim according to
+which they a polynomial of degree $n$ and roots $\{r_i\}_{i \leq k}$ where $i \leq n$. 
+So one can think of target polynomial as the product of monomials having the form $(x - r_i)$.
 
-The next notion we need is a square span program (see~\cite{danezis2014square}) for verification of which the target polynomial is used. Originally, it has been introduced as a simpler version of quadratic span programs for an alternative characterisation of the $\operatorname{NP}$ complexity class.
+In turn, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that obviously means all those $r_i$'s are exaclty the roots of $p$.
 
-A square span program is defined rigorously as:
+We can consider this intuition in a more rigorous way using the notion of a square span program, see~\cite{danezis2014square}.
+Originally, it has been introduced as a simpler version of quadratic span programs for an alternative characterisation of $\operatorname{NP}$
+to represent the Boolean circuit satisfability problem as the polynomial satisfability problem.
+
 \begin{definition}
-Let $F$ be a field and $m$ a natural number. A \emph{square span program} $Q$ over $F$ is a collection of polynomials $t_0, \dots, t_m \in F[X]$ and a target polynomial $t$ such that:
-\begin{center}
-$\forall i \leq m \: \deg(t_i) \leq \deg(t)$
-\end{center}
+Let $F$ be a field and $m$ a natural number. A \emph{square span program} $Q$ over $F$ is a
+collection of polynomials $t_0, \dots, t_m \in F[X]$ and a target polynomial $t$
+such that $\forall i \leq m \: \deg(t_i) \leq \deg(t)$
 
 Let $1 \leq l \leq m$, then a square span program $Q$ accepts a tuple $(a_1, \dots, a_l) \in F^l$ iff
 
@@ -127,26 +140,36 @@ $\exists a_{l + 1}, \dots, a_m \in F \: \left( t(x) \: | \: {\left( t_0(x) + \su
 \end{center}
 \end{definition}
 
-Square span programs are $\operatorname{NP}$-complete and it is proved by reducing them to the Boolean satisfability problem. We focus on their application in non-interactive zero-knowledge arguments.
+Square span programs are $\operatorname{NP}$-complete and it is proved by reducing them to the Boolean satisfability problem.
+We focus on their application in non-interactive zero-knowledge arguments.
 
-TODO: describe in more detail
-
+In order to summarise the definitions above, we provide the following scheme that can be thought as a rough protocol:
 \begin{itemize}
-\item
-\item
-\item
-\item
+  \item A prover provides some set of polynomials $\{ p_i \}_{i < k}$ and some set of coefficients $\{c_i \}_{i < k}$ (assuming we have some fixed $k > 0$). A prover's witness is a linear combination of the corresponding polynomials and coefficients:
+  \begin{equation}
+  \pi = \sum \limits_{i = 1}^{k} c_i \cdot p_i(x)
+  \end{equation}
+  \item A verifier checks whether $t | \pi$ or not.
 \end{itemize}
+
+The problem is that this scheme is rather problematic since $k$ might large, so this might break succinctness.
+That is why we generally do not send polynomials themselvels but the evaluation at some random point.
+In turn, a verifier checks divisibility of $t(s)$ by $\pi(s)$ for a random value $s \in F$.
+The evaluation itself is performed using the common reference string that plays the role of a
+public key as we have already discussed. Thus, a verifier knows nothing about a prover's witness since the evaluation is encrypted.
+
+Note that this scheme is zero-knowledge indeed since we did not address to the original polynomial $p$.
+Thus, $p$ remains unknown to both sides during the verification process. Moreover, choosing $s$ is randomised.
+The procedure is also succinct since we actually deal with field elements rather that polynomials. 
+To be more precise, the verification time is equal to $O(\log n)$ where $n$ is a size of an encrypted witness. 
+Note that such protocols as Groth16 have a better bounds since the size of a proof there is equal to $O(1)$.
 
 Now we discuss specific aspects of Groth16 in addition the aforedescribed general ZK-SNARK scheme.
-We emphasise such properties of Groth16 as:
-\begin{itemize}
-\item
-\item
-\item
-\item
-\end{itemize}
-TODO: fill in these items
+Groth16 has been introduced as an NIZK-argument with a proof consisting of only 3 group elements.
+Here the verifier merely computes approximately the same number of exponentiations as the statement size
+and checks a single pairing product equation that has only 3 pairings.
+In particular, this makes the proof quite easy to verify.
+Our formalisation also includes the Type III pairing which is one of the most efficient ones.
 
 \section{Preliminary definitions}
 
@@ -156,7 +179,7 @@ We have a fixed finite field $F$, and $F[X]$ stands for the polynomial ring over
 variable {F : Type u} [field : Field F]
 \end{lstlisting}
 
-In Groth16, we have random values $\alpha, \beta, \gamma, \delta \in F$ that we introduce separately as a data type:
+In Groth16, we have random values $\alpha, \beta, \gamma, \delta \in F$ that we introduce separately as an inductive data type:
 \begin{lstlisting}
 inductive Vars : Type
   | alpha : Vars
@@ -178,10 +201,10 @@ where $n_{wit}$ is the degree of the target polynomial
 In Lean 4, we introduce those parameters as variables in the following way:
 
 \begin{lstlisting}
-variable {n_stmt n_wit n_var : Nat}
+variable {n_stmt n_wit n_var : ℕ}
 \end{lstlisting}
 
-We also define several finite collections of polynomials from the square span program:
+We also define the following finite collections of polynomials from the square span program:
 
 \begin{itemize}
 \item $u_{stmt} = \{ f_{i} \in F[X] \: | \: i < n_{stmt} \}$
@@ -230,6 +253,7 @@ $ $
 \end{enumerate}
 \end{lemma}
 
+The aforemention properties is a common place for the target polynomial from zero-knowledge protocols.
 We formalise these statements as follows (but we skip proofs):
 \begin{lstlisting}
 lemma nat_degree_t : (t r).natDegree = n_wit
@@ -260,6 +284,7 @@ sat = \sum \limits_{i = 0}^{n_{stmt}} a_{{stmt}_i} v_{{stmt}_i}(x) + \sum \limit
 \end{equation}
 A pair $(F_{{wit}_{sv}}, F_{{stmt}_{sv}})$ satisfies \emph{the square span program},
 if the remainder of division of $sat$ by $t$ is equal to $0$.
+In particular, this mean that the roots of $t$ are the roots of $sat$ as well.
 This requirement is common for ZK-SNARK protocols and the square span program in general as we discussed in the introduction.
 
 The Lean 4 analogue of the property defined above:
@@ -275,7 +300,10 @@ def satisfying (a_stmt : Finₓ n_stmt → F) (a_wit : Finₓ n_wit → F) :=
 
 \section{Common reference string elements}
 
-Assume we interpreted $\alpha$, $\beta$, $\gamma$, and $\delta$ somehow with elements of $F$, say $crs_{\alpha}$, $crs_{\beta}$, $crs_{\gamma}$, and $crs_{\delta}$, that is, in Lean 4:
+Assume we interpreted $\alpha$, $\beta$, $\gamma$, and $\delta$ somehow with elements of $F$,
+say $crs_{\alpha}$, $crs_{\beta}$, $crs_{\gamma}$, and $crs_{\delta}$.
+In Lean 4, we define those elements as higher-order function with an interpretation function
+$f : Vars \to F$ as an argument.
 
 \begin{lstlisting}
 def crs_α  (f : Vars → F) : F := f Vars.α
@@ -283,11 +311,6 @@ def crs_β (f : Vars → F) : F := f Vars.β
 def crs_γ (f : Vars → F) : F := f Vars.γ
 def crs_δ (f : Vars → F) : F := f Vars.δ
 \end{lstlisting}
-
-For simplicity, we write this interpretation as a function $f :  \{ \alpha,\beta,\gamma, \delta \} \to F$ defined by equations:
-\begin{center}
-$f(a) = crs_{a}$ for $a \in \{ \alpha,\beta,\gamma, \delta \}$.
-\end{center}
 
 TODO: explain semantic roles of the CRS polynomials
 In addition to those four elements of $F$ we have a collection of degrees for $a \in F$:
@@ -415,11 +438,10 @@ TODO: describe soundness
 
 \section{Groth16, Type III}
 
-In this section, we describe the Lean 4 formalisation of a Groth16 version called Type III, see \cite{baghery2021another}. It has certain specific moments.
+In this section, we describe the Lean 4 formalisation of a Groth16 version called Type III, see~\cite{baghery2021another}.
+Let us discuss the Type III pairing briefly, see~\cite{galbraith2008pairings} for details.
 
-TODO: motivate Type III
-
-In Type III, polynomials $A$, $B$, $C$ have a slightly more simple form:
+In Groth 16 of Type III, polynomials $A$, $B$, $C$ have a slightly more simple form:
 \begin{lstlisting}
   def A (f : Vars → F) : F[X] :=
   (Polynomial.c A_α) * crs_α F f + (Polynomial.c A_β) * crs_β F f +
