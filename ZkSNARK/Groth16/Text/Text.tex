@@ -83,7 +83,7 @@ Groth16 is a kind of ZK-SNARK protocol introduced in~\cite{groth2016size}. The l
   In other words, a prover has only a particular piece of information.
   A prover proves that they know some value but the value itself remains disclosed.
 \item It is \emph{non-interactive}, that is, there is no back and forth interaction
-between a prover and a verifier. In particular, this allows reusing secret parameters,
+between a prover and a verifier. A proved sends a \emph{single} message to a verifier. Generally, this allows reusing secret parameters,
 having efficient performance, and verifying statements at a small cost one.
 \end{itemize}
 
@@ -93,6 +93,7 @@ Protocols of this kind have the core characteristics such as:
 \item \emph{Completeness}, i.e., the verifier is convinced whenever a statement is true.
 \item \emph{Zero-knowledge}, i.e., the only thing is needed is the truth of a statement.
 \end{itemize}
+The first two requirements can be formulated in a more precise way in terms of probabilities, but we omit that.
 
 Generally, non-interactive zero-knowledge proofs relies on the \emph{common reference string} model,
 that is, a model where a public string is generated in a trusted way and all parties have an access to it.
@@ -100,8 +101,8 @@ One can think of a common reference string as a public set of parameters or as a
 
 Let us describe the commond scheme that non-interactive zero-knowledge protocols obey, see~\cite{petkus2019and} and~\cite{bitansky2012extractable} to have more details. Before that, we need a bit of terminology.
 
-Let $p \in F[X]$ be a polynomial, a prover is going to convince a verifier that they know $p$. In turn, knowing $p$ means that a prover knows some of its roots. As it is well-known,
-any polynomial might be decomposed as follows whenever it has roots\footnote{Since fields we consider are finite and they are not algebraically closed}:
+Let $p \in F[X]$ be a polynomial, a prover is going to convince a verifier that they know $p$. In turn, knowing $p$ means that a prover knows some of its roots. 
+As it is well-known, any polynomial might be decomposed as follows whenever it has roots \footnote{Since fields we consider are finite and they are not algebraically closed}:
 \begin{equation}
 p(x) = \prod_{i = 0}^{\deg(p)} (x - r_i)
 \end{equation}
@@ -118,7 +119,8 @@ for some $h \in F[X]$.
 
 Denote $\prod_{i = 0}^n (x - r_i)$ as $t(x)$. We shall call $t(x)$ further a \emph{target polynomial}.
 In this approach, the original polynomial remains disclosed, so a prover has a slightly weaker claim according to
-which they a polynomial of degree $n$ and roots $\{r_i\}_{i \leq k}$ where $i \leq n$. So one can think of target polynomial as the product of monomials having the form $(x - r_i)$.
+which they a polynomial of degree $n$ and roots $\{r_i\}_{i \leq k}$ where $i \leq n$. 
+So one can think of target polynomial as the product of monomials having the form $(x - r_i)$.
 
 In turn, a verifier accepts only if a target polynomial $t$ divides $p$, in particular, that obviously means all those $r_i$'s are exaclty the roots of $p$.
 
@@ -143,7 +145,7 @@ We focus on their application in non-interactive zero-knowledge arguments.
 
 In order to summarise the definitions above, we provide the following scheme that can be thought as a rough protocol:
 \begin{itemize}
-  \item A proved provides some set of polynomials ${p_i}_{i < k}$ and some set of coefficients ${c_i}_{i < k}$ (assuming we have some fixed $k > 0$). A prover's witness is a linear combination of the corresponding polynomials and coefficients:
+  \item A prover provides some set of polynomials $\{ p_i \}_{i < k}$ and some set of coefficients $\{c_i \}_{i < k}$ (assuming we have some fixed $k > 0$). A prover's witness is a linear combination of the corresponding polynomials and coefficients:
   \begin{equation}
   \pi = \sum \limits_{i = 1}^{k} c_i \cdot p_i(x)
   \end{equation}
@@ -154,11 +156,13 @@ The problem is that this scheme is rather problematic since $k$ might large, so 
 That is why we generally do not send polynomials themselvels but the evaluation at some random point.
 In turn, a verifier checks divisibility of $t(s)$ by $\pi(s)$ for a random value $s \in F$.
 The evaluation itself is performed using the common reference string that plays the role of a
-public key as we have already discussed.
+public key as we have already discussed. Thus, a verifier knows nothing about a prover's witness since the evaluation is encrypted.
 
 Note that this scheme is zero-knowledge indeed since we did not address to the original polynomial $p$.
 Thus, $p$ remains unknown to both sides during the verification process. Moreover, choosing $s$ is randomised.
-The procedure is also succinct since we actually deal with field elements rather that polynomials.
+The procedure is also succinct since we actually deal with field elements rather that polynomials. 
+To be more precise, the verification time is equal to $O(\log n)$ where $n$ is a size of an encrypted witness. 
+Note that such protocols as Groth16 have a better bounds since the size of a proof there is equal to $O(1)$.
 
 Now we discuss specific aspects of Groth16 in addition the aforedescribed general ZK-SNARK scheme.
 Groth16 has been introduced as an NIZK-argument with a proof consisting of only 3 group elements.
@@ -197,7 +201,7 @@ where $n_{wit}$ is the degree of the target polynomial
 In Lean 4, we introduce those parameters as variables in the following way:
 
 \begin{lstlisting}
-variable {n_stmt n_wit n_var : Nat}
+variable {n_stmt n_wit n_var : ℕ}
 \end{lstlisting}
 
 We also define the following finite collections of polynomials from the square span program:
