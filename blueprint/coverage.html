@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles/style.css" />
+<link rel="stylesheet" href="styles/theme-blue.css" />
+<link rel="stylesheet" href="styles/stylecours.css" />
+<link rel="stylesheet" href="styles/style_coverage.css" />
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<title>Formalization status</title>
+</head>
+
+<body>
+<div class="wrapper">
+<header>
+  <a href="index.html">Home</a>
+  <h1 id="doc_title">Formalization status</h1>
+</header>
+
+<div class="content">
+
+<h2>Completion report</h2>
+
+Click chapter titles to see missing items.
+
+
+<section>
+  <h3>Introduction <span class="ok">100%</span></h3>
+  
+</section>
+
+<section>
+  <h3>1 Supporting Lemmas <span class="ok">100%</span></h3>
+  
+</section>
+
+<section>
+  <h3>2 Knowledge Soundness for BabySNARK <span class="partial">68%</span></h3>
+  
+  <ul class="coverage">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.14 (lem:Ht_mod_t)</div>
+      <div class="thm_thm_content"><p>  \( (Ht + 1) \equiv (V (a_i)_{i = 0}^{l})^2 (\text{mod }t) \) </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.15 (lem:singlify_Ht)</div>
+      <div class="thm_thm_content"><p> \(\textrm{singlify} (Ht + 1)/t = \textrm{singlify} H\) </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Theorem 2.16 (lem:knowledge_soundness)</div>
+      <div class="thm_thm_content"><p> If an adversary produces polynomials \(B(X,Y,Z), V(X,Y,Z), H(X,Y,Z)\) which satisfy \(B_w = Y V_w\) and \(H t = V^2 -1\), then the adversary can extract a satisfying witness. </p>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.4 (lem:Z2_Ht_coeff)</div>
+      <div class="thm_thm_content"><p>  The coefficient of \(Z^2\) in \(H t + 1\) is 0. </p>
+</div>
+    </li>
+    
+    
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.5 (lem:B_sq_coeff)</div>
+      <div class="thm_thm_content"><p>  Given \((a_i)_{i = 0}^{l - 1}\), the coefficient of \(Z^2\) in \((b_{\gamma \beta } \cdot Z + \sum _{i = 0}^{l - 1} a_i u_i (X) + \sum _{j = l}^{n - 1} b'_i u_i (X))^2\) is \(b_{\gamma \beta }^2\). </p>
+</div>
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  </ul>
+  
+</section>
+
+
+<h2>What to define next?</h2>
+
+
+<section>
+  
+</section>
+
+<section>
+  
+</section>
+
+<section>
+  
+</section>
+
+
+<h2>What to state next?</h2>
+
+
+<section>
+  
+</section>
+
+<section>
+  
+</section>
+
+<section>
+  
+  <h3>2 Knowledge Soundness for BabySNARK</h3>
+  <ul class="coverage">
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.15 (lem:singlify_Ht)</div>
+      <div class="thm_thm_content"><p> \(\textrm{singlify} (Ht + 1)/t = \textrm{singlify} H\) </p>
+</div>
+    </li>
+    
+    <li>
+      <div class="thm_thmheading">Lemma 2.8 (lem:b_g_zero)</div>
+      <div class="thm_thm_content"><p> \(b_{\gamma } = 0\) </p>
+</div>
+    </li>
+    
+  </ul>
+  
+</section>
+
+
+<h2>What to prove next?</h2>
+
+
+<section>
+  
+</section>
+
+<section>
+  
+</section>
+
+<section>
+  
+</section>
+
+
+</div>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/coverage.js"></script>
+</body>
+</html>

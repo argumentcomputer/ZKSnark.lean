@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+
+<title>Formalizing ZkSNARKs</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="pygments.css">
+  <script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+
+    macros: {
+      Prop: "{\\mathrm{Prop}}",
+      Type: "{\\mathrm{Type}}",
+      NN: "{\\mathbb{N}}",
+      ZZ: "{\\mathbb{Z}}",
+      RR: "{\\mathbb{R}}",
+      F: "{\\mathscr{F}}",
+      id: "{\\mathop{id}}",
+      Opens: "{\\mathop{Opens}}",
+      bold: ["{\\bf #1}", 1]
+  }
+  },
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+  </head>
+  <body>
+    <section class="page-header">
+	    <h1 class="project-name">Formalizing ZkSNARKs</h1>
+	    <h2 class="project-tagline">by Ashvni Narayanan, Matej Penciak, Daniel Rogozin, Winston Zhang</h2>
+      
+        <a href="blueprint/index.html" class="btn">Blueprint</a>
+        <a href="https://github.com/yatima-inc/ZKSnark.lean" class="btn">GitHub</a>
+    </section>
+
+    <section class="main-content">
+
+			<h1 id="what-is-it-about">What is it about?</h1>
+<p>In this blueprint we formalize the knowledge soundness proof for various ZkSNARK protocols in the Lean 4 theorem prover. The outline for the proofs of knowledge soundness for BabySNARK and Groth 16 are based off Bolton Bailey’s Lean 3 <a href="https://github.com/BoltonBailey/formal-snarks-project/">library</a>.</p>
+<p>The current progress is focused on the <a href="https://github.com/initc3/babySNARK">BabySNARK</a> protocol, and some general lemmas that are used across BabySNARK and <a href="https://eprint.iacr.org/2016/260.pdf">Groth 16</a>.</p>
+<p>The next steps for the project include:</p>
+<ol type="1">
+<li>Formalization of knowledge soundness for the NOVA protocol</li>
+<li>Verification of other specifications for these protocols: zero knowledge, and completeness.</li>
+</ol>
+<p>The eventual goal will include a reference implementation for the protocols together with proofs of correctness, but all of this is still in the works!</p>
+<p>Consider contributing by visiting the <a href="https://github.com/yatima-inc/ZKSnark.lean/">repository</a>, checking out any open issues, or filling in any sorries you may find.</p>
+
+      <footer class="site-footer">
+          <span class="site-footer-owner"><a href="https://github.com/yatima-inc/ZKSnark.lean">ZKSnark.lean</a> is maintained by Yatima Inc.</span>
+        
+      </footer>
+    </section>
+  </body>
+</html>
+

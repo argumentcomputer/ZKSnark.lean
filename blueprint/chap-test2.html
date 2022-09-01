@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Knowledge Soundness for BabySNARK</title>
+<link rel="prev" href="chap-supporting_lemmas.html" title="Supporting Lemmas" />
+<link rel="up" href="index.html" title="Formalizing ZkSNARKs" />
+<link rel="stylesheet" href="styles/theme-blue.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/stylecours.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Formalizing ZkSNARKs</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Introduction</span></a>
+ </li>
+<li class="">
+  <a href="chap-supporting_lemmas.html"><span class="toc_ref">1</span> <span class="toc_entry">Supporting Lemmas</span></a>
+ </li>
+<li class=" active current">
+  <a href="chap-test2.html"><span class="toc_ref">2</span> <span class="toc_entry">Knowledge Soundness for BabySNARK</span></a>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="chap:test2">2 Knowledge Soundness for BabySNARK</h1>
+
+<p>Fix natural numbers \(n, l\) with \(l {\lt} n\), and a sequence \(a_s = (a_0, \ldots , a_{l-1})\) and \(a_w = (a_l, \ldots , a_n)\) (the <em>statement</em> and <em>witness</em>). </p>
+<p>Fix also a collection of polynomials \(u_i(X) \in F[X]\) for \(0 \leq i {\lt} n\) split up into the first \(l\) denoted \(u_s\) and the last \(l-n\) denoted \(u_w\). </p>
+<p>Finally, fix strings \((b_0, \ldots ,b_m), (h_0, \ldots , h_m), (v_0, \ldots v_m) \in F^m\) where \(m = \deg t\). Similarly fix \((b'_i)_{i = l}^{n - l - 1}\), \((v'_i)_{i = l}^{n - l - 1}\) and \((h'_i)_{i = l}^{n - l - 1} \in F^{n-l}\), and \(b_\gamma , v_\gamma , h_\gamma , b_{\gamma \beta }, v_{\gamma \beta }\). </p>
+<p><div class="definition_thmwrapper" id="def:V_B_H">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">2.1</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#def:V_B_H">#</a>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p> Define the polynomials \(V_s = \sum _i^{n-1} a_i u_i(X) = V_{ss} + V_{sw}\), and </p>
+<div class="displaymath" id="a0000000004">
+  \[  B_w = \sum _{i = 0}^{m - 1} b_i X^i + b_{\gamma }Z + b_{\gamma \beta }YZ + \sum _{i = l}^{n - 1} b'_{i} Y u_{i}(X)  \]
+</div>
+<div class="displaymath" id="a0000000005">
+  \[  V_w = \sum _{i = 0}^{m - 1} v_i X^i + v_{\gamma }Z + v_{\gamma \beta }YZ + \sum _{i = l}^{n - 1} v'_{i} Y u_{i}(X)  \]
+</div>
+<div class="displaymath" id="a0000000006">
+  \[  H = \sum _{i = 0}^{m - 1} h_i X^i + h_{\gamma }Z + h_{\gamma \beta }YZ + \sum _{i = l}^{n - 1} h'_{i} Y u_{i}(X)  \]
+</div>
+
+  </div>
+</div> </p>
+<p><div class="definition_thmwrapper" id="def:satisfying">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">2.2</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#def:satisfying">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="chap-supporting_lemmas.html#def:poly_t">Definition 1.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  Call a sequence \((a_i)_{i=0}^{n-1}\) <em>satisfying</em> if </p>
+<div class="displaymath" id="a0000000007">
+  \[  \sum _{i = 0}^{l - 1} a_i u_i(X) + \sum _{i = l}^{n - 1} a_i u_i (X) \equiv 1 \mod t  \]
+</div>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:B_coeff">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.3</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:B_coeff">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000008"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="chap-test2.html#def:V_B_H">Definition 2.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  \(\forall 0 \le i {\lt} m\), the coefficient of \(X^{i}\) in \(B_{w}\) (or <span class="ttfamily">B_wit</span>) is \(b_i\). </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000008">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:Z2_Ht_coeff">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.4</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:Z2_Ht_coeff">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="chap-test2.html#def:V_B_H">Definition 2.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  The coefficient of \(Z^2\) in \(H t + 1\) is 0. </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:B_sq_coeff">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.5</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:B_sq_coeff">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="chap-test2.html#def:V_B_H">Definition 2.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Given \((a_i)_{i = 0}^{l - 1}\), the coefficient of \(Z^2\) in \((b_{\gamma \beta } \cdot Z + \sum _{i = 0}^{l - 1} a_i u_i (X) + \sum _{j = l}^{n - 1} b'_i u_i (X))^2\) is \(b_{\gamma \beta }^2\). </p>
+
+  </div>
+</div> </p>
+<p>For the following lemmas assume we are in the setting of the proof of knowledge soundness. In particular, assume: </p>
+<div class="equation" id="a0000000009">
+<p>
+  <div class="equation_content">
+    \begin{equation}  B_w = YV_w \end{equation}
+  </div>
+  <span class="equation_label">1</span>
+</p>
+</div>
+<div class="equation" id="a0000000010">
+<p>
+  <div class="equation_content">
+    \begin{equation}  Ht = V^2 - 1 \end{equation}
+  </div>
+  <span class="equation_label">2</span>
+</p>
+</div>
+<p>Knowledge soundness for BabySNARK follows from the following lemmas: </p>
+<p><div class="lemma_thmwrapper" id="lem:B_Y_coeff">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.6</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:B_Y_coeff">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000011"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="chap-test2.html#def:V_B_H">Definition 2.1</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Then given a monomial \(m\) not having a \(Y\)-term, the coefficient of \(m\) in \(B_w\) is 0. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000011">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:b_i_zero">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.7</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:b_i_zero">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000012"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(\forall 0 \le i \le m - 1\), \(b_i = 0\). </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000012">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:b_g_zero">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.8</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:b_g_zero">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000013"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(b_{\gamma } = 0\) </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000013">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:B_def">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.9</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:B_def">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000014"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(B_w = b_{\gamma \beta } ZY + \sum _{i = l}^{n - 1} b'_i Y u_i(X) \) </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000014">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:V_def">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.10</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:V_def">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000015"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(V_w = b_{\gamma \beta } Z + \sum _{i = l}^{n - 1} b'_i u_i(X) \) </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000015">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:V_eval">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.11</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:V_eval">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000016"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(V (a_i)_{i = 0}^{l} = b_{\gamma \beta } Z + \sum _{i = 0}^{l - 1} a_i u_i(X) + \sum _{i = l}^{n - 1} b'_i u_i(X) \) </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000016">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:b_gb_zero">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.12</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:b_gb_zero">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000017"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(b_{\gamma \beta } = 0\) </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000017">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:V_eval2">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.13</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:V_eval2">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000018"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(V (a_i)_{i = 0}^{l} = \sum _{i = 0}^{l - 1} a_i u_i(X) + \sum _{i = l}^{n - 1} b'_i u_i(X) \) </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000018">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="lemma_thmwrapper" id="lem:Ht_mod_t">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.14</span>
+    ✓
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:Ht_mod_t">#</a>
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+    <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+                <ul class="uses">
+          <li><a href="chap-test2.html#def:V_B_H">Definition 2.1</a></li>
+          <li><a href="chap-supporting_lemmas.html#lem:t_props">Lemma 1.2</a></li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  \( (Ht + 1) \equiv (V (a_i)_{i = 0}^{l})^2 (\text{mod }t) \) </p>
+
+  </div>
+</div> </p>
+<p><div class="lemma_thmwrapper" id="lem:singlify_Ht">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">2.15</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:singlify_Ht">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000019"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> \(\textrm{singlify} (Ht + 1)/t = \textrm{singlify} H\) </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000019">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<p><div class="theorem_thmwrapper" id="lem:knowledge_soundness">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">2.16</span>
+    <div class="thm_icons">
+    <a class="icon proof" href="chap-test2.html#lem:knowledge_soundness">#</a>
+    <a class="icon proof" href="chap-test2.html#a0000000020"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+  </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p> If an adversary produces polynomials \(B(X,Y,Z), V(X,Y,Z), H(X,Y,Z)\) which satisfy \(B_w = Y V_w\) and \(H t = V^2 -1\), then the adversary can extract a satisfying witness. </p>
+
+  </div>
+</div> </p>
+<div class="proof_wrapper" id="a0000000020">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="chap-supporting_lemmas.html" title="Supporting Lemmas"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Formalizing ZkSNARKs"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>
